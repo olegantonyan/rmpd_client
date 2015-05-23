@@ -1,0 +1,8 @@
+mplayer.py
+requests
+tzlocal
+pytz
+bottle
+netifaces
+pycrypto
+pexpect

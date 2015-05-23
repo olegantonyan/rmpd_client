@@ -1,0 +1,17 @@
+[remote_control]
+server_url = https://server.slon-ds.ru
+login = rmpd-vanilla-image
+password = NbYO9R36P9DF1fXjI8yKfoNEM08O6PhwxBx8yfia6ufugXhOhhtKCSxaENdfQySgFhpgKR1GNrmci2kyramOLg==
+
+[logging]
+logfile = /var/log/rmpd.log
+verbose = yes
+
+[player]
+mplayer_executable = mplayer
+omxplayer_executable = omxplayer
+omxplayer_arguments = -o both
+mediafiles_path = /var/lib/rmpd
+
+[webui]
+password = 1ZwBxM8HGiEkR2jUpG6o9Juzi4NQGPnRZHoL+ShQL6s=

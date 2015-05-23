@@ -1,0 +1,11 @@
+/var/log/rmpd/*.log {
+    daily
+    dateext
+    dateformat .%Y-%m-%d
+    missingok
+    rotate 30
+    compress
+    delaycompress
+    notifempty
+    copytruncate
+}

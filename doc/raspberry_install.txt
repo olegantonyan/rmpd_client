@@ -1,0 +1,66 @@
+Disable blank screen
+  sed -i s/BLANK_TIME=30/BLANK_TIME=0/g /etc/kbd/config
+  sed -i s/POWERDOWN_TIME=30/POWERDOWN_TIME=0/g /etc/kbd/config
+  
+Update/install soft
+  apt-get update && apt-get dist-upgrade && apt-get install watchdog mplayer python3-pip git-core libpcre3 fonts-freefont-ttf fbset netplug libpcre3-dev libpcrecpp0 libva-dev libva-x11-1 libva1 fbi libssh-4 sudo alsa-utils
+  apt-get purge gpm
+  
+  #http://omxplayer.sconde.net/
+  wget http://omxplayer.sconde.net/builds/omxplayer_0.3.6~git20150128~18f051d_armhf.deb && dpkg -i omxplayer_0.3.6~git20150128~18f051d_armhf.deb && rm omxplayer_0.3.6~git20150128~18f051d_armhf.deb
+      
+  git clone git://git.drogon.net/wiringPi && cd wiringPi && ./build && cd .. && rm -rf wiringPi/
+  
+Network
+  echo -e "auto lo\niface lo inet loopback\nauto eth0\niface eth0 inet dhcp\nauto eth0:0\niface eth0:0 inet static\n\taddress 10.10.10.2\n\tnetmask 255.255.255.252\n" > /etc/network/interfaces
+  rm /etc/udev/rules.d/70-persistent-net.rules
+  
+Watchdog
+  echo 'bcm2708_wdog' >> /etc/modules
+  echo "options bcm2708_wdog nowayout=1 heartbeat=14" | tee /etc/modprobe.d/watchdog.conf
+  sed -i s/#watchdog-device/watchdog-device/g /etc/watchdog.conf
+  sed -i s/#max-load-1/max-load-1/g /etc/watchdog.conf
+  
+Sound
+  echo "snd-bcm2835" >> /etc/modules
+  
+  amixer cset numid=3 1 # force mplayer analog output
+  
+Timezone/locales
+  dpkg-reconfigure console-data
+  dpkg-reconfigure locales
+  dpkg-reconfigure tzdata
+  
+Hostname/issues
+  sed -i s/raspberry-pi/rmpd-vanilla-image/g /etc/hostname
+  echo "SLON-DS mediaplayer slon-ds.ru" > /etc/issue
+  echo "SLON-DS mediaplayer slon-ds.ru" > /etc/issue.net
+  
+User/group
+  adduser rmpd # password: f6c1a188
+  passwd root  # password: 4e8cfc5f
+  
+  usermod -a -G audio rmpd
+  usermod -a -G video rmpd
+  usermod -a -G users rmpd
+  echo 'SUBSYSTEM=="vchiq",GROUP="video",MODE="0660"' > /etc/udev/rules.d/10-vchiq-permissions.rules
+  
+Install rmpd
+  mkdir /var/lib/rmpd
+  mkdir /var/log/rmpd
+  chown rmpd:rmpd /var/lib/rmpd
+  chown rmpd:rmpd /var/log/rmpd
+  chown -R rmpd:rmpd /etc/network/
+  
+  sed -i s/1:2345:respawn:\/sbin\/getty 38400 tty1/1:2345:respawn:\/sbin\/getty --noclear 38400 tty1/g /etc/inittab
+  sed -i s/3:23:respawn:\/sbin\/getty 38400 tty3/#3:23:respawn:\/sbin\/getty 38400 tty3/g /etc/inittab
+  sed -i s/4:23:respawn:\/sbin\/getty 38400 tty4/#4:23:respawn:\/sbin\/getty 38400 tty4/g /etc/inittab
+  sed -i s/5:23:respawn:\/sbin\/getty 38400 tty5/#5:23:respawn:\/sbin\/getty 38400 tty5/g /etc/inittab
+  sed -i s/6:23:respawn:\/sbin\/getty 38400 tty6/#6:23:respawn:\/sbin\/getty 38400 tty6/g /etc/inittab
+  
+  # SSH keys for sshtunnel:
+  # doc/sshtunnel_keys
+  
+
+
+
