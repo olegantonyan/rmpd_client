@@ -4,6 +4,7 @@
 from time import sleep
 from sys import stdout, exit
 from logging import basicConfig, getLogger, StreamHandler, Formatter, info, DEBUG, INFO, warning, debug, critical
+from logging.handlers import RotatingFileHandler
 from optparse import OptionParser
 from traceback import format_exc
 from signal import signal, SIGTERM
@@ -19,21 +20,25 @@ import webui.webui
 import hardware
 import system.watchdog
 
+
 def signal_handler(signum, frame):
     mediaplayer.playercontroller.PlayerController().quit()
     hardware.platfrom.set_all_leds_disabled()
     warning("terminated")
     exit(0)
 
-def bootstrap(configfile, console_app=False, verbose_log=False):
-    utils.config.Config(configfile)
-    utils.state.State(path.join(getcwd(), "statefile"))
-    
-    basicConfig(filename=utils.config.Config().logfile(), 
-                        format = "[%(asctime)s] %(name)s |%(levelname)s| %(message)s", 
-                        datefmt="%Y-%m-%d %H:%M:%S", 
-                        level=(DEBUG if (verbose_log or utils.config.Config().verbose_logging()) else INFO))
-    
+
+def setup_logger(console_app=False, verbose_log=False):
+    basicConfig(filename=utils.config.Config().logfile(),
+                format="[%(asctime)s] %(name)s |%(levelname)s| %(message)s",
+                datefmt="%Y-%m-%d %H:%M:%S",
+                level=(DEBUG if (verbose_log or utils.config.Config().verbose_logging()) else INFO))
+
+    log_handler = RotatingFileHandler(utils.config.Config().logfile(), mode='a', maxBytes=4*1024*1024,
+                                      backupCount=2, encoding=None, delay=0)
+    log = getLogger()
+    log.addHandler(log_handler)
+
     if console_app:
         root_logger = getLogger()
         child_logger = StreamHandler(stdout)
@@ -44,10 +49,16 @@ def bootstrap(configfile, console_app=False, verbose_log=False):
         info("started as console application")
     else:
         info("started as daemon")
-        
+
+
+def bootstrap(configfile, console_app=False, verbose_log=False):
+    utils.config.Config(configfile)
+    utils.state.State(path.join(getcwd(), "statefile"))
+    setup_logger(console_app, verbose_log)
     info("using config file: '{c}'".format(c=configfile))
     debug("working directory: '{w}'".format(w=getcwd()))
     signal(SIGTERM, signal_handler)
+
 
 def app():
     player = mediaplayer.playercontroller.PlayerController()
@@ -60,11 +71,12 @@ def app():
         proto.send_now_playing(track, pos)
         system.watchdog.Watchdog().feed()
         sleep(20)
-        
-class DaemonApp(utils.daemon.Daemon): 
+
+
+class DaemonApp(utils.daemon.Daemon):
     def set_working_dir(self, cwd):
         self.__cwd = cwd
-         
+
     def run(self):
         try:
             chdir(self.__cwd)
@@ -72,7 +84,8 @@ class DaemonApp(utils.daemon.Daemon):
             app()
         except Exception as e:
             critical("fatal: unhandled exception\n{e}\n{t}".format(e=str(e), t=format_exc()))
-    
+
+
 def main():
     parser = OptionParser()
     parser.add_option("-c", "--config-file", dest="configfile", help="path to configration file")
@@ -81,11 +94,11 @@ def main():
     parser.add_option("-t", "--console-app", action="store_true", dest="console_app", help="run program as a console app instead of daemon")
     parser.add_option("-d", "--daemon-contol", dest="daemon_control", help="run program as a console app instead of daemon")
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose", help="enable verbose logging")
-    
+
     (opts, args) = parser.parse_args()  # @UnusedVariable
-    
+
     if opts.console_app:
-        bootstrap(opts.configfile if opts.configfile else "rmpd.conf",  
+        bootstrap(opts.configfile if opts.configfile else "rmpd.conf",
                   True,
                   opts.verbose)
         exit(app())
@@ -93,7 +106,7 @@ def main():
         if not opts.pidfile:
             parser.error("no pid file specified for daemon mode")
             exit(2)
-            
+
         daemon = DaemonApp(opts.pidfile)
         if 'start' == opts.daemon_control:
             if not opts.configfile:

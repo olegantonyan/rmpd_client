@@ -15,3 +15,5 @@ main.exe
 rmpd
 logs/*
 tmp/*
+.idea/
+watchdogfile

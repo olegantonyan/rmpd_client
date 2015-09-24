@@ -3,7 +3,7 @@
     dateext
     dateformat .%Y-%m-%d
     missingok
-    rotate 30
+    rotate 10
     compress
     delaycompress
     notifempty

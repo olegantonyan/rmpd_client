@@ -8,6 +8,7 @@ PYTHON=python3
 
 function start_rmpd {
     echo "Starting RMPD"
+    $INSTAL_DIR/tools/delete_large_logs.sh
     $PYTHON $INSTAL_DIR/main.py -d start -c $CONFIGFILE -w $WORKDIR -p $PIDFILE
 }
 
