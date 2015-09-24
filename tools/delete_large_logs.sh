@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-MAX_SIZE=1M
+MAX_SIZE=20M
 
 CONFIGFILE=$(dirname $(readlink -f $0))/../rmpd.conf
 LOGFILE=$(awk -F "=" '/logfile/ {print $2}' $CONFIGFILE)
