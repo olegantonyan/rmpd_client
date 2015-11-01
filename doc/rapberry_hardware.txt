@@ -1,0 +1,20 @@
+                        ox - 5V
+                        ox - 5V
+                        ox - GND
+                        oo
+                        oo
+                        oo
+                        oo
+   22 network (green) - xo
+                        oo
+                        oo
+                        oo
+                        oo
+                        oo
+                        oo
+                        oo
+                        oo
+                        oo
+                        oo
+                        oo
+                        ox - 21 player (orange)
