@@ -115,7 +115,7 @@ def main():
             if not opts.workingdir:
                 parser.error("no working directory specified in daemon mode")
                 exit(2)
-            chdir(opts.workingdir) # in main app context
+            chdir(opts.workingdir)  # in main app context
             daemon.set_working_dir(opts.workingdir)
             bootstrap(opts.configfile, False, opts.verbose)
             daemon.start()

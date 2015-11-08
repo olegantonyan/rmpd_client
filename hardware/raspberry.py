@@ -7,6 +7,7 @@ import hardware
 import utils.shell
 import utils.threads
 
+
 class PlatformRaspberry(hardware.Platform):
     @property
     def __name__(self):
