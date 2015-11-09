@@ -12,12 +12,14 @@ from os import path
 log = getLogger(__name__)
 getLogger("requests").setLevel(WARNING)
 import requests.packages.urllib3
-requests.packages.urllib3.disable_warnings() # for self-signed certificate
+requests.packages.urllib3.disable_warnings()  # for self-signed certificate
 
 import system.systeminfo
 
+
 def self_signed_certificate():
     return path.join(path.dirname(__file__), 'server.slon-ds.ru.crt')
+
 
 class HttpClient(object):
     '''
@@ -29,32 +31,30 @@ class HttpClient(object):
         self.__login = login
         self.__password = password
         self.__onreceive = onreceive_callback
-        
+
     def send(self, msg, seq):
         json, seq = self.__post_request(msg, seq)
         if json is not None and len(json) > 0:
             self.__onreceive(json, seq)
-    
+
     def __post_request(self, jsondata, sequence_number=0):
-        r = post(self.__api_url, 
-                 json=jsondata, 
-                 auth=HTTPBasicAuth(self.__login, self.__password), 
-                 timeout=20, 
+        r = post(self.__api_url,
+                 json=jsondata,
+                 auth=HTTPBasicAuth(self.__login, self.__password),
+                 timeout=20,
                  headers={"X-Sequence-Number": str(sequence_number), "User-Agent": system.systeminfo.user_agent()},
                  verify=self_signed_certificate()
                  )
         if r.status_code != 200:
             raise RuntimeError("error sending data, status code: {s}".format(s=r.status_code))
         return r.json(), r.headers["X-Sequence-Number"]
-    
+
+
 def download_file(url, localpath):
     r = get(url, stream=True, timeout=60, headers={"User-Agent": system.systeminfo.user_agent()}, verify=self_signed_certificate())
-    temp_file = NamedTemporaryFile()
-    for chunk in r.iter_content(chunk_size=2048): 
-        if chunk: # filter out keep-alive new chunks
+    temp_file = NamedTemporaryFile(delete=False)  # delete is not required since we are moving it afterward
+    for chunk in r.iter_content(chunk_size=2048):
+        if chunk:  # filter out keep-alive new chunks
             temp_file.write(chunk)
             temp_file.flush()
     move(temp_file.name, localpath)
-
-
-        
