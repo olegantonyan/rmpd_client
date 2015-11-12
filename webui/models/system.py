@@ -4,12 +4,11 @@
 import hardware
 import system.control
 
+
 class System(object):
     def restart_network(self):
         return hardware.platfrom.restart_networking()
-    
+
     def reboot(self):
-        (r,o,e) = system.control.Control().reboot()  # @UnusedVariable
+        (r, o, e) = system.control.Control().reboot()
         return o
-        
-        

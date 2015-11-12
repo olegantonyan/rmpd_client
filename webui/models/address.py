@@ -16,6 +16,7 @@ if 'debian' not in system.systeminfo.linux_disto():
     webui.models.debinterface.constants.INTERFACES = '/home/flysnake/Desktop/interfaces'
     webui.models.debinterface.constants.BACKUP = '/home/flysnake/Desktop/interfaces.old'
 
+
 class Address(object):
     def __init__(self, iface):
         self.__iface = iface
@@ -24,31 +25,31 @@ class Address(object):
         self.__iface_config = self.__get_ifaces_config().get(self.__iface, None)
         self.__error = ''
         self.__iface_config_changed = False
-        
+
     @staticmethod
     def iface_name_webui():
         return hardware.platfrom.get_webui_interface()
-    
+
     @staticmethod
     def iface_name_main():
         return hardware.platfrom.get_main_interface()
-    
+
     def addr_configured(self):
         return self.__iface_config
-        
+
     def addr_actual(self):
         return self.__iface_actual
-        
+
     def addr_summary(self):
         if self.__iface_actual:
             if self.__iface_actual.get('addr', None):
                 return self.__iface_actual.get('addr', 'none') + " (" + (self.__iface_config.get('source', 'unknown') if self.__iface_config else 'not configured') + ")"
-    
+
     def set_addr(self, addr):
         if self.__iface_config != addr:
             self.__iface_config = addr
             self.__iface_config_changed = True
-    
+
     def save(self):
         if not self.__iface_config:
             self.__error = "Not configured address"
@@ -90,11 +91,10 @@ class Address(object):
             self.__error = "Error saving IP addr: " + str(e)
             log.exception("error saving ip addr")
             return False
-        
-        
+
     def error(self):
         return self.__error
-    
+
     def __get_ifaces_config(self):
         res = {}
         for i in self.__all_ifaces.adapters:
@@ -106,20 +106,18 @@ class Address(object):
                                                          'nameservers': i.ifAttributes.get('dns-nameservers', '').split(' ')
                                                          }
         return res
-      
+
     def __get_ifaces_actual(self):
         res = {}
         for iface_name in interfaces():
             addr = ifaddresses(iface_name)[AF_INET][0]['addr']
             netmask = ifaddresses(iface_name)[AF_INET][0]['netmask']
-            res[iface_name] = {'addr': addr, 
-                               'netmask': netmask }
+            res[iface_name] = {'addr': addr, 'netmask': netmask}
         return res
-    
+
     def __validate_ip(self, ip):
         try:
             inet_aton(ip)
             return True
         except error:
             return False
-    

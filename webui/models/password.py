@@ -8,12 +8,13 @@ log = getLogger(__name__)
 
 import utils.config
 
+
 class Password(object):
     def __init__(self, current, new=""):
         self.__current_password = current
         self.__new_password = new
         self.__errors = ""
-        
+
     def save(self):
         if Password.password() != self.__current_password:
             self.__errors = "Wrong current password"
@@ -32,17 +33,14 @@ class Password(object):
             log.exception("error saving password")
             self.__errors = "Error saving new password, please try another one"
             return False
-    
+
     def errors(self):
         return self.__errors
-    
+
     @staticmethod
     def authenticate(username, password):
         return username == "admin" and password == Password.password()
-    
+
     @staticmethod
     def password():
         return utils.config.Config().webui_password()
-    
-    
-        

@@ -37,4 +37,3 @@ class Status(object, metaclass=utils.singleton.Singleton):
     def downloading(self, state):
         self.__downloading = state
         hardware.platfrom.set_network_blink_led(state)
-    

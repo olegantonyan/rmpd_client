@@ -10,9 +10,10 @@ log = getLogger(__name__)
 
 import mediaplayer.wrapperplayer
 import mediaplayer.playlist
-import utils.singleton  # @UnusedImport
+import utils.singleton
 import utils.threads
 import system.status
+
 
 class PlayerGuard(object, metaclass=utils.singleton.Singleton):
     '''
@@ -25,43 +26,43 @@ class PlayerGuard(object, metaclass=utils.singleton.Singleton):
         self.__playlist = None
         self.__callbacks = None
         self.__check_status()
-        
-    def __wait_on_change_decorator(func):  # @NoSelf
+
+    def __wait_on_change_decorator(func):
         def wrap(self, *args):
-            if self.isstopped(): #wait for poll __check_status
+            if self.isstopped():  # wait for poll __check_status
                 sleep(2.5)
             self.__onchange_lock.acquire()
             result = func(self, *args)
             self.__onchange_lock.release()
             return result
         return wrap
-    
+
     def __check_status(self):
         try:
             is_stopped = self.isstopped()
-            if is_stopped and self.__playlist is not None:  
+            if is_stopped and self.__playlist is not None:
                 log.debug("track finished, about to start a next one")
                 self.__set_playing_status(False)
                 try:
                     self.__callbacks["onstop"](filename=path.basename(self.__playlist.current()))
                 except:
                     pass
-                
+
                 self.play(self.__playlist.next())
         except:
             log.exception("unhandled exception when checking status")
         finally:
             utils.threads.run_after_timeout(timeout=1.1, target=self.__check_status, daemon=True)
-    
+
     def __set_playing_status(self, status):
         system.status.Status().playing = status
-        
+
     def isstopped(self):
         return self.__player is not None and self.__player.isstopped()
-        
+
     def set_callbacks(self, **kwargs):
         self.__callbacks = kwargs
-        
+
     def play_list(self, playlist):
         log.info("start playlist '%s'", playlist)
         if not self.isstopped():
@@ -69,9 +70,9 @@ class PlayerGuard(object, metaclass=utils.singleton.Singleton):
         lst = mediaplayer.playlist.Playlist(playlist)
         self.play(lst.current())
         self.__playlist = lst
-        #self.__playlist = mediaplayer.playlist.Playlist(playlist)
-        #self.play(self.__playlist.current())
-        
+        # self.__playlist = mediaplayer.playlist.Playlist(playlist)
+        # self.play(self.__playlist.current())
+
     def play(self, filename):
         log.info("start track '%s'", filename)
         if path.isfile(filename):
@@ -105,11 +106,11 @@ class PlayerGuard(object, metaclass=utils.singleton.Singleton):
                 self.__callbacks["onerror"](message="file does not exists", filename=path.basename(filename))
             except:
                 pass
-        
+
     def pause(self):
         log.info("paused/resumed")
         self.__player.pause()
-        
+
     def stop(self):
         log.info("stopped")
         self.__player.stop()
@@ -118,25 +119,23 @@ class PlayerGuard(object, metaclass=utils.singleton.Singleton):
         except Exception:
             pass
         self.__playlist = None
-    
-    @__wait_on_change_decorator    
+
+    @__wait_on_change_decorator
     def time_pos(self):
         return self.__player.time_pos()
-    
+
     @__wait_on_change_decorator
     def percent_pos(self):
         return self.__player.percent_pos()
-    
+
     @__wait_on_change_decorator
     def filename(self):
         return self.__player.filename()
-    
+
     @__wait_on_change_decorator
     def length(self):
         return self.__player.length()
-        
+
     def quit(self):
         self.__player.quit()
         del self.__player
-        
-    
