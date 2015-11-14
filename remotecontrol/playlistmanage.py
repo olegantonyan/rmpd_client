@@ -117,7 +117,10 @@ class DeleteWorker(Thread):
         try:
             playlist_fullpath = full_file_localpath("playlist.m3u")
             for f in list_files_in_playlist(playlist_fullpath):
-                remove(full_file_localpath(f))
+                try:
+                    remove(full_file_localpath(f))
+                except FileNotFoundError:
+                    pass
             remove(playlist_fullpath)
             utils.state.State().current_track_num = 0
             self.__onfinish(True, self.__seq, "playlist deleted successfully")
