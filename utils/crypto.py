@@ -1,13 +1,14 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-        
+
 from base64 import b64encode, b64decode
 from Crypto.Cipher import AES
 from Crypto import Random
 
+
 BS = AES.block_size
 pad = lambda s: s + (BS - len(s) % BS) * chr(BS - len(s) % BS) 
-unpad = lambda s : s[:-ord(s[len(s)-1:])]
+unpad = lambda s: s[:-ord(s[len(s)-1:])]
+
 
 class AESCipher(object):
     def __init__(self, key):

@@ -6,19 +6,15 @@ from traceback import format_exc
 from json import loads, dumps  # @UnresolvedImport
 from os import path, getcwd
 
-log = getLogger(__name__)
-
 import remotecontrol.httpclient
 import remotecontrol.messagequeue
 import utils.threads
 import system.status
 
+log = getLogger(__name__)
+
 
 class ControlWrapper(object):
-    '''
-    Implements wrapper for remote control
-    '''
-
     def __init__(self, server_url, login, password, receive_protocol_callback):
         self.__proto = remotecontrol.httpclient.HttpClient(server_url, login, password, self.onreceive)
         self.__receive_protocol_callback = receive_protocol_callback

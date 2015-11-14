@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import sys, os, time, atexit
-from signal import SIGTERM
+import sys
+import os
+import time
+import atexit
+import signal
+
 
 class Daemon(object):
     """
@@ -124,7 +128,7 @@ class Daemon(object):
  
         # Try killing daemon process.
         try:
-            os.kill(pid, SIGTERM)
+            os.kill(pid, signal.SIGTERM)
             time.sleep(1)
         except OSError as e:
             print(str(e))

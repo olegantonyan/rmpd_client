@@ -1,26 +1,27 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from sqlite3 import connect  # @UnresolvedImport
-from threading import Thread
-from queue import Queue
-from traceback import format_exc
+import sqlite3
+import threading
+import queue
+import traceback
+
 
 class SqlError(RuntimeError):
     pass
 
+
 class SqlExecutor(object):
     def __init__(self, dbpath):
         self.__db_path = dbpath
-        self.__rx = Queue()
-        self.__tx = Queue()
-        self.__thread = Thread(target=self.__serve)
+        self.__rx = queue.Queue()
+        self.__tx = queue.Queue()
+        self.__thread = threading.Thread(target=self.__serve)
         self.__thread.setDaemon(True)
         self.__stop_flag = False
         self.__thread.start()
 
     def __serve(self):
-        self.__conn = connect(self.__db_path)
+        self.__conn = sqlite3.connect(self.__db_path)
         cursor = self.__conn.cursor()
         while not self.__stop_flag:
             try:
@@ -30,7 +31,7 @@ class SqlExecutor(object):
                 self.__conn.commit()
                 self.__tx.put({"result": result, "ok": True, "error_message": ""})
             except:
-                self.__tx.put({"result": [], "ok": False, "error_message": format_exc()})
+                self.__tx.put({"result": [], "ok": False, "error_message": traceback.format_exc()})
 
     def execute(self, statement, values=()):
         self.__rx.put((statement, values))
@@ -42,6 +43,6 @@ class SqlExecutor(object):
     def __del__(self):
         self.__stop_flag = True
         try:
-            self.execute("SELECT TIME()") # force execution to fetch from queue
+            self.execute("SELECT TIME()")  # force execution to fetch from queue
         except:
             pass

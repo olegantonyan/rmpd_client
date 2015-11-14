@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from configparser import SafeConfigParser
+from configparser import ConfigParser
 from codecs import open
 
-import utils.singleton  # @UnusedImport
+import utils.singleton
 import utils.crypto
 
 KP1 = ('mplayer_executable' * 2)[0:-4]
 KP2 = ('mediafiles_path'*3)[0:-13]
+
 
 class Config(object, metaclass=utils.singleton.Singleton):
     '''
@@ -17,9 +18,9 @@ class Config(object, metaclass=utils.singleton.Singleton):
 
     def __init__(self, filename):
         self.__filename = filename
-        self.__parser = SafeConfigParser()
+        self.__parser = ConfigParser()
         with open(self.__filename, 'r', encoding='utf-8') as f:
-            self.__parser.readfp(f)
+            self.__parser.read_file(f)
         
         self.__enc1 = utils.crypto.AESCipher(KP1)
         self.__enc2 = utils.crypto.AESCipher(KP2)
@@ -90,5 +91,3 @@ class Config(object, metaclass=utils.singleton.Singleton):
     def set_webui_password(self, value):
         self.__save_value('webui', 'password', self.__enc2.encrypt_text(value))
         self.__webui_password = value
-    
-        
