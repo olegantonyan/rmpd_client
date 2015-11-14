@@ -7,20 +7,16 @@ from logging import getLogger
 from tzlocal import get_localzone
 from datetime import datetime
 
-log = getLogger(__name__)
-
 import remotecontrol.controlwrapper
 import remotecontrol.playlistmanage
-import utils.singleton  # @UnusedImport
+import utils.singleton
 import utils.config
 import utils.shell
 
+log = getLogger(__name__)
+
 
 class ProtocolDispatcher(object, metaclass=utils.singleton.Singleton):
-    '''
-    Implements the protocol for remote control
-    '''
-
     def __init__(self):
         self.__playlist_manage = remotecontrol.playlistmanage.PlaylistManage()
         self.__control_wrapper = remotecontrol.controlwrapper.ControlWrapper(utils.config.Config().server_url(),

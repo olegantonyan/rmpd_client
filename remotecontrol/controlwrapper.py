@@ -13,6 +13,7 @@ import remotecontrol.messagequeue
 import utils.threads
 import system.status
 
+
 class ControlWrapper(object):
     '''
     Implements wrapper for remote control
