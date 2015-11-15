@@ -22,7 +22,7 @@ class DeletePlaylist(remotecontrol.protocol.incoming.base_command.BaseCommand):
 
     def call(self):
         if self.__class__.busy():
-            log.warning("trying to start DeleteWorker while another one is active")
+            log.warning("trying to start delete worker while another one is active")
             return
         return self._start_worker()
 
@@ -34,7 +34,7 @@ class DeletePlaylist(remotecontrol.protocol.incoming.base_command.BaseCommand):
 
     def _start_worker(self):
         self.__class__.lock.acquire()
-        self.__class__.worker = DeleteWorker(self._sequence, self._onfinish)
+        self.__class__.worker = Worker(self._sequence, self._onfinish)
         self.__class__.lock.release()
         return self.__class__.worker.start()
 
@@ -44,10 +44,9 @@ class DeletePlaylist(remotecontrol.protocol.incoming.base_command.BaseCommand):
         self.__class__.lock.release()
 
 
-class DeleteWorker(threading.Thread):
+class Worker(threading.Thread):
     def __init__(self, sequence, onfinish_callback):
-        # threading.Thread.__init__(self)
-        super()
+        threading.Thread.__init__(self)
         self._sequence = sequence
         self.daemon = True
         self._onfinish = onfinish_callback

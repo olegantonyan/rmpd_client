@@ -13,7 +13,3 @@ class Ack(base_command.BaseCommand):
 
     def _json(self, ok, message):
         return {'type': 'ack', 'status': 'ok' if ok else 'fail', 'message': message}
-
-
-
-

@@ -1,15 +1,15 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 from os import path, makedirs
 from logging import getLogger
 
-log = getLogger(__name__)
-
 import mediaplayer.playerguard
 import utils.config
 import remotecontrol.protocoldispatcher
-import remotecontrol.playlistmanage
+import utils.files
+
+log = getLogger(__name__)
+
 
 class PlayerController(object):
     '''
@@ -40,7 +40,7 @@ class PlayerController(object):
         
         playlist_fullpath = path.join(utils.config.Config().mediafiles_path(), "playlist.m3u")
         if path.exists(playlist_fullpath):
-            remotecontrol.protocoldispatcher.ProtocolDispatcher().send_on_playlist_begin(remotecontrol.playlistmanage.list_files_in_playlist(playlist_fullpath))
+            remotecontrol.protocoldispatcher.ProtocolDispatcher().send_on_playlist_begin(utils.files.list_files_in_playlist(playlist_fullpath))
             self.__player.play_list(playlist_fullpath)
             
     def stop(self):
@@ -54,4 +54,3 @@ class PlayerController(object):
     
     def current_track_posiotion(self):
         return self.__player.percent_pos()
-        
