@@ -2,13 +2,13 @@
 
 import logging
 
-import remotecontrol.protocol.incoming.base_command as base_command
+import remotecontrol.protocol.incoming.base_command
 import utils
 
 log = logging.getLogger(__name__)
 
 
-class RequestSshTunnel(base_command.BaseCommand):
+class RequestSshTunnel(remotecontrol.protocol.incoming.base_command.BaseCommand):
     def call(self):
         cli = "ssh -R {ext_port}:localhost:{int_port} {user}@{server} -p {server_port} -f sleep {dur}"\
             .format(ext_port=self._data['external_port'],
