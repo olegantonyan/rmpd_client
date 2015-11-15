@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import remotecontrol.protocol.commands.base_command as base_command
+import remotecontrol.protocol.incoming.base_command as base_command
 
 
 class DeletePlaylist(base_command.BaseCommand):

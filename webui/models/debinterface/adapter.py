@@ -83,29 +83,29 @@ class networkAdapter:
     def appendBropts(self, key, value):
         self.ifAttributes['bridge-opts'][key] = self.ifAttributes['bridge-opts'][key] + value
 
-    # Set and add to the up commands for an interface.
-    # Takes a LIST of shell commands.
+    # Set and add to the up incoming for an interface.
+    # Takes a LIST of shell incoming.
     def setUp(self, up):
         self.ifAttributes['up'] = up
     def appendUp(self, cmd):
         self.ifAttributes['up'].append(cmd)
 
-    # Set and add to the down commands for an interface.
-    # Takes a LIST of shell commands.
+    # Set and add to the down incoming for an interface.
+    # Takes a LIST of shell incoming.
     def setDown(self, down):
             self.ifAttributes['down'] = down
     def appendDown(self, cmd):
             self.ifAttributes['down'].append(cmd)
 
-    # Set and add to the pre-up commands for an interface.
-    # Takes a LIST of shell commands.
+    # Set and add to the pre-up incoming for an interface.
+    # Takes a LIST of shell incoming.
     def setPreUp(self, pre):
             self.ifAttributes['pre-up'] = pre
     def appendPreUp(self, cmd):
             self.ifAttributes['pre-up'].append(cmd)
 
-    # Set and add to the post-down commands for an interface.
-    # Takes a LIST of shell commands.
+    # Set and add to the post-down incoming for an interface.
+    # Takes a LIST of shell incoming.
     def setPostDown(self, post):
             self.ifAttributes['post-down'] = post
     def appendPostDown(self, cmd):

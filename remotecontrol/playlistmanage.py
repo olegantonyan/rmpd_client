@@ -7,14 +7,14 @@ from urllib import parse
 from traceback import format_exc
 from threading import Thread
 
-log = getLogger(__name__)
-
 import utils.config
 import utils.state
 import remotecontrol.httpclient
 import mediaplayer.playercontroller
 import remotecontrol.protocoldispatcher
 import system.status
+
+log = getLogger(__name__)
 
 
 class PlaylistManage(object):

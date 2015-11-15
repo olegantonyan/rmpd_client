@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 from os import path
@@ -12,6 +11,7 @@ import remotecontrol.playlistmanage
 import utils.singleton
 import utils.config
 import utils.shell
+import remotecontrol.protocol.receiver
 
 log = getLogger(__name__)
 
@@ -30,7 +30,9 @@ class ProtocolDispatcher(object, metaclass=utils.singleton.Singleton):
             if msg["type"] == "playlist":
                 self.__process_playlist(msg, seq)
             if msg["type"] == "ssh_tunnel":
-                self.__process_ssh_tunnel(msg, seq)
+                remotecontrol.protocol.receiver.Receiver(self.__control_wrapper, msg, seq).call()
+                #self.__process_ssh_tunnel(msg, seq)
+            # remotecontrol.protocol.receiver.Receiver(self.__control_wrapper, msg, seq).call()
         except Exception as e:
             log.error("error processing message '{m}' -- {e} -- {t}".format(m=str(msg), e=str(e), t=format_exc()))
 
