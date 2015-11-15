@@ -20,7 +20,7 @@ class Playlist(object):
         utils.state.State().current_track_num = 0
 
     def next(self):
-        self.__current_position = self.__current_position + 1
+        self.__current_position += 1
         if self.__current_position % len(self.__list) == 0:
             self.__current_position = 0
         return self.current()

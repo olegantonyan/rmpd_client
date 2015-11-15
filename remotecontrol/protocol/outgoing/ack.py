@@ -8,7 +8,6 @@ class Ack(base_command.BaseCommand):
         ok = kwargs.get('ok') or False
         message = kwargs.get('message') or ''
         self._sequence = kwargs.get('sequence') or 0
-        self._queued = True
         self._send(self._json(ok, message))
 
     def _json(self, ok, message):

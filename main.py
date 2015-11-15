@@ -68,7 +68,7 @@ def app():
     while True:
         track = player.current_track_name()
         pos = player.current_track_posiotion()
-        proto.send_now_playing(track, pos)
+        proto.send('now_playing', track=track, percent_position=pos)
         system.watchdog.Watchdog().feed()
         sleep(20)
 
