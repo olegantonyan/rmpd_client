@@ -1,12 +1,11 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from re import match
-from logging import getLogger
-
-log = getLogger(__name__)
+import re
+import logging
 
 import utils.config
+
+log = logging.getLogger(__name__)
 
 
 class Password(object):
@@ -22,7 +21,7 @@ class Password(object):
         if len(self.__new_password) < 4:
             self.__errors = "Password must be at least 4 characters long"
             return False
-        if match('^[\w]+$', self.__new_password) is None:
+        if re.match('^[\w]+$', self.__new_password) is None:
             self.__errors = "Password may only contain latin characters and digits"
             return False
         try:
@@ -39,7 +38,7 @@ class Password(object):
 
     @staticmethod
     def authenticate(username, password):
-        return username == "admin" and password == Password.password()
+        return username == 'admin' and password == Password.password()
 
     @staticmethod
     def password():

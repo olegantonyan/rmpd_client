@@ -1,21 +1,20 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 from bottle import template, run, get, post, auth_basic, abort, request, static_file, TEMPLATE_PATH, redirect
-from os import path
-from logging import getLogger
-
-log = getLogger(__name__)
+import os
+import logging
 
 import webui.models.status
 import webui.models.password
 import webui.models.address
 import webui.models.system
 
+log = logging.getLogger(__name__)
+
 
 @get('/static/:filename#.*#')
 def send_static(filename):
-    return static_file(filename, root=path.join(path.dirname(path.abspath(__file__)), "views", "static"))
+    return static_file(filename, root=os.path.join(os.path.dirname(os.path.abspath(__file__)), "views", "static"))
 
 
 def check_pass(username, password):
@@ -120,5 +119,5 @@ def reboot():
 
 def start(host, port):
     log.debug("starting on {h}:{p}".format(h=host, p=port))
-    TEMPLATE_PATH.append(path.join(path.dirname(path.abspath(__file__)), "views"))
+    TEMPLATE_PATH.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "views"))
     run(host=host, port=port, debug=False, reloader=False)

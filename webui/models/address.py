@@ -1,30 +1,30 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from netifaces import interfaces, ifaddresses, AF_INET  # @UnresolvedImport
-from socket import inet_aton, error
-from logging import getLogger
+import netifaces
+import socket
+import logging
 
-log = getLogger(__name__)
-
-import webui.models.debinterface.constants  # @UnusedImport
+import webui.models.debinterface.constants
 import webui.models.debinterface.interfaces
 import hardware
 import system.systeminfo
 
+log = logging.getLogger(__name__)
+
+
 if 'debian' not in system.systeminfo.linux_disto():
-    webui.models.debinterface.constants.INTERFACES = '/home/flysnake/Desktop/interfaces'
-    webui.models.debinterface.constants.BACKUP = '/home/flysnake/Desktop/interfaces.old'
+    webui.models.debinterface.constants.INTERFACES = '/home/oleg/Desktop/interfaces'
+    webui.models.debinterface.constants.BACKUP = '/home/oleg/Desktop/interfaces.old'
 
 
 class Address(object):
     def __init__(self, iface):
-        self.__iface = iface
-        self.__all_ifaces = webui.models.debinterface.interfaces.interfaces()
-        self.__iface_actual = self.__get_ifaces_actual().get(self.__iface, None)
-        self.__iface_config = self.__get_ifaces_config().get(self.__iface, None)
-        self.__error = ''
-        self.__iface_config_changed = False
+        self._iface = iface
+        self._all_ifaces = webui.models.debinterface.interfaces.interfaces()
+        self._iface_actual = self._get_ifaces_actual().get(self._iface, None)
+        self._iface_config = self._get_ifaces_config().get(self._iface, None)
+        self._error = ''
+        self._iface_config_changed = False
 
     @staticmethod
     def iface_name_webui():
@@ -35,69 +35,69 @@ class Address(object):
         return hardware.platfrom.get_main_interface()
 
     def addr_configured(self):
-        return self.__iface_config
+        return self._iface_config
 
     def addr_actual(self):
-        return self.__iface_actual
+        return self._iface_actual
 
     def addr_summary(self):
-        if self.__iface_actual:
-            if self.__iface_actual.get('addr', None):
-                return self.__iface_actual.get('addr', 'none') + " (" + (self.__iface_config.get('source', 'unknown') if self.__iface_config else 'not configured') + ")"
+        if self._iface_actual:
+            if self._iface_actual.get('addr', None):
+                return self._iface_actual.get('addr', 'none') + " (" + (self._iface_config.get('source', 'unknown') if self._iface_config else 'not configured') + ")"
 
     def set_addr(self, addr):
-        if self.__iface_config != addr:
-            self.__iface_config = addr
-            self.__iface_config_changed = True
+        if self._iface_config != addr:
+            self._iface_config = addr
+            self._iface_config_changed = True
 
     def save(self):
-        if not self.__iface_config:
-            self.__error = "Not configured address"
+        if not self._iface_config:
+            self._error = "Not configured address"
             return False
-        if not self.__iface_config_changed:
-            return True
+        if not self._iface_config_changed:
             self._error = "Not changed"
+            return True
         try:
-            for i in self.__all_ifaces.adapters:
-                if self.__iface == i.ifAttributes.get('name', ''):
-                    if self.__iface_config['source'] not in ['dhcp', 'static']:
-                        self.__error = "Invalid address source"
+            for i in self._all_ifaces.adapters:
+                if self._iface == i.ifAttributes.get('name', ''):
+                    if self._iface_config['source'] not in ['dhcp', 'static']:
+                        self._error = "Invalid address source"
                         return False
-                    i.ifAttributes['source'] = self.__iface_config['source']
+                    i.ifAttributes['source'] = self._iface_config['source']
                     if not i.ifAttributes['source'] == 'dhcp':
-                        if self.__validate_ip(self.__iface_config['addr']):
-                            i.ifAttributes['address'] = self.__iface_config['addr']
+                        if self._validate_ip(self._iface_config['addr']):
+                            i.ifAttributes['address'] = self._iface_config['addr']
                         else:
-                            self.__error = "No static IP address specified"
+                            self._error = "No static IP address specified"
                             return False
-                        if self.__validate_ip(self.__iface_config['netmask']):
-                            i.ifAttributes['netmask'] = self.__iface_config['netmask']
+                        if self._validate_ip(self._iface_config['netmask']):
+                            i.ifAttributes['netmask'] = self._iface_config['netmask']
                         else:
-                            self.__error = "No netmask specified"
+                            self._error = "No netmask specified"
                             return False
-                        if self.__validate_ip(self.__iface_config['gateway']):
-                            i.ifAttributes['gateway'] = self.__iface_config['gateway']
+                        if self._validate_ip(self._iface_config['gateway']):
+                            i.ifAttributes['gateway'] = self._iface_config['gateway']
                         else:
-                            self.__error = "No gateway specified"
+                            self._error = "No gateway specified"
                             return False
-                        if len(self.__iface_config['nameservers']) > 0 and len(self.__iface_config['nameservers'][0]) > 0:
-                            i.ifAttributes['dns-nameservers'] = ' '.join(self.__iface_config['nameservers'])
+                        if len(self._iface_config['nameservers']) > 0 and len(self._iface_config['nameservers'][0]) > 0:
+                            i.ifAttributes['dns-nameservers'] = ' '.join(self._iface_config['nameservers'])
                         else:
                             i.ifAttributes['dns-nameservers'] = i.ifAttributes['gateway']
-            self.__all_ifaces.writeInterfaces()
+            self._all_ifaces.writeInterfaces()
             log.warning("new network configuration written")
             return True
         except Exception as e:
-            self.__error = "Error saving IP addr: " + str(e)
+            self._error = "Error saving IP addr: " + str(e)
             log.exception("error saving ip addr")
             return False
 
     def error(self):
-        return self.__error
+        return self._error
 
-    def __get_ifaces_config(self):
+    def _get_ifaces_config(self):
         res = {}
-        for i in self.__all_ifaces.adapters:
+        for i in self._all_ifaces.adapters:
             if i.ifAttributes.get('name', None) is not None:
                 res[i.ifAttributes.get('name', None)] = {'source': i.ifAttributes.get('source', ''),
                                                          'addr': i.ifAttributes.get('address', ''),
@@ -107,17 +107,17 @@ class Address(object):
                                                          }
         return res
 
-    def __get_ifaces_actual(self):
+    def _get_ifaces_actual(self):
         res = {}
-        for iface_name in interfaces():
-            addr = ifaddresses(iface_name)[AF_INET][0]['addr']
-            netmask = ifaddresses(iface_name)[AF_INET][0]['netmask']
+        for iface_name in netifaces.interfaces():
+            addr = netifaces.ifaddresses(iface_name)[netifaces.AF_INET][0]['addr']
+            netmask = netifaces.ifaddresses(iface_name)[netifaces.AF_INET][0]['netmask']
             res[iface_name] = {'addr': addr, 'netmask': netmask}
         return res
 
-    def __validate_ip(self, ip):
+    def _validate_ip(self, ip):
         try:
-            inet_aton(ip)
+            socket.inet_aton(ip)
             return True
-        except error:
+        except socket.error:
             return False
