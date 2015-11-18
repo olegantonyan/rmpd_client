@@ -1,30 +1,30 @@
 # -*- coding: utf-8 -*-
 
-from logging import getLogger
-from traceback import format_exc
-from json import loads, dumps
-from os import path, getcwd
+import logging
+import traceback
+import json
+import os
 
 import remotecontrol.httpclient
 import remotecontrol.messagequeue
 import utils.threads
 import system.status
 
-log = getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 class ControlWrapper(object):
     def __init__(self, server_url, login, password, receive_protocol_callback):
         self._proto = remotecontrol.httpclient.HttpClient(server_url, login, password, self.onreceive)
         self._receive_protocol_callback = receive_protocol_callback
-        self._queue = remotecontrol.messagequeue.MessageQueue(path.join(getcwd(), "message_queue.db3"))
+        self._queue = remotecontrol.messagequeue.MessageQueue(os.path.join(os.getcwd(), "message_queue.db3"))
         self._check_queue()
 
     def send(self, msg, queued=False, seq=0):
         log.debug("sending message ({q}): '{s}'".format(s=str(msg), q=("queued" if queued else "immed")))
         if queued:
             data = {'msg': msg, 'seq': seq}
-            self._queue.enqueue(dumps(data))
+            self._queue.enqueue(json.dumps(data))
             return True
         else:
             try:
@@ -33,7 +33,7 @@ class ControlWrapper(object):
                 return True
             except:
                 log.error("error sending message: '{s}'".format(s=str(msg)))
-                log.debug(format_exc())
+                log.debug(traceback.format_exc())
                 self._set_online_status(False)
                 return False
 
@@ -44,7 +44,7 @@ class ControlWrapper(object):
     def _check_queue(self):
         messageid, data = self._queue.dequeue()
         if data is not None and messageid is not None and len(data) > 0:
-            parsed_data = loads(data)
+            parsed_data = json.loads(data)
             if self.send(parsed_data["msg"], False, parsed_data["seq"]):
                 self._queue.remove(messageid)
 

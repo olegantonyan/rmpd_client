@@ -5,14 +5,14 @@ import traceback
 import logging
 import os
 
-import remotecontrol.protocol.incoming.base_command
+import remotecontrol.protocol.incoming.base_playlist_command
 import mediaplayer.playercontroller
 import utils.files
 
 log = logging.getLogger(__name__)
 
 
-class DeletePlaylist(remotecontrol.protocol.incoming.base_command.BaseCommand):
+class DeletePlaylist(remotecontrol.protocol.incoming.base_playlist_command.BasePlaylistCommand):
     worker = None
     lock = threading.Lock()
 
@@ -29,8 +29,9 @@ class DeletePlaylist(remotecontrol.protocol.incoming.base_command.BaseCommand):
     def _onfinish(self, ok, sequence, message):
         self._release_worker()
         if ok:
+            self._remove_playlist_file()
             mediaplayer.playercontroller.PlayerController().stop()
-        self._sender('ack').call(ok=ok, sequence=sequence, message=message)
+        self._send_ack(ok, sequence, message)
 
     def _start_worker(self):
         self.__class__.lock.acquire()

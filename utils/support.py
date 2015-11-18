@@ -20,3 +20,7 @@ def camelcase_to_underscore(s):
             from_char_position = current_char_position
     words.append(s[from_char_position:].lower())
     return '_'.join(words)
+
+
+def list_compact(arg):
+    return [j for j in arg if j is not None]
