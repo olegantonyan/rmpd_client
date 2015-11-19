@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
 
 import threading
-import traceback
 import logging
 import os
 
-import remotecontrol.protocol.incoming.base_playlist_command
+import remotecontrol.protocol.incoming.base_playlist_command as base
 import mediaplayer.playercontroller
 import utils.files
 
 log = logging.getLogger(__name__)
 
 
-class DeletePlaylist(remotecontrol.protocol.incoming.base_playlist_command.BasePlaylistCommand):
+class DeletePlaylist(base.BasePlaylistCommand):
     worker = None
     lock = threading.Lock()
 
@@ -29,6 +28,7 @@ class DeletePlaylist(remotecontrol.protocol.incoming.base_playlist_command.BaseP
     def _onfinish(self, ok, sequence, message):
         self._release_worker()
         if ok:
+            utils.state.State().current_track_num = 0
             self._remove_playlist_file()
             mediaplayer.playercontroller.PlayerController().stop()
         self._send_ack(ok, sequence, message)
@@ -45,24 +45,17 @@ class DeletePlaylist(remotecontrol.protocol.incoming.base_playlist_command.BaseP
         self.__class__.lock.release()
 
 
-class Worker(threading.Thread):
+class Worker(base.BaseWorker):
     def __init__(self, sequence, onfinish_callback):
-        threading.Thread.__init__(self)
-        self._sequence = sequence
-        self.daemon = True
-        self._onfinish = onfinish_callback
+        base.BaseWorker.__init__(self, sequence, onfinish_callback)
+        self._error_message = 'error deleting playlist'
+        self._success_message = 'playlist deleted successfully'
 
-    def run(self):
-        try:
-            playlist_fullpath = utils.files.full_file_localpath("playlist.m3u")
-            for f in utils.files.list_files_in_playlist(playlist_fullpath):
-                self._remove_mediaifile(f)
-            os.remove(playlist_fullpath)
-            utils.state.State().current_track_num = 0
-            self._onfinish(True, self._sequence, "playlist deleted successfully")
-        except Exception:
-            log.error("error deleting playlist\n{ex}".format(ex=traceback.format_exc()))
-            self._onfinish(False, self._sequence, "playlist delete error")
+    def _run(self):
+        playlist_fullpath = utils.files.full_file_localpath("playlist.m3u")
+        for f in utils.files.list_files_in_playlist(playlist_fullpath):
+            self._remove_mediaifile(f)
+        os.remove(playlist_fullpath)
 
     def _remove_mediaifile(self, file):
         try:

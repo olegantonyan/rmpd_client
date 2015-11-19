@@ -4,13 +4,12 @@ import threading
 import logging
 import os
 import urllib.parse
-import traceback
 
 import utils.files
 import utils.state
 import utils.config
 import utils.support
-import remotecontrol.protocol.incoming.base_playlist_command
+import remotecontrol.protocol.incoming.base_playlist_command as base
 import system.status
 import remotecontrol.httpclient
 import mediaplayer.playercontroller
@@ -18,7 +17,7 @@ import mediaplayer.playercontroller
 log = logging.getLogger(__name__)
 
 
-class UpdatePlaylist(remotecontrol.protocol.incoming.base_playlist_command.BasePlaylistCommand):
+class UpdatePlaylist(base.BasePlaylistCommand):
     worker = None
     lock = threading.Lock()
 
@@ -30,7 +29,7 @@ class UpdatePlaylist(remotecontrol.protocol.incoming.base_playlist_command.BaseP
         if self.__class__.busy():
             log.warning("trying to start update worker while another one is active")
             return
-        media_items = self._data['items']
+        media_items = self._legacy_media_items()
         self._sender('update_playlist').call(files=[os.path.basename(i) for i in media_items])
         system.status.Status().downloading = True
         return self._start_worker(media_items)
@@ -55,24 +54,24 @@ class UpdatePlaylist(remotecontrol.protocol.incoming.base_playlist_command.BaseP
         self.__class__.worker = None
         self.__class__.lock.release()
 
+    def _legacy_media_items(self):
+        return self._data['items']
 
-class Worker(threading.Thread):
-    def __init__(self, media_items, seq, onfinish_callback):
-        threading.Thread.__init__(self)
-        self.__media_items = utils.support.list_compact(media_items)
-        self.__seq = seq
-        self.daemon = True
-        self._onfinish = onfinish_callback
+    def _media_items(self):
+        return [i['url'] for i in self._data['playlist']['items']]
 
-    def run(self):
-        try:
-            for i in self.__media_items:
-                self._download_file(i)
-            self._utilize_nonplaylist_files(self.__media_items, utils.files.mediafiles_path())
-            self._onfinish(True, self.__seq, "playlist updated successfully")
-        except:
-            log.error("error updating playlist\n{ex}".format(ex=traceback.format_exc()))
-            self._onfinish(False, self.__seq, "playlist update error")
+
+class Worker(base.BaseWorker):
+    def __init__(self, media_items, sequence, onfinish_callback):
+        base.BaseWorker.__init__(self, sequence, onfinish_callback)
+        self._media_items = utils.support.list_compact(media_items)
+        self._error_message = 'error updating playlist'
+        self._success_message = 'playlist updated successfully'
+
+    def _run(self):
+        for i in self._media_items:
+            self._download_file(i)
+        self._utilize_nonplaylist_files(self._media_items, utils.files.mediafiles_path())
 
     def _download_file(self, file):
         url = self._full_file_url(file)
