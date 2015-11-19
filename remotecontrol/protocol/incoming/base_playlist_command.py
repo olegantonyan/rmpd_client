@@ -40,8 +40,8 @@ class BaseWorker(threading.Thread):
         self._sequence = sequence
         self.daemon = True
         self._onfinish = onfinish_callback
-        self._error_message = ''
-        self._success_message = ''
+        self._error_message = 'please set error message in subclass'
+        self._success_message = 'please set success message in subclass'
 
     def run(self):
         try:

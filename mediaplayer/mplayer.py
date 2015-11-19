@@ -1,81 +1,76 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from mplayer import Player, CmdPrefix
+import mplayer
 
 import utils.config
 
 
 class MPlayer(object):
-    '''
-    Wrapper class wor MPlayer
-    '''
-
     SEEK_MODE_SECONDS_RELATIVE = 0
     SEEK_MODE_PERCENTS_ABSOLUTE = 1
     SEEK_MODE_SECONDS_ABSOLUTE = 2
 
     def __init__(self):
-        Player.cmd_prefix = CmdPrefix.PAUSING_KEEP
+        mplayer.Player.cmd_prefix = mplayer.CmdPrefix.PAUSING_KEEP
         if utils.config.Config().mplayer_executable() is not None:
-            Player.exec_path = utils.config.Config().mplayer_executable()
-        self.__player = Player()
-        self.__player.args = ['-really-quiet', '-msglevel', 'global=6']
+            mplayer.Player.exec_path = utils.config.Config().mplayer_executable()
+        self._player = mplayer.Player()
+        self._player.args = ['-really-quiet', '-msglevel', 'global=6']
 
     def __del__(self):
-        self.__player.quit()
+        self._player.quit()
 
     def isstopped(self):
-        return self.__player is not None and self.filename() is None and self.length() is None
+        return self._player is not None and self.filename() is None and self.length() is None
 
     def play_list(self, playlist):
-        self.__player.loadlist(playlist)
+        self._player.loadlist(playlist)
 
     def play(self, filename):
-        self.__player.loadfile(filename)
+        self._player.loadfile(filename)
         self.fullscreen(True)
 
     def pause(self):
-        self.__player.pause()
+        self._player.pause()
 
     def stop(self):
-        self.__player.stop()
+        self._player.stop()
 
     def seek(self, value, seek_mode=SEEK_MODE_SECONDS_RELATIVE):
-        self.__player.seek(seek_mode, value)
+        self._player.seek(seek_mode, value)
 
     def fullscreen(self, value):
-        self.__player.vo_fullscreen(1 if value else 0)
+        self._player.vo_fullscreen(1 if value else 0)
 
     def time_pos(self):
-        d = self.__player.time_pos
+        d = self._player.time_pos
         if d is None:
-            return self.__player.time_pos
+            return self._player.time_pos
         return d
 
     def percent_pos(self):
-        d = self.__player.percent_pos
+        d = self._player.percent_pos
         if d is None:
-            return self.__player.percent_pos
+            return self._player.percent_pos
         return d
 
     def path(self):
-        d = self.__player.path
+        d = self._player.path
         if d is None:
-            return self.__player.path
-        return self.__player.path
+            return self._player.path
+        return self._player.path
 
     def filename(self):
-        d = self.__player.filename
+        d = self._player.filename
         if d is None:
-            return self.__player.filename
+            return self._player.filename
         return d
 
     def loop(self, value):
-        self.__player.loop = value
+        self._player.loop = value
 
     def length(self):
-        d = self.__player.length
+        d = self._player.length
         if d is None:
-            return self.__player.length
+            return self._player.length
         return d

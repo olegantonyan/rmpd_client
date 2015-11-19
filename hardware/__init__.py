@@ -1,10 +1,10 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from platform import machine
-from logging import getLogger
+import platform
+import logging
 
-log = getLogger(__name__)
+log = logging.getLogger(__name__)
+
 
 class Platform(object):
     @property
@@ -35,13 +35,13 @@ class Platform(object):
 platfrom = Platform()
     
 for i in ["i386", "i486", "i586", "i686", "x86", "x86-64", "x86_64", "x64"]:
-    if i in machine():
-        import hardware.pc  # @UnresolvedImport
+    if i in platform.machine():
+        import hardware.pc
         platfrom = hardware.pc.PlatformPc()
         break
     
 for i in ["arm"]:
-    if i in machine():
-        import hardware.raspberry  # @UnresolvedImport
-        platfrom = hardware.raspberry.PlatformRaspberry()  # @UndefinedVariable
+    if i in platform.machine():
+        import hardware.raspberry
+        platfrom = hardware.raspberry.PlatformRaspberry()
         break

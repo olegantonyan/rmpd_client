@@ -1,12 +1,9 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from time import sleep
-from logging import getLogger
-from os import path
-from threading import Lock
-
-log = getLogger(__name__)
+import time
+import logging
+import os
+import threading
 
 import mediaplayer.wrapperplayer
 import mediaplayer.playlist
@@ -14,54 +11,32 @@ import utils.singleton
 import utils.threads
 import system.status
 
+log = logging.getLogger(__name__)
+
 
 class PlayerGuard(object, metaclass=utils.singleton.Singleton):
-    '''
-    Guard for media player(s)
-    '''
-
     def __init__(self):
-        self.__onchange_lock = Lock()
-        self.__player = mediaplayer.wrapperplayer.WrapperPlayer()
-        self.__playlist = None
-        self.__callbacks = None
-        self.__check_status()
+        self._onchange_lock = threading.Lock()
+        self._player = mediaplayer.wrapperplayer.WrapperPlayer()
+        self._playlist = None
+        self._callbacks = None
+        self._check_status()
 
-    def __wait_on_change_decorator(func):
+    def _wait_on_change_decorator(func):
         def wrap(self, *args):
-            if self.isstopped():  # wait for poll __check_status
-                sleep(2.5)
-            self.__onchange_lock.acquire()
+            if self.isstopped():  # wait for poll _check_status
+                time.sleep(2.5)
+            self._onchange_lock.acquire()
             result = func(self, *args)
-            self.__onchange_lock.release()
+            self._onchange_lock.release()
             return result
         return wrap
 
-    def __check_status(self):
-        try:
-            is_stopped = self.isstopped()
-            if is_stopped and self.__playlist is not None:
-                log.debug("track finished, about to start a next one")
-                self.__set_playing_status(False)
-                try:
-                    self.__callbacks["onstop"](filename=path.basename(self.__playlist.current()))
-                except:
-                    pass
-
-                self.play(self.__playlist.next())
-        except:
-            log.exception("unhandled exception when checking status")
-        finally:
-            utils.threads.run_after_timeout(timeout=1.1, target=self.__check_status, daemon=True)
-
-    def __set_playing_status(self, status):
-        system.status.Status().playing = status
-
     def isstopped(self):
-        return self.__player is not None and self.__player.isstopped()
+        return self._player is not None and self._player.isstopped()
 
     def set_callbacks(self, **kwargs):
-        self.__callbacks = kwargs
+        self._callbacks = kwargs
 
     def play_list(self, playlist):
         log.info("start playlist '%s'", playlist)
@@ -69,73 +44,94 @@ class PlayerGuard(object, metaclass=utils.singleton.Singleton):
             self.stop()
         lst = mediaplayer.playlist.Playlist(playlist)
         self.play(lst.current())
-        self.__playlist = lst
+        self._playlist = lst
         # self.__playlist = mediaplayer.playlist.Playlist(playlist)
         # self.play(self.__playlist.current())
 
     def play(self, filename):
         log.info("start track '%s'", filename)
-        if path.isfile(filename):
-            self.__onchange_lock.acquire()
-            self.__player.play(filename)
+        if os.path.isfile(filename):
+            self._onchange_lock.acquire()
+            self._player.play(filename)
             retries = 0
             while self.isstopped():
-                sleep(0.5)
-                retries = retries + 1
+                time.sleep(0.5)
+                retries += 1
                 if retries > 10:
                     log.warning("reinitializing mplayer as it has probably crashed")
                     try:
-                        self.__callbacks["onerror"](message="reinitializing mplayer as it has probably crashed", filename=path.basename(self.__playlist.pick_prev()))
+                        self._callbacks["onerror"](message="reinitializing mplayer as it has probably crashed",
+                                                   filename=os.path.basename(self._playlist.pick_prev()))
                     except:
                         pass
-                    del self.__player
-                    self.__player = mediaplayer.wrapperplayer.WrapperPlayer()
-                    self.__player.play(filename)
+                    del self._player
+                    self._player = mediaplayer.wrapperplayer.WrapperPlayer()
+                    self._player.play(filename)
                     retries = 0
-            self.__onchange_lock.release()
-            if self.__playlist:
-                self.__playlist.save_position()
-            self.__set_playing_status(True)
+            self._onchange_lock.release()
+            if self._playlist:
+                self._playlist.save_position()
+            self._set_playing_status(True)
             try:
-                self.__callbacks["onplay"](filename=self.filename())
-            except Exception:
+                self._callbacks["onplay"](filename=self.filename())
+            except:
                 pass
         else:
             log.error("file '{f}' does not exists".format(f=filename))
             try:
-                self.__callbacks["onerror"](message="file does not exists", filename=path.basename(filename))
+                self._callbacks["onerror"](message="file does not exists", filename=os.path.basename(filename))
             except:
                 pass
 
     def pause(self):
         log.info("paused/resumed")
-        self.__player.pause()
+        self._player.pause()
 
     def stop(self):
         log.info("stopped")
-        self.__player.stop()
+        self._player.stop()
         try:
-            self.__callbacks["onstop"](filename=path.basename(self.__playlist.current()))
-        except Exception:
+            self._callbacks["onstop"](filename=os.path.basename(self._playlist.current()))
+        except:
             pass
-        self.__playlist = None
+        self._playlist = None
 
-    @__wait_on_change_decorator
+    @_wait_on_change_decorator
     def time_pos(self):
-        return self.__player.time_pos()
+        return self._player.time_pos()
 
-    @__wait_on_change_decorator
+    @_wait_on_change_decorator
     def percent_pos(self):
-        return self.__player.percent_pos()
+        return self._player.percent_pos()
 
-    @__wait_on_change_decorator
+    @_wait_on_change_decorator
     def filename(self):
-        return self.__player.filename()
+        return self._player.filename()
 
-    @__wait_on_change_decorator
+    @_wait_on_change_decorator
     def length(self):
-        return self.__player.length()
+        return self._player.length()
 
     def quit(self):
-        self.__player.quit()
-        del self.__player
+        self._player.quit()
+        del self._player
+
+    def _check_status(self):
+        try:
+            is_stopped = self.isstopped()
+            if is_stopped and self._playlist is not None:
+                log.debug("track finished, about to start a next one")
+                self._set_playing_status(False)
+                try:
+                    self._callbacks["onstop"](filename=os.path.basename(self._playlist.current()))
+                except:
+                    pass
+
+                self.play(self._playlist.next())
+        except:
+            log.exception("unhandled exception when checking status")
+        finally:
+            utils.threads.run_after_timeout(timeout=1.1, target=self._check_status, daemon=True)
+
+    def _set_playing_status(self, status):
+        system.status.Status().playing = status

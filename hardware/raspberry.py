@@ -1,7 +1,6 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from sys import exit
+import sys
 
 import hardware
 import utils.shell
@@ -20,12 +19,12 @@ class PlatformRaspberry(hardware.Platform):
         try:
             r, o, e = utils.shell.execute("gpio -v")
             if r != 0:
-                exit("WiringPI gpio does not work properly: 'gpio -v' result: {r}, stdout: {o}, stderr: {e}\nPlease, install it http://wiringpi.com\nTerminated".format(r=r, o=o, e=e))
+                sys.exit("WiringPI gpio does not work properly: 'gpio -v' result: {r}, stdout: {o}, stderr: {e}\nPlease, install it http://wiringpi.com\nTerminated".format(r=r, o=o, e=e))
         except OSError:
-            exit("No wiringPI gpio utility \nPlease, install it http://wiringpi.com\nTerminated")
-        self.__setup_pins([self.__network_pin, self.__player_pin])
-        self.__blink_network = False
-        self.__init_timer_once = False
+            sys.exit("No wiringPI gpio utility \nPlease, install it http://wiringpi.com\nTerminated")
+        self._setup_pins([self.__network_pin, self.__player_pin])
+        self._blink_network = False
+        self._init_timer_once = False
     
     def get_webui_interface(self):
         return 'eth0:0'
@@ -35,47 +34,47 @@ class PlatformRaspberry(hardware.Platform):
     
     def restart_networking(self):
         hardware.log.warning("restarting network")
-        (r,o,e) = utils.shell.execute("sudo /etc/init.d/networking restart")
+        (r, o, e) = utils.shell.execute("sudo /etc/init.d/networking restart")
         if r != 0:
-            hardware.log.error("error restarting network: " + o.decode('utf-8') + ", " + e.decode('utf-8'))
+            hardware.log.error("error restarting network: " + o + ", " + e)
             return False
         return True
     
     def set_network_led(self, state):
         hardware.log.debug("Raspberry Pi platform, network: {s}".format(s=state))
-        self.__write_pin(self.__network_pin, 1 if state else 0)
+        self._write_pin(self.__network_pin, 1 if state else 0)
     
     def set_player_led(self, state):
         hardware.log.debug("Raspberry Pi platform, player: {s}".format(s=state))
-        self.__write_pin(self.__player_pin, 1 if state else 0)
+        self._write_pin(self.__player_pin, 1 if state else 0)
         
     def set_all_leds_disabled(self):
         hardware.log.debug("Raspberry Pi platform, disable all leds")
-        self.__write_pin(self.__player_pin, 0)
-        self.__write_pin(self.__network_pin, 0)
+        self._write_pin(self.__player_pin, 0)
+        self._write_pin(self.__network_pin, 0)
     
     def set_network_blink_led(self, state):
         hardware.log.debug("Raspberry Pi platform, network blink: {s}".format(s=state))
-        self.__blink_network = state
-        if not self.__init_timer_once:
-            self.__blink_network_pin()
-            self.__init_timer_once = True
+        self._blink_network = state
+        if not self._init_timer_once:
+            self._blink_network_pin()
+            self._init_timer_once = True
             
-    def __blink_network_pin(self):
-        if self.__blink_network:
-            if self.__read_pin(self.__network_pin) == 1:
-                self.__write_pin(self.__network_pin, 0)
+    def _blink_network_pin(self):
+        if self._blink_network:
+            if self._read_pin(self.__network_pin) == 1:
+                self._write_pin(self.__network_pin, 0)
             else:
-                self.__write_pin(self.__network_pin, 1)
-        utils.threads.run_after_timeout(0.4, self.__blink_network_pin)
+                self._write_pin(self.__network_pin, 1)
+        utils.threads.run_after_timeout(0.4, self._blink_network_pin)
                     
-    def __setup_pins(self, pins):
+    def _setup_pins(self, pins):
         for i in pins:
             utils.shell.execute("gpio export {pin} out".format(pin=i))
             
-    def __write_pin(self, pin, state):
+    def _write_pin(self, pin, state):
         utils.shell.execute("gpio -g write {pin} {st}".format(pin=pin, st=state))
         
-    def __read_pin(self, pin):
-        (r, o, e) = utils.shell.execute("gpio -g read {pin}".format(pin=pin))  # @UnusedVariable
+    def _read_pin(self, pin):
+        (r, o, e) = utils.shell.execute("gpio -g read {pin}".format(pin=pin))
         return int(o)

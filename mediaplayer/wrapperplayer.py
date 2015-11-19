@@ -1,7 +1,6 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from os import path
+import os
 
 import mediaplayer.mplayer
 import mediaplayer.pyomxplayer.pyomxplayer
@@ -11,57 +10,57 @@ import utils.config
 
 class WrapperPlayer(object):
     def __init__(self):
-        self.__mplayer = mediaplayer.mplayer.MPlayer()
-        self.__omxplayer = mediaplayer.pyomxplayer.pyomxplayer.OMXPlayer()
+        self._mplayer = mediaplayer.mplayer.MPlayer()
+        self._omxplayer = mediaplayer.pyomxplayer.pyomxplayer.OMXPlayer()
         if utils.config.Config().omplayer_executable() is not None:
-            self.__omxplayer.exec_path = utils.config.Config().omplayer_executable()
+            self._omxplayer.exec_path = utils.config.Config().omplayer_executable()
         if utils.config.Config().omplayer_arguments() is not None:
-            self.__omxplayer.args = utils.config.Config().omplayer_arguments()
+            self._omxplayer.args = utils.config.Config().omplayer_arguments()
 
     def __del__(self):
-        del self.__mplayer
-        del self.__omxplayer
+        del self._mplayer
+        del self._omxplayer
 
     def quit(self):
-        self.__omxplayer.quit()
-        del self.__mplayer
-        del self.__omxplayer
+        self._omxplayer.quit()
+        del self._mplayer
+        del self._omxplayer
 
-    def __player(self, filename=None):
+    def _player(self, filename=None):
         if not filename:
-            if hardware.platfrom.__name__ == 'raspberry' and not self.__omxplayer.isstopped():
-                return self.__omxplayer
-            return self.__mplayer
+            if hardware.platfrom.__name__ == 'raspberry' and not self._omxplayer.isstopped():
+                return self._omxplayer
+            return self._mplayer
         elif self.isvideo(filename) and hardware.platfrom.__name__ == 'raspberry':
-            return self.__omxplayer
-        return self.__mplayer
+            return self._omxplayer
+        return self._mplayer
 
     def isvideo(self, filename):
-        ext = path.splitext(filename)[1].replace('.', '')
+        ext = os.path.splitext(filename)[1].replace('.', '')
         if ext in ['mkv', 'mp4', 'avi', 'mpeg2', 'mov', 'mpg']:
             return True
         return False
 
     def play(self, filename):
-        return self.__player(filename).play(filename)
+        return self._player(filename).play(filename)
 
     def pause(self):
-        return self.__player().pause()
+        return self._player().pause()
 
     def stop(self):
-        return self.__player().stop()
+        return self._player().stop()
 
     def isstopped(self):
-        return self.__player().isstopped()
+        return self._player().isstopped()
 
     def time_pos(self):
-        return self.__player().time_pos()
+        return self._player().time_pos()
 
     def percent_pos(self):
-        return self.__player().percent_pos()
+        return self._player().percent_pos()
 
     def filename(self):
-        return self.__player().filename()
+        return self._player().filename()
 
     def length(self):
-        return self.__player().length()
+        return self._player().length()

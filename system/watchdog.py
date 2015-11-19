@@ -1,14 +1,13 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from os import path, getcwd
+import os
 
 import utils.shell
 
 
 class Watchdog(object):
     def __init__(self):
-        self.__wdt_file = path.join(getcwd(), "watchdogfile")
+        self._wdt_file = os.path.join(os.getcwd(), "watchdogfile")
 
     def feed(self):
-        utils.shell.execute("touch {f}".format(f=self.__wdt_file))
+        utils.shell.execute("touch {f}".format(f=self._wdt_file))

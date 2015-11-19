@@ -1,11 +1,10 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from logging import getLogger
-
-log = getLogger(__name__)
+import logging
 
 import utils.shell
+
+log = logging.getLogger(__name__)
 
 
 class Control(object):
