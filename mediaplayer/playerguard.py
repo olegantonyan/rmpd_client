@@ -4,6 +4,7 @@ import time
 import logging
 import os
 import threading
+import traceback
 
 import mediaplayer.wrapperplayer
 import mediaplayer.playlist
@@ -45,8 +46,6 @@ class PlayerGuard(object, metaclass=utils.singleton.Singleton):
         lst = mediaplayer.playlist.Playlist(playlist)
         self.play(lst.current())
         self._playlist = lst
-        # self.__playlist = mediaplayer.playlist.Playlist(playlist)
-        # self.play(self.__playlist.current())
 
     def play(self, filename):
         log.info("start track '%s'", filename)
@@ -58,12 +57,9 @@ class PlayerGuard(object, metaclass=utils.singleton.Singleton):
                 time.sleep(0.5)
                 retries += 1
                 if retries > 10:
-                    log.warning("reinitializing mplayer as it has probably crashed")
-                    try:
-                        self._callbacks["onerror"](message="reinitializing mplayer as it has probably crashed",
-                                                   filename=os.path.basename(self._playlist.pick_prev()))
-                    except:
-                        pass
+                    msg = "reinitializing mplayer as it has probably crashed"
+                    log.warning(msg)
+                    self._run_callback('onerror', message=msg, filename=os.path.basename(self._playlist.pick_prev()))
                     del self._player
                     self._player = mediaplayer.wrapperplayer.WrapperPlayer()
                     self._player.play(filename)
@@ -72,16 +68,10 @@ class PlayerGuard(object, metaclass=utils.singleton.Singleton):
             if self._playlist:
                 self._playlist.save_position()
             self._set_playing_status(True)
-            try:
-                self._callbacks["onplay"](filename=self.filename())
-            except:
-                pass
+            self._run_callback('onplay', filename=self.filename())
         else:
             log.error("file '{f}' does not exists".format(f=filename))
-            try:
-                self._callbacks["onerror"](message="file does not exists", filename=os.path.basename(filename))
-            except:
-                pass
+            self._run_callback('onerror', message="file does not exists", filename=os.path.basename(filename))
 
     def pause(self):
         log.info("paused/resumed")
@@ -90,10 +80,7 @@ class PlayerGuard(object, metaclass=utils.singleton.Singleton):
     def stop(self):
         log.info("stopped")
         self._player.stop()
-        try:
-            self._callbacks["onstop"](filename=os.path.basename(self._playlist.current()))
-        except:
-            pass
+        self._run_callback('onstop', filename=os.path.basename(self._playlist.current()))
         self._playlist = None
 
     @_wait_on_change_decorator
@@ -122,16 +109,21 @@ class PlayerGuard(object, metaclass=utils.singleton.Singleton):
             if is_stopped and self._playlist is not None:
                 log.debug("track finished, about to start a next one")
                 self._set_playing_status(False)
-                try:
-                    self._callbacks["onstop"](filename=os.path.basename(self._playlist.current()))
-                except:
-                    pass
-
+                self._run_callback('onstop', filename=os.path.basename(self._playlist.current()))
                 self.play(self._playlist.next())
         except:
-            log.exception("unhandled exception when checking status")
+            log.exception("unhandled exception when checking status:\n{ex}".format(ex=traceback.format_exc()))
         finally:
             utils.threads.run_after_timeout(timeout=1.1, target=self._check_status, daemon=True)
 
     def _set_playing_status(self, status):
         system.status.Status().playing = status
+
+    def _run_callback(self, name, **kwargs):
+        cb = self._callbacks.get(name)
+        if cb is None:
+            return
+        try:
+            cb(**kwargs)
+        except:
+            log.warning("error running {name} callback:{ex}\n".format(name=name, ex=traceback.format_exc()))
