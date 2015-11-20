@@ -27,6 +27,7 @@ class ControlWrapper(object):
             self._queue.enqueue(json.dumps(data))
             return True
         else:
+            # XXX possible thread-safety problem here
             try:
                 self._proto.send(msg, seq)
                 self._set_online_status(True)
