@@ -11,8 +11,8 @@ import utils.config
 import utils.support
 import remotecontrol.protocol.incoming.base_playlist_command as base
 import system.status
-import remotecontrol.httpclient
-import mediaplayer.playercontroller
+import remotecontrol.httpclient as http
+import mediaplayer.playercontroller as player
 
 log = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ class UpdatePlaylist(base.BasePlaylistCommand):
         if ok:
             self._save_playlist_file()  # successfully downloaded => save new playlist file
             utils.state.State().current_track_num = 0
-            mediaplayer.playercontroller.PlayerController().start_playlist()
+            player.PlayerController().start_playlist()
         self._send_ack(ok, sequence, message)
 
     def _start_worker(self, legacy_items):
@@ -78,7 +78,7 @@ class Worker(base.BaseWorker):
         localpath = utils.files.full_file_localpath(file)
         if not os.path.isfile(localpath) or localpath.endswith("m3u"):
             log.info("downloading file '%s'", url)
-            remotecontrol.httpclient.download_file(url, localpath)
+            http.download_file(url, localpath)
 
     def _full_file_url(self, relativeurl):
         return urllib.parse.urljoin(utils.config.Config().server_url(), relativeurl)
