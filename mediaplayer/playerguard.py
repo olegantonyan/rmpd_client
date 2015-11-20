@@ -37,6 +37,7 @@ class PlayerGuard(object, metaclass=utils.singleton.Singleton):
         return self._player is not None and self._player.isstopped()
 
     def set_callbacks(self, **kwargs):
+        # TODO thread-safety
         self._callbacks = kwargs
 
     def play_list(self, playlist):
