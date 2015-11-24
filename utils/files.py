@@ -3,6 +3,7 @@
 import os
 
 import utils
+import utils.config
 
 
 def mediafiles_path():
