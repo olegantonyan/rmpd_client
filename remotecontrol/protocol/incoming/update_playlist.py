@@ -76,7 +76,7 @@ class Worker(base.BaseWorker):
     def _download_file(self, file):
         url = self._full_file_url(file)
         localpath = utils.files.full_file_localpath(file)
-        if not os.path.isfile(localpath) or localpath.endswith("m3u"):
+        if not os.path.isfile(localpath):
             log.info("downloading file '%s'", url)
             http.download_file(url, localpath)
 
@@ -86,6 +86,8 @@ class Worker(base.BaseWorker):
     def _utilize_nonplaylist_files(self, media_items, media_items_path):
         media_items = [os.path.basename(i) for i in media_items]
         for file in os.listdir(media_items_path):
-            if file not in media_items and not file.endswith('.log'):
+            if file not in media_items \
+                    and not file.endswith('.log') \
+                    and not file.endswith(os.path.basename(self._playlist_fullpath)):
                 log.info("removing file not in current playlist '{f}'".format(f=file))
                 os.remove(utils.files.full_file_localpath(file))

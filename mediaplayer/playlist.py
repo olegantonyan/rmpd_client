@@ -4,9 +4,17 @@ import utils.state
 import utils.files
 
 
+def filename():
+    return 'playlist.json'
+
+
+def full_filepath():
+    return utils.files.full_file_localpath(filename())
+
+
 class Playlist(object):
-    def __init__(self, playlist_file):
-        self._playlistfile = utils.files.full_file_localpath(playlist_file)
+    def __init__(self):
+        self._playlistfile = full_filepath()  # utils.files.full_file_localpath("playlist.m3u")
         self._list = utils.files.list_files_in_playlist(self._playlistfile)
         self._current_position = utils.state.State().current_track_num
         if self._current_position >= len(self._list):

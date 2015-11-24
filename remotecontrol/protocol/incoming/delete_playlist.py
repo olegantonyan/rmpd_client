@@ -52,10 +52,9 @@ class Worker(base.BaseWorker):
         self._success_message = 'playlist deleted successfully'
 
     def _run(self):
-        playlist_fullpath = utils.files.full_file_localpath("playlist.m3u")
-        for f in utils.files.list_files_in_playlist(playlist_fullpath):
+        for f in utils.files.list_files_in_playlist(self._playlist_fullpath):
             self._remove_mediaifile(f)
-        os.remove(playlist_fullpath)
+        os.remove(self._playlist_fullpath)
 
     def _remove_mediaifile(self, file):
         try:

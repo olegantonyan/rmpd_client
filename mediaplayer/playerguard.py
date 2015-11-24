@@ -16,11 +16,11 @@ log = logging.getLogger(__name__)
 
 
 class PlayerGuard(object, metaclass=utils.singleton.Singleton):
-    def __init__(self):
+    def __init__(self, **kwargs):
         self._onchange_lock = threading.Lock()
-        self._player = mediaplayer.wrapperplayer.WrapperPlayer()
+        self._init_player_object()
         self._playlist = None
-        self._callbacks = None
+        self._callbacks = kwargs  # TODO thread-safety
         self._check_status()
 
     def _wait_on_change_decorator(func):
@@ -36,15 +36,11 @@ class PlayerGuard(object, metaclass=utils.singleton.Singleton):
     def isstopped(self):
         return self._player is not None and self._player.isstopped()
 
-    def set_callbacks(self, **kwargs):
-        # TODO thread-safety
-        self._callbacks = kwargs
-
-    def play_list(self, playlist):
-        log.info("start playlist '%s'", playlist)
+    def play_list(self):
         if not self.isstopped():
             self.stop()
-        lst = mediaplayer.playlist.Playlist(playlist)
+        log.info("start playlist")
+        lst = mediaplayer.playlist.Playlist()
         self.play(lst.current())
         self._playlist = lst
 
@@ -62,7 +58,7 @@ class PlayerGuard(object, metaclass=utils.singleton.Singleton):
                     log.warning(msg)
                     self._run_callback('onerror', message=msg, filename=os.path.basename(self._playlist.pick_prev()))
                     del self._player
-                    self._player = mediaplayer.wrapperplayer.WrapperPlayer()
+                    self._init_player_object()
                     self._player.play(filename)
                     retries = 0
             self._onchange_lock.release()
@@ -120,11 +116,15 @@ class PlayerGuard(object, metaclass=utils.singleton.Singleton):
     def _set_playing_status(self, status):
         system.status.Status().playing = status
 
+    def _init_player_object(self):
+        self._player = mediaplayer.wrapperplayer.WrapperPlayer()
+        return self._player
+
     def _run_callback(self, name, **kwargs):
         cb = self._callbacks.get(name)
         if cb is None:
             return
         try:
-            cb(**kwargs)
+            return cb(**kwargs)
         except:
             log.warning("error running {name} callback:{ex}\n".format(name=name, ex=traceback.format_exc()))
