@@ -25,7 +25,7 @@ class BasePlaylistCommand(remotecontrol.protocol.incoming.base_command.BaseComma
         return mediaplayer.playlist.Playlist.reset_position()
 
     def _playlist_file_path(self):
-        return mediaplayer.playlist.full_filepath()
+        return mediaplayer.playlist.PlaylistLoader().filepath()
 
     def _send_ack(self, ok, sequence, message):
         self._sender('ack').call(ok=ok, sequence=sequence, message=message)
@@ -37,7 +37,7 @@ class BaseWorker(threading.Thread):
         self._sequence = sequence
         self.daemon = True
         self._onfinish = onfinish_callback
-        self._playlist_fullpath = mediaplayer.playlist.full_filepath()
+        self._playlist_fullpath = mediaplayer.playlist.PlaylistLoader().filepath()
         self._error_message = 'please set error message in subclass'
         self._success_message = 'please set success message in subclass'
 

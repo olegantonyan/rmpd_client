@@ -5,7 +5,7 @@ import logging
 
 import mediaplayer.playerguard
 import utils.config
-import remotecontrol.protocoldispatcher
+import remotecontrol.protocoldispatcher as proto
 import utils.files
 import utils.singleton
 import mediaplayer.playlist
@@ -24,13 +24,13 @@ class PlayerController(object, metaclass=utils.singleton.Singleton):
         if not os.path.exists(mediafiles_fullpath):
             os.makedirs(mediafiles_fullpath)
         
-        playlist_fullpath = mediaplayer.playlist.full_filepath()
+        playlist_fullpath = mediaplayer.playlist.PlaylistLoader().filepath()
         if not os.path.exists(playlist_fullpath):
             log.error("playlist file '{f}' does not exists".format(f=playlist_fullpath))
             return
 
-        remotecontrol.protocoldispatcher.ProtocolDispatcher().send('playlist_begin',
-                                                                   files=utils.files.list_files_in_playlist(playlist_fullpath))
+        proto.ProtocolDispatcher().send('playlist_begin',
+                                        files=mediaplayer.playlist.PlaylistLoader(playlist_fullpath).list_all_files())
         self._player.play_list()
             
     def stop(self):
@@ -47,12 +47,12 @@ class PlayerController(object, metaclass=utils.singleton.Singleton):
 
     def _onplay_callback(self, **kwargs):
         log.debug("callback on play: " + kwargs["filename"])
-        remotecontrol.protocoldispatcher.ProtocolDispatcher().send('track_begin', **kwargs)
+        proto.ProtocolDispatcher().send('track_begin', **kwargs)
 
     def _onstop_callback(self, **kwargs):
         log.debug("callback on stop: " + kwargs["filename"])
-        remotecontrol.protocoldispatcher.ProtocolDispatcher().send('track_end', **kwargs)
+        proto.ProtocolDispatcher().send('track_end', **kwargs)
 
     def _onerror_callback(self, **kwargs):
         log.debug("callback on error: " + kwargs["filename"] + " : " + kwargs["message"])
-        remotecontrol.protocoldispatcher.ProtocolDispatcher().send('playback_error', **kwargs)
+        proto.ProtocolDispatcher().send('playback_error', **kwargs)

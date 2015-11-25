@@ -95,7 +95,7 @@ def main():
     parser.add_option("-d", "--daemon-contol", dest="daemon_control", help="run program as a console app instead of daemon")
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose", help="enable verbose logging")
 
-    (opts, args) = parser.parse_args()  # @UnusedVariable
+    (opts, args) = parser.parse_args()
 
     if opts.console_app:
         bootstrap(opts.configfile if opts.configfile else "rmpd.conf",
