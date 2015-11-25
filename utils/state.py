@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import configparser
@@ -17,7 +16,7 @@ class State(object, metaclass=utils.singleton.Singleton):
         for i in range(3):  # re-create corrupted file
             self._create_file_if_needed()
             try:
-                self.__read_file()
+                self._read_file()
                 break
             except:
                 os.remove(self._filename)
@@ -41,7 +40,7 @@ class State(object, metaclass=utils.singleton.Singleton):
                 self._parser.set('playlist', 'current_track_num', '0')
                 self._parser.write(f)
 
-    def __read_file(self):
+    def _read_file(self):
         with codecs.open(self._filename, 'r', encoding='utf-8') as f:
             self._parser.read_file(f)
         section = 'playlist'
