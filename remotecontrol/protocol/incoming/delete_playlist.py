@@ -8,6 +8,7 @@ import remotecontrol.protocol.incoming.base_playlist_command as base
 import mediaplayer.playercontroller
 import utils.files
 
+
 log = logging.getLogger(__name__)
 
 
@@ -28,7 +29,7 @@ class DeletePlaylist(base.BasePlaylistCommand):
     def _onfinish(self, ok, sequence, message):
         self._release_worker()
         if ok:
-            utils.state.State().current_track_num = 0
+            self._reset_playlist_position()
             self._remove_playlist_file()
             mediaplayer.playercontroller.PlayerController().stop()
         self._send_ack(ok, sequence, message)

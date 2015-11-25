@@ -39,7 +39,7 @@ class UpdatePlaylist(base.BasePlaylistCommand):
         system.status.Status().downloading = False
         if ok:
             self._save_playlist_file()  # successfully downloaded => save new playlist file
-            utils.state.State().current_track_num = 0
+            self._reset_playlist_position()
             player.PlayerController().start_playlist()
         self._send_ack(ok, sequence, message)
 

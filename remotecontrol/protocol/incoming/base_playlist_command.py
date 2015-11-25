@@ -22,6 +22,9 @@ class BasePlaylistCommand(remotecontrol.protocol.incoming.base_command.BaseComma
         with open(localpath, 'w') as f:
             f.write(jsondata)
 
+    def _reset_playlist_position(self):
+        return mediaplayer.playlist.Playlist().reset_position()
+
     def _remove_playlist_file(self):
         localpath = self._playlist_file_path()
         if os.path.isfile(localpath):
@@ -52,4 +55,7 @@ class BaseWorker(threading.Thread):
         except:
             log.error("{msg}\n{ex}".format(msg=self._error_message, ex=traceback.format_exc()))
             self._onfinish(False, self._sequence, self._error_message)
+
+    def _run(self):
+        raise NotImplementedError('override this method in subclass')
 
