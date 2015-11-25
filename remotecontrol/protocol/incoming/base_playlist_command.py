@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import json
-import os
 import threading
 import logging
 import traceback
@@ -23,12 +22,7 @@ class BasePlaylistCommand(remotecontrol.protocol.incoming.base_command.BaseComma
             f.write(jsondata)
 
     def _reset_playlist_position(self):
-        return mediaplayer.playlist.Playlist().reset_position()
-
-    def _remove_playlist_file(self):
-        localpath = self._playlist_file_path()
-        if os.path.isfile(localpath):
-            os.remove(localpath)
+        return mediaplayer.playlist.Playlist.reset_position()
 
     def _playlist_file_path(self):
         return mediaplayer.playlist.full_filepath()

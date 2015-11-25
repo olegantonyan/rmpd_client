@@ -30,7 +30,6 @@ class DeletePlaylist(base.BasePlaylistCommand):
         self._release_worker()
         if ok:
             self._reset_playlist_position()
-            self._remove_playlist_file()
             mediaplayer.playercontroller.PlayerController().stop()
         self._send_ack(ok, sequence, message)
 
@@ -54,11 +53,11 @@ class Worker(base.BaseWorker):
 
     def _run(self):
         for f in utils.files.list_files_in_playlist(self._playlist_fullpath):
-            self._remove_mediaifile(f)
-        os.remove(self._playlist_fullpath)
+            self._remove_file(utils.files.full_file_localpath(f))
+        self._remove_file(self._playlist_fullpath)
 
-    def _remove_mediaifile(self, file):
+    def _remove_file(self, file):
         try:
-            os.remove(utils.files.full_file_localpath(file))
+            os.remove(file)
         except FileNotFoundError:
             pass

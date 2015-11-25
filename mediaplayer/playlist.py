@@ -21,11 +21,12 @@ class Playlist(object):
             self._current_position = 0
             self.save_position()
 
+    @staticmethod
+    def reset_position():
+        utils.state.State().current_track_num = 0
+
     def save_position(self):
         utils.state.State().current_track_num = self._current_position
-
-    def reset_position(self):
-        utils.state.State().current_track_num = 0
 
     def next(self):
         self._current_position += 1
