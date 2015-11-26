@@ -9,7 +9,6 @@ import json
 class Playlist(object):
     def __init__(self):
         self._loader = PlaylistLoader()
-        self._filepath = self._loader.filepath()
         self._data = self._loader.load()
         self._list = self._loader.list_all_files()
         self._current_position = utils.state.State().current_track_num
