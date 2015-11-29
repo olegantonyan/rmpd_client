@@ -9,9 +9,7 @@ log = logging.getLogger(__name__)
 
 class PlaybackError(base_command.BaseCommand):
     def call(self, **kwargs):
-        message = "{f} ({m})".format(m=kwargs.get('message'), f=kwargs.get('filename'))
-        return self._send(self._json(message))
+        self._message = "{f} ({m})".format(m=kwargs.get('message'), f=kwargs.get('filename'))
+        return self._send()
 
-    def _json(self, message):
-        return {'type': 'playback', 'status': 'error', 'track': message}
 

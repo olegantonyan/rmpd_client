@@ -13,7 +13,5 @@ class TrackBegin(base_command.BaseCommand):
         if filename is None:
             log.error("track is none")
             return
-        return self._send(self._json(filename))
-
-    def _json(self, filename):
-        return {'type': 'playback', 'status': 'begin', 'track': filename}
+        self._message = filename
+        return self._send()

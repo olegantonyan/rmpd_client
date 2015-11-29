@@ -13,7 +13,6 @@ class TrackEnd(base_command.BaseCommand):
         if filename is None:
             log.error("track is none")
             return
-        return self._send(self._json(filename))
+        self._message = filename
+        return self._send()
 
-    def _json(self, filename):
-        return {'type': 'playback', 'status': 'end', 'track': filename}

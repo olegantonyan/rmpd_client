@@ -11,12 +11,13 @@ class BaseCommand(object):
         self._control_wrapper = control_wrapper
         self._queued = True  # override in subclass
         self._sequence = 0   # // - //
+        self._message = None  # '<empty message, set in subclass>'
 
     def _thetime(self):
         return datetime.datetime.now(tzlocal.get_localzone()).strftime('%Y-%m-%dT%H:%M:%S%z')
 
-    def _send(self, json):
-        full_json = dict(json, **{'localtime': self._thetime(), 'command': self._type()})
+    def _send(self, json={}):
+        full_json = dict(json, **{'localtime': self._thetime(), 'command': self._type(), 'message': self._message})
         return self._control_wrapper.send(full_json, self._queued, self._sequence)
 
     def _type(self):

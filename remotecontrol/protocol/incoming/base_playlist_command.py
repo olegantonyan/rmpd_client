@@ -28,7 +28,7 @@ class BasePlaylistCommand(remotecontrol.protocol.incoming.base_command.BaseComma
         return mediaplayer.playlist.PlaylistLoader().filepath()
 
     def _send_ack(self, ok, sequence, message):
-        self._sender('ack').call(ok=ok, sequence=sequence, message=message)
+        self._sender('ack_' + ('ok' if ok else 'fail')).call(sequence=sequence, message=message)
 
 
 class BaseWorker(threading.Thread):
