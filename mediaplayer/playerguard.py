@@ -28,9 +28,10 @@ class PlayerGuard(object, metaclass=utils.singleton.Singleton):
             if self.isstopped():  # wait for poll _check_status
                 time.sleep(2.5)
             self._onchange_lock.acquire()
-            result = func(self, *args)
-            self._onchange_lock.release()
-            return result
+            try:
+                return func(self, *args)
+            finally:
+                self._onchange_lock.release()
         return wrap
 
     def isstopped(self):
@@ -45,30 +46,18 @@ class PlayerGuard(object, metaclass=utils.singleton.Singleton):
         self._playlist = lst
 
     def play(self, filename):
+        if filename is None:
+            return
         log.info("start track '%s'", filename)
-        if os.path.isfile(filename):
-            self._onchange_lock.acquire()
-            self._player.play(filename)
-            retries = 0
-            while self.isstopped():
-                time.sleep(0.5)
-                retries += 1
-                if retries > 10:
-                    msg = "reinitializing mplayer as it has probably crashed"
-                    log.warning(msg)
-                    self._run_callback('onerror', message=msg, filename=os.path.basename(self._playlist.pick_prev()))
-                    del self._player
-                    self._init_player_object()
-                    self._player.play(filename)
-                    retries = 0
-            self._onchange_lock.release()
-            if self._playlist:
-                self._playlist.save_position()
-            self._set_playing_status(True)
-            self._run_callback('onplay', filename=self.filename())
-        else:
+        if not os.path.isfile(filename):
             log.error("file '{f}' does not exists".format(f=filename))
             self._run_callback('onerror', message="file does not exists", filename=os.path.basename(filename))
+            return
+        self._try_play(filename)
+        if self._playlist:
+            self._playlist.save_position()
+        self._set_playing_status(True)
+        self._run_callback('onplay', filename=self.filename())
 
     def pause(self):
         log.info("paused/resumed")
@@ -128,3 +117,22 @@ class PlayerGuard(object, metaclass=utils.singleton.Singleton):
             return cb(**kwargs)
         except:
             log.warning("error running {name} callback:{ex}\n".format(name=name, ex=traceback.format_exc()))
+
+    def _try_play(self, filename):
+        self._onchange_lock.acquire()
+        try:
+            self._player.play(filename)
+            retries = 0
+            while self.isstopped():
+                time.sleep(0.5)
+                retries += 1
+                if retries > 10:
+                    msg = "reinitializing mplayer as it has probably crashed"
+                    log.warning(msg)
+                    self._run_callback('onerror', message=msg, filename=os.path.basename(self._playlist.pick_prev()))
+                    del self._player
+                    self._init_player_object()
+                    self._player.play(filename)
+                    retries = 0
+        finally:
+            self._onchange_lock.release()

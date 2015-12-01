@@ -15,7 +15,7 @@ class BaseCommand(object):
         self._json = {}       # // - //
 
     def call(self):
-        self._send()
+        return self._send()
 
     def _thetime(self):
         return datetime.datetime.now(tzlocal.get_localzone()).strftime('%Y-%m-%dT%H:%M:%S%z')
