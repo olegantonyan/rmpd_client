@@ -14,4 +14,4 @@ class TrackBegin(base_command.BaseCommand):
             log.error("track is none")
             return
         self._message = filename
-        return self._send()
+        return super().call()

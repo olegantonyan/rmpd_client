@@ -10,6 +10,6 @@ log = logging.getLogger(__name__)
 class PlaybackError(base_command.BaseCommand):
     def call(self, **kwargs):
         self._message = "{f} ({m})".format(m=kwargs.get('message'), f=kwargs.get('filename'))
-        return self._send()
+        return super().call()
 
 

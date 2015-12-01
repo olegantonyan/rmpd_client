@@ -7,4 +7,4 @@ class AckOk(base_command.BaseCommand):
     def call(self, **kwargs):
         self._message = kwargs.get('message') or ''
         self._sequence = kwargs.get('sequence') or 0
-        return self._send()
+        return super().call()

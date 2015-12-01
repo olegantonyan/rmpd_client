@@ -7,4 +7,4 @@ class UpdatePlaylist(base_command.BaseCommand):
     def call(self, **kwargs):
         files = kwargs.get('files') or []
         self._message = ', '.join(files)
-        return self._send()
+        return super().call()
