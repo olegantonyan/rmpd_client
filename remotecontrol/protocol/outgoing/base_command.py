@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import datetime
-import tzlocal
-
 import utils.support
+import utils.datetime
 
 
 class BaseCommand(object):
@@ -18,7 +16,7 @@ class BaseCommand(object):
         return self._send()
 
     def _thetime(self):
-        return datetime.datetime.now(tzlocal.get_localzone()).strftime('%Y-%m-%dT%H:%M:%S%z')
+        return utils.datetime.now().strftime('%Y-%m-%dT%H:%M:%S%z')
 
     def _send(self):
         full_json = dict(self._json, **{'localtime': self._thetime(), 'command': self._type(), 'message': self._message})

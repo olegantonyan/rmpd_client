@@ -5,7 +5,8 @@ import threading
 import logging
 import traceback
 
-import mediaplayer.playlist
+import mediaplayer.playlist.playlist as p
+import mediaplayer.playlist.loader as pl
 import remotecontrol.protocol.incoming.base_command
 
 log = logging.getLogger(__name__)
@@ -22,10 +23,10 @@ class BasePlaylistCommand(remotecontrol.protocol.incoming.base_command.BaseComma
             f.write(jsondata)
 
     def _reset_playlist_position(self):
-        return mediaplayer.playlist.Playlist.reset_position()
+        return p.Playlist.reset_position()
 
     def _playlist_file_path(self):
-        return mediaplayer.playlist.PlaylistLoader().filepath()
+        return pl.Loader().filepath()
 
     def _send_ack(self, ok, sequence, message):
         self._sender('ack_' + ('ok' if ok else 'fail')).call(sequence=sequence, message=message)
@@ -37,7 +38,7 @@ class BaseWorker(threading.Thread):
         self._sequence = sequence
         self.daemon = True
         self._onfinish = onfinish_callback
-        self._playlist_fullpath = mediaplayer.playlist.PlaylistLoader().filepath()
+        self._playlist_fullpath = pl.Loader().filepath()
         self._error_message = 'please set error message in subclass'
         self._success_message = 'please set success message in subclass'
 

@@ -7,7 +7,7 @@ import os
 import remotecontrol.protocol.incoming.base_playlist_command as base
 import mediaplayer.playercontroller
 import utils.files
-import mediaplayer.playlist
+import mediaplayer.playlist.loader as pl
 
 
 log = logging.getLogger(__name__)
@@ -53,7 +53,7 @@ class Worker(base.BaseWorker):
         self._success_message = 'playlist deleted successfully'
 
     def _run(self):
-        for f in mediaplayer.playlist.PlaylistLoader(self._playlist_fullpath).list_all_files():
+        for f in pl.Loader(self._playlist_fullpath).list_all_files():
             self._remove_file(utils.files.full_file_localpath(f))
         self._remove_file(self._playlist_fullpath)
 

@@ -7,7 +7,7 @@ import threading
 import traceback
 
 import mediaplayer.wrapperplayer
-import mediaplayer.playlist
+import mediaplayer.playlist.playlist as playlist
 import utils.singleton
 import utils.threads
 import system.status
@@ -41,7 +41,7 @@ class PlayerGuard(object, metaclass=utils.singleton.Singleton):
         if not self.isstopped():
             self.stop()
         log.info("start playlist")
-        lst = mediaplayer.playlist.Playlist()
+        lst = playlist.Playlist()
         self.play(lst.current())
         self._playlist = lst
 

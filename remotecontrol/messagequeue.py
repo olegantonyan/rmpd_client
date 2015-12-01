@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import datetime
 import os
 import logging
 
 import utils.sqlexecutor
+import utils.datetime
 
 log = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ class MessageQueue(object):
         def wrap(self, *args):
             try:
                 return func(self, *args)
-            except utils.sqlexecutor.SqlError as e:
+            except utils.sqlexecutor.SqlError:
                 log.exception("message queue sql error #%s", self._error_count + 1)
                 self._error_count += 1
                 raise
@@ -48,7 +48,7 @@ class MessageQueue(object):
     @_watch_exceptions
     def enqueue(self, data):
         res = self._db.execute("INSERT OR REPLACE INTO message_queue ([data], [created_at]) VALUES (?, ?)",
-                               (data, datetime.datetime.now()))
+                               (data, utils.datetime.utcnow()))
         return res["result"]
 
     @_guard_db

@@ -8,7 +8,7 @@ import utils.config
 import remotecontrol.protocoldispatcher as proto
 import utils.files
 import utils.singleton
-import mediaplayer.playlist
+import mediaplayer.playlist.loader as pl
 
 log = logging.getLogger(__name__)
 
@@ -24,13 +24,13 @@ class PlayerController(object, metaclass=utils.singleton.Singleton):
         if not os.path.exists(mediafiles_fullpath):
             os.makedirs(mediafiles_fullpath)
         
-        playlist_fullpath = mediaplayer.playlist.PlaylistLoader().filepath()
+        playlist_fullpath = pl.Loader().filepath()
         if not os.path.exists(playlist_fullpath):
             log.error("playlist file '{f}' does not exists".format(f=playlist_fullpath))
             return
 
         proto.ProtocolDispatcher().send('playlist_begin',
-                                        files=mediaplayer.playlist.PlaylistLoader(playlist_fullpath).list_all_files())
+                                        files=pl.Loader(playlist_fullpath).list_all_files())
         self._player.play_list()
             
     def stop(self):
