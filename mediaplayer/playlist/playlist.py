@@ -3,8 +3,10 @@
 import utils.state
 import utils.files
 import utils.datetime
+import random
 
 import mediaplayer.playlist.loader
+import mediaplayer.playlist.item as item
 
 
 class Playlist(object):
@@ -12,6 +14,7 @@ class Playlist(object):
         self._loader = mediaplayer.playlist.loader.Loader()
         self._data = self._loader.load()
         self._list = self._loader.list_all_files()
+        self._items = self._fill_items()
         self._current_position = utils.state.State().current_track_num
         if self._current_position >= len(self._list):
             self._current_position = 0
@@ -41,4 +44,13 @@ class Playlist(object):
 
     def _thetime(self):
         return utils.datetime.now().time()
+
+    def _fill_items(self):
+        raw_items = [item.Item(i) for i in self._data['items']]
+        if self._data['shuffle']:
+            random.shuffle(raw_items)
+            return raw_items
+        else:
+            return sorted(raw_items, key=lambda j: j.position)
+
 

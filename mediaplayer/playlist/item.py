@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import datetime
+
 
 class Item(object):
     def __init__(self, i):
@@ -23,11 +25,11 @@ class Item(object):
 
     @property
     def begin_time(self):
-        return self._d['begin_time']
+        return self._parse_time(self._d['begin_time'])
 
     @property
     def end_time(self):
-        return self._d['end_time']
+        return self._parse_time(self._d['end_time'])
 
     @property
     def begin_date(self):
@@ -46,3 +48,6 @@ class Item(object):
 
     def is_advertising(self):
         return self.type == 'advertising'
+
+    def _parse_time(self, arg):
+        return datetime.datetime.strptime(arg, '%H:%M:%S').time()
