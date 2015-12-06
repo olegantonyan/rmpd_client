@@ -14,7 +14,8 @@ class Playlist(object):
         self._loader = mediaplayer.playlist.loader.Loader()
         self._data = self._loader.load()
         self._list = self._loader.list_all_files()
-        self._items = self._fill_items()
+        self._background = self._background_items()
+        self._advertising = self._advertising_items()
         self._current_position = utils.state.State().current_track_num
         if self._current_position >= len(self._list):
             self._current_position = 0
@@ -45,12 +46,20 @@ class Playlist(object):
     def _thetime(self):
         return utils.datetime.now().time()
 
-    def _fill_items(self):
-        raw_items = [item.Item(i) for i in self._data['items']]
+    def _background_items(self):
+        raw_items = list(filter(lambda i: i.is_background, self._all_items()))
         if self._data['shuffle']:
             random.shuffle(raw_items)
             return raw_items
         else:
             return sorted(raw_items, key=lambda j: j.position)
+
+    def _advertising_items(self):
+        return list(filter(lambda i: i.is_advertising, self._all_items()))
+
+    def _all_items(self):
+        return [item.Item(i) for i in self._data['items']]
+
+
 
 
