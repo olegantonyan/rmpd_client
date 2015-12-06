@@ -43,9 +43,11 @@ class Item(object):
     def playbacks_per_day(self):
         return self._d['playbacks_per_day']
 
+    @property
     def is_background(self):
         return self.type == 'background'
 
+    @property
     def is_advertising(self):
         return self.type == 'advertising'
 
