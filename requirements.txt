@@ -1,8 +1,9 @@
-mplayer.py
-requests
-tzlocal
-pytz
-bottle
-netifaces
-pycrypto
-pexpect
+bottle==0.12.9
+fysom==2.1.2
+mplayer.py==0.7.0
+netifaces==0.10.4
+pexpect==4.0.1
+pycrypto==2.6.1
+pytz==2015.7
+requests==2.8.1
+tzlocal==1.2
