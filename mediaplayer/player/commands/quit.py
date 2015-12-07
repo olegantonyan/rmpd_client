@@ -7,5 +7,5 @@ class Quit(base.BaseCommand):
     def call(self):
         self._player.quit()
         self._deinit_player()
-        self._set_expected_state('stopped')
+        self._set_playing_status(False)
         return self._player

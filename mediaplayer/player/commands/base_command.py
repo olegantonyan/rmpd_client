@@ -4,10 +4,9 @@ import system.status
 
 
 class BaseCommand(object):
-    def __init__(self, player_getter, expected_state_setter, init_player_cb, deinit_player_cb, **kwargs):
+    def __init__(self, player_getter, init_player_cb, deinit_player_cb, **kwargs):
         self._player_getter = player_getter
         self._init_player = init_player_cb
-        self._set_expected_state = expected_state_setter
         self._deinit_player = deinit_player_cb
         self._args = kwargs
 

@@ -6,7 +6,6 @@ import threading
 import logging
 
 import utils.singleton
-import utils.threads
 import utils.support as support
 
 import mediaplayer.wrapperplayer
@@ -24,13 +23,10 @@ class Guard(object, metaclass=utils.singleton.Singleton):
         self._thread.setDaemon(True)
         self._stop_flag = False
         self._thread.start()
-        self._expected_state = {'name': 'stopped', 'args': {}}
-        self._check_state()
 
     def execute(self, command, **kwargs):
         self._rx.put((command, kwargs))
-        res = self._tx.get()
-        return res
+        return self._tx.get()
 
     def _serve(self):
         while not self._stop_flag:
@@ -51,7 +47,6 @@ class Guard(object, metaclass=utils.singleton.Singleton):
         module = importlib.import_module(".commands.{name}".format(name=command_name), __package__)
         command_class = getattr(module, command_class_name)
         command_object = command_class(self._player_object,
-                                       self._set_expected_state,
                                        self._init_player,
                                        self._deinit_player,
                                        **kwargs)
@@ -68,27 +63,6 @@ class Guard(object, metaclass=utils.singleton.Singleton):
     def _player_object(self):
         return self._player
 
-    def _check_state(self):
-        try:
-            if self._expected_state['name'] == 'playing':
-                if self.execute('state') == 'stopped':
-                    print('suddenly stopped')
-                    print(self._expected_state['args'])
-                    log.debug("track finished, about to start a next one")
-                    # self._set_playing_status(False)
-                    # self._run_callback('onstop', filename=os.path.basename(self._playlist.current()))
-        except:
-            log.exception("unhandled exception when checking status")
-        finally:
-            if not self._stop_flag:
-                utils.threads.run_after_timeout(timeout=1, target=self._check_state, daemon=True)
-
-    def _set_expected_state(self, state, **kwargs):
-        self._expected_state = {'name': state, 'args': kwargs}
-
     def __del__(self):
         self._stop_flag = True
-        try:
-            self.execute("quit")  # force execution to fetch from queue
-        except:
-            pass
+        self.execute("quit")  # force execution to fetch from queue
