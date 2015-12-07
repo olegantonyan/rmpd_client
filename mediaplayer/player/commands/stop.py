@@ -11,5 +11,5 @@ class Stop(base.BaseCommand):
     def call(self):
         log.info('stopped')
         self._set_playing_status(False)
-        return self._player.stop()
-        # self._run_callback('onstop', filename=os.path.basename(self._playlist.current()))
+        self._player.stop()
+        return True
