@@ -6,7 +6,9 @@ import threading
 import logging
 
 import utils.singleton
+import utils.threads
 import utils.support as support
+
 import mediaplayer.wrapperplayer
 
 log = logging.getLogger(__name__)
@@ -22,6 +24,8 @@ class Guard(object, metaclass=utils.singleton.Singleton):
         self._thread.setDaemon(True)
         self._stop_flag = False
         self._thread.start()
+        self._expected_state = {'name': 'stopped', 'args': {}}
+        self._check_state()
 
     def execute(self, command, **kwargs):
         self._rx.put((command, kwargs))
@@ -29,10 +33,9 @@ class Guard(object, metaclass=utils.singleton.Singleton):
         return res
 
     def _serve(self):
-        if self._player is None:
-            pass
-            # self._player = mediaplayer.wrapperplayer.WrapperPlayer()
         while not self._stop_flag:
+            if self._player is None:
+                self._init_player()
             result = None
             command, kwargs = None, {}
             try:
@@ -47,8 +50,41 @@ class Guard(object, metaclass=utils.singleton.Singleton):
         command_class_name = support.underscore_to_camelcase(command_name)
         module = importlib.import_module(".commands.{name}".format(name=command_name), __package__)
         command_class = getattr(module, command_class_name)
-        command_object = command_class(self._player, **kwargs)
+        command_object = command_class(self._player_object,
+                                       self._set_expected_state,
+                                       self._init_player,
+                                       self._deinit_player,
+                                       **kwargs)
         return command_object.call()
+
+    def _init_player(self):
+        self._player = mediaplayer.wrapperplayer.WrapperPlayer()
+        return self._player
+
+    def _deinit_player(self):
+        del self._player
+        self._player = None
+
+    def _player_object(self):
+        return self._player
+
+    def _check_state(self):
+        try:
+            if self._expected_state['name'] == 'playing':
+                if self.execute('state') == 'stopped':
+                    print('suddenly stopped')
+                    print(self._expected_state['args'])
+                    log.debug("track finished, about to start a next one")
+                    # self._set_playing_status(False)
+                    # self._run_callback('onstop', filename=os.path.basename(self._playlist.current()))
+        except:
+            log.exception("unhandled exception when checking status")
+        finally:
+            if not self._stop_flag:
+                utils.threads.run_after_timeout(timeout=1, target=self._check_state, daemon=True)
+
+    def _set_expected_state(self, state, **kwargs):
+        self._expected_state = {'name': state, 'args': kwargs}
 
     def __del__(self):
         self._stop_flag = True
@@ -56,34 +92,3 @@ class Guard(object, metaclass=utils.singleton.Singleton):
             self.execute("quit")  # force execution to fetch from queue
         except:
             pass
-
-
-class Result(object):
-    def __init__(self, ok=False, value={}, message=''):
-        self._ok = ok
-        self._value = value
-        self._message = message
-
-    @property
-    def ok(self):
-        return self._ok
-
-    @ok.setter
-    def ok(self, arg):
-        self._ok = arg
-
-    @property
-    def value(self):
-        return self._value
-
-    @value.setter
-    def value(self, arg):
-        self._value = arg
-
-    @property
-    def message(self):
-        return self._message
-
-    @message.setter
-    def message(self, arg):
-        self._message = arg

@@ -18,8 +18,10 @@ class WrapperPlayer(object):
             self._omxplayer.args = utils.config.Config().omplayer_arguments()
 
     def __del__(self):
-        del self._mplayer
-        del self._omxplayer
+        if hasattr(self, '_mplayer'):
+            del self._mplayer
+        if hasattr(self, '_omxplayer'):
+            del self._omxplayer
 
     def quit(self):
         self._omxplayer.quit()
