@@ -15,6 +15,7 @@ log = logging.getLogger(__name__)
 class Watcher(object, metaclass=utils.singleton.Singleton):
     def __init__(self):
         self._lock = threading.Lock()
+        self._callbacks = None
         self._guard = guard.Guard()
         self._expected_state = ('stopped', {})
         self._check_state()
@@ -50,6 +51,9 @@ class Watcher(object, metaclass=utils.singleton.Singleton):
     def quit(self):
         return self._guard.execute('quit')
 
+    def set_callbacks(self, **kwargs):
+        self._callbacks = kwargs
+
     def _set_expected_state(self, name, **kwargs):
         with self._lock:
             self._expected_state = (name, kwargs)
@@ -68,6 +72,7 @@ class Watcher(object, metaclass=utils.singleton.Singleton):
                     log.debug('finished track {f}'.format(f=filepath))
                     self._set_expected_state('stopped')
                     self._onstop(filepath)
+                    #  onfinished
         except:
             log.exception('error checking player state')
         finally:
