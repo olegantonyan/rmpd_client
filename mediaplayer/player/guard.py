@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 
-import queue
 import importlib
-import threading
 import logging
+import queue
+import threading
 
+import mediaplayer.player.commands.base_command
+import mediaplayer.player.wrapperplayer
 import utils.singleton
 import utils.support as support
-
-import mediaplayer.wrapperplayer
-import mediaplayer.player.commands.base_command
 
 log = logging.getLogger(__name__)
 
@@ -57,7 +56,7 @@ class Guard(object, metaclass=utils.singleton.Singleton):
         return command_object.call()
 
     def _init_player(self):
-        self._player = mediaplayer.wrapperplayer.WrapperPlayer()
+        self._player = mediaplayer.player.wrapperplayer.WrapperPlayer()
         return self._player
 
     def _deinit_player(self):

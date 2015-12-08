@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
-import time
 import logging
 import os
 import threading
+import time
 import traceback
 
-import mediaplayer.wrapperplayer
+import mediaplayer.player.wrapperplayer
 import mediaplayer.playlist.playlist as playlist
+import system.status
 import utils.singleton
 import utils.threads
-import system.status
 
 log = logging.getLogger(__name__)
 
@@ -106,7 +106,7 @@ class PlayerGuard(object, metaclass=utils.singleton.Singleton):
         system.status.Status().playing = status
 
     def _init_player_object(self):
-        self._player = mediaplayer.wrapperplayer.WrapperPlayer()
+        self._player = mediaplayer.player.wrapperplayer.WrapperPlayer()
         return self._player
 
     def _run_callback(self, name, **kwargs):
