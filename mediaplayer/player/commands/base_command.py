@@ -18,4 +18,3 @@ class BaseCommand(object):
 
     def _set_playing_status(self, status):
         system.status.Status().playing = status
-
