@@ -11,19 +11,19 @@ log = logging.getLogger(__name__)
 
 class Play(base.BaseCommand):
     def call(self):
-        filename = self._args['filename']
-        if filename is None:
+        filepath = self._args['filepath']
+        if filepath is None:
             return False
-        log.info("start track '%s'", filename)
-        if not os.path.isfile(filename):
-            log.error("file '{f}' does not exists".format(f=filename))
+        log.info("start track '%s'", filepath)
+        if not os.path.isfile(filepath):
+            log.error("file '{f}' does not exists".format(f=filepath))
             return False
-        self._try_play(filename)
+        self._try_play(filepath)
         self._set_playing_status(True)
         return True
 
-    def _try_play(self, filename):
-            self._player.play(filename)
+    def _try_play(self, filepath):
+            self._player.play(filepath)
             retries = 0
             while self._player.isstopped():
                 time.sleep(0.5)

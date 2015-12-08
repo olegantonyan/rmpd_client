@@ -1,5 +1,4 @@
 bottle==0.12.9
-fysom==2.1.2
 mplayer.py==0.7.0
 netifaces==0.10.4
 pexpect==4.0.1

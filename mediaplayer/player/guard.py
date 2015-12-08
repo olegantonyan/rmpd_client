@@ -5,8 +5,6 @@ import importlib
 import threading
 import logging
 
-from pip.commands import commands
-
 import utils.singleton
 import utils.support as support
 

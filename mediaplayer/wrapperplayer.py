@@ -2,16 +2,17 @@
 
 import os
 
-import mediaplayer.mplayer
-import mediaplayer.pyomxplayer.pyomxplayer
+import mediaplayer.player.mplayer
+
 import hardware
+import mediaplayer.player.pyomxplayer.pyomxplayer
 import utils.config
 
 
 class WrapperPlayer(object):
     def __init__(self):
-        self._mplayer = mediaplayer.mplayer.MPlayer()
-        self._omxplayer = mediaplayer.pyomxplayer.pyomxplayer.OMXPlayer()
+        self._mplayer = mediaplayer.player.mplayer.MPlayer()
+        self._omxplayer = mediaplayer.player.pyomxplayer.pyomxplayer.OMXPlayer()
         if utils.config.Config().omplayer_executable() is not None:
             self._omxplayer.exec_path = utils.config.Config().omplayer_executable()
         if utils.config.Config().omplayer_arguments() is not None:
