@@ -34,7 +34,11 @@ class Watcher(object, metaclass=utils.singleton.Singleton):
             log.error('error starting track {f}'.format(f=filepath))
 
     def stop(self):
-        self._guard.execute('stop')
+        current_expected_state = self._get_expected_state()
+        if current_expected_state[0] != 'stopped':
+            self._guard.execute('stop')
+            self._set_expected_state('stopped')
+            self._onstop(current_expected_state[1].get('filepath'))
 
     def time_pos(self):
         return self._guard.execute('time_pos')
@@ -72,7 +76,7 @@ class Watcher(object, metaclass=utils.singleton.Singleton):
                     log.debug('finished track {f}'.format(f=filepath))
                     self._set_expected_state('stopped')
                     self._onstop(filepath)
-                    #  onfinished
+                    self._run_callback('onfinished', filepath=filepath)
         except:
             log.exception('error checking player state')
         finally:
@@ -95,4 +99,15 @@ class Watcher(object, metaclass=utils.singleton.Singleton):
         filename = self._filename_by_path(filepath)
         log.debug("callback on error: " + filename + " : " + message)
         proto.ProtocolDispatcher().send('playback_error', filename=filename, message=message)
+
+    def _run_callback(self, name, **kwargs):
+        if self._callbacks is None:
+            return
+        cb = self._callbacks.get(name)
+        if cb is None:
+            return
+        try:
+            return cb(**kwargs)
+        except:
+            log.exception("error running {name} callback".format(name=name))
 

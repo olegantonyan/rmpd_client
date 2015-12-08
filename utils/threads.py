@@ -16,3 +16,11 @@ def run_after_timeout(timeout, target, daemon=True):
     t.start()
     return t
 
+
+def synchronized(lock):
+    def wrap(f):
+        def new_func(*args, **kw):
+            with lock:
+                return f(*args, **kw)
+        return new_func
+    return wrap
