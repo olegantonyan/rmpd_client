@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 
 
 class Watcher(object, metaclass=utils.singleton.Singleton):
-    lock = threading.Lock()
+    lock = threading.RLock()
 
     def __init__(self):
         self._player = player.Watcher()
