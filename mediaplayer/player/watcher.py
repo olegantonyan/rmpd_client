@@ -22,6 +22,9 @@ class Watcher(object, metaclass=utils.singleton.Singleton):
         self._check_state()
 
     def play(self, filepath):
+        if filepath is None:
+            return False
+
         current_expected_state = self._get_expected_state()
         if current_expected_state[0] == 'playing':
             self._guard.execute('stop')
