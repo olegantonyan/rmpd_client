@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import os
 import threading
 
 import utils.singleton
@@ -21,9 +20,11 @@ class Watcher(object, metaclass=utils.singleton.Singleton):
 
     @utils.threads.synchronized(lock)
     def set_playlist(self, playlist):
+        log.info("start playlist")
         self._playlist = playlist
+        self._player.play(self._playlist.current().filepath)
 
     @utils.threads.synchronized(lock)
     def _onfinished(self, **kwargs):
-        print("finished")
-        self._player.play(self._playlist.next())
+        log.debug("track finished")
+        self._player.play(self._playlist.next().filepath)

@@ -2,6 +2,8 @@
 
 import datetime
 
+import utils.files
+
 
 class Item(object):
     def __init__(self, i):
@@ -52,17 +54,21 @@ class Item(object):
         return self.type == 'advertising'
 
     def is_appropriate_at(self, thetime):
-        if self.is_advertising():
+        if self.is_advertising:
             return False
         return self.begin_time <= thetime <= self.end_time
 
     @property
     def playbacks_per_hour(self):
-        if self.is_background():
+        if self.is_background:
             return 0
         begin_hour = self.begin_time.hour
         end_hour = self.end_time.hour
         return self.playbacks_per_day / (end_hour - begin_hour)
+
+    @property
+    def filepath(self):
+        return utils.files.full_file_localpath(self.filename)
 
     def _parse_time(self, arg):
         if arg is None:

@@ -13,8 +13,9 @@ log = logging.getLogger(__name__)
 
 
 class Watcher(object, metaclass=utils.singleton.Singleton):
+    lock = threading.Lock()
+
     def __init__(self):
-        self._lock = threading.Lock()
         self._callbacks = None
         self._guard = guard.Guard()
         self._expected_state = ('stopped', {})
@@ -26,8 +27,8 @@ class Watcher(object, metaclass=utils.singleton.Singleton):
             self._guard.execute('stop')
             self._onstop(current_expected_state[1]['filepath'])
 
+        self._set_expected_state('playing', filepath=filepath)
         if self._guard.execute('play', filepath=filepath):
-            self._set_expected_state('playing', filepath=filepath)
             self._onplay(filepath)
         else:
             self._onerror(filepath, 'unable to start playback, reinitializing player')
@@ -55,16 +56,17 @@ class Watcher(object, metaclass=utils.singleton.Singleton):
     def quit(self):
         return self._guard.execute('quit')
 
+    @utils.threads.synchronized(lock)
     def set_callbacks(self, **kwargs):
         self._callbacks = kwargs
 
+    @utils.threads.synchronized(lock)
     def _set_expected_state(self, name, **kwargs):
-        with self._lock:
-            self._expected_state = (name, kwargs)
+        self._expected_state = (name, kwargs)
 
+    @utils.threads.synchronized(lock)
     def _get_expected_state(self):
-        with self._lock:
-            return self._expected_state
+        return self._expected_state
 
     def _check_state(self):
         try:
