@@ -3,7 +3,6 @@
 import logging
 import traceback
 import json
-import os
 
 import remotecontrol.httpclient
 import remotecontrol.messagequeue
@@ -17,7 +16,7 @@ class ControlWrapper(object):
     def __init__(self, server_url, login, password, receive_protocol_callback):
         self._proto = remotecontrol.httpclient.HttpClient(server_url, login, password, self.onreceive)
         self._receive_protocol_callback = receive_protocol_callback
-        self._queue = remotecontrol.messagequeue.MessageQueue(os.path.join(os.getcwd(), "message_queue.db3"))
+        self._queue = remotecontrol.messagequeue.MessageQueue()
         self._check_queue()
 
     def send(self, msg, queued=False, seq=0):
