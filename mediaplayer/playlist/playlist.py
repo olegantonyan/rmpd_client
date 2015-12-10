@@ -28,13 +28,32 @@ class Playlist(object):
         pass  # utils.state.State().current_track_num = self._current_position
 
     def next(self):
-        self._current_position += 1
-        if self._current_position % len(self._background) == 0:
-            self._current_position = 0
-        return self.current()
+        next_item = self._find_next_appropriate(self._current_position + 1, len(self._background))
+        if next_item is not None:
+            return next_item
+        next_item = self._find_next_appropriate(0, self._current_position)
+        if next_item is not None:
+            return next_item
+        return None
 
     def current(self):
-        return self._background[self._current_position]
+        current_item = self._background[self._current_position]
+        if current_item.is_appropriate_at(self._thetime()):
+            return current_item
+        else:
+            return None
+
+    def advertising(self):
+        return self._advertising
+
+    def _find_next_appropriate(self, start_pos, end_pos):
+        thetime = self._thetime()
+        for i in range(start_pos, end_pos):
+            next_item = self._background[i]
+            if next_item.is_appropriate_at(thetime):
+                self._current_position = i
+                return next_item
+        return None
 
     def _thetime(self):
         return utils.datetime.now().time()

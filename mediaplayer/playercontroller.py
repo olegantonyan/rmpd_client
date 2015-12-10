@@ -3,7 +3,7 @@
 import os
 import logging
 
-import mediaplayer.playlist.watcher
+import mediaplayer.playlist.scheduler
 import mediaplayer.player.watcher
 import utils.config
 import remotecontrol.protocoldispatcher as proto
@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 class PlayerController(object):
     def __init__(self):
         self._player = mediaplayer.player.watcher.Watcher()
-        self._playlist_watcher = mediaplayer.playlist.watcher.Watcher()
+        self._scheduler = mediaplayer.playlist.scheduler.Scheduler()
     
     def start_playlist(self):
         mediafiles_fullpath = utils.config.Config().mediafiles_path()
@@ -31,7 +31,7 @@ class PlayerController(object):
 
         proto.ProtocolDispatcher().send('playlist_begin',
                                         files=playlist_loader.Loader(playlist_fullpath).list_all_files())
-        self._playlist_watcher.set_playlist(playlist.Playlist())
+        self._scheduler.set_playlist(playlist.Playlist())
             
     def stop(self):
         self._player.stop()
