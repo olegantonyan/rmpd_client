@@ -14,8 +14,8 @@ def _guard_errors(func):
         try:
             return func(self, *args)
         except utils.sqlexecutor.SqlError:
-            log.exception("%s sql error #%s", self._db_path, self._error_count + 1)
             self._error_count += 1
+            log.exception("%s sql error #%s", self._db_path, self._error_count)
             if self._error_count > 15:
                 self._reinit_db()
             raise
