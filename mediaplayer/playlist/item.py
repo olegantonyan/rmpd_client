@@ -54,9 +54,12 @@ class Item(object):
         return self.type == 'advertising'
 
     def is_appropriate_at(self, thetime):
+        fit_time = lambda: self.begin_time <= thetime.time() <= self.end_time
+        fit_date = lambda: self.begin_date <= thetime.date() <= self.end_date
         if self.is_advertising:
-            return False
-        return self.begin_time <= thetime <= self.end_time
+            return fit_time() and fit_date()
+        else:
+            return fit_time()
 
     @property
     def playbacks_per_hour(self):
