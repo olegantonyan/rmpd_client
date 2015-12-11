@@ -16,7 +16,7 @@ def _guard_errors(func):
         except utils.sqlexecutor.SqlError:
             self._error_count += 1
             log.exception("%s sql error #%s", self._db_path, self._error_count)
-            if self._error_count > 15:
+            if self._error_count > self._max_errors:
                 self._reinit_db()
             raise
     return wrap
@@ -27,6 +27,7 @@ class DbWrapper(object):
         self._db_path = dbpath
         self._db = utils.sqlexecutor.SqlExecutor(self._db_path)
         self._error_count = 0
+        self._max_errors = 15
         try:
             self.create_db()
         except:

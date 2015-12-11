@@ -33,10 +33,12 @@ class Watcher(object, metaclass=utils.singleton.Singleton):
         if self._guard.execute('play', filepath=filepath):
             self._onplay(filepath)
             self._set_expected_state('playing', filepath=filepath)
+            return True
         else:
             self._onerror(filepath, 'unable to start playback, reinitializing player')
             log.error('error starting track {f}'.format(f=filepath))
             self._run_callback('onfinished', filepath=filepath)
+            return False
 
     def stop(self):
         current_expected_state = self._get_expected_state()

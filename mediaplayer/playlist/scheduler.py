@@ -18,32 +18,55 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
     def __init__(self):
         self._player = player.Watcher()
         self._playlist = None
+        self._now_playing = None
         self._player.set_callbacks(onfinished=self._onfinished)
         self._thread = threading.Thread(target=self._loop)
         self._thread.setDaemon(True)
         self._stop_flag = False
         self._thread.start()
-        self._now_playing = None
 
     @utils.threads.synchronized(lock)
     def set_playlist(self, playlist):
         log.info("start playlist")
         self._playlist = playlist
-        self._play(self._playlist.current())
+        item_to_start = self._playlist.current_background()
+        if item_to_start is None:
+            self._stop()
+        else:
+            self._play(item_to_start)
 
     @utils.threads.synchronized(lock)
     def _onfinished(self, **kwargs):
         log.debug("track finished {f}".format(f=kwargs.get('filepath', '')))
-        self._play(self._playlist.next())
+        current = self._get_now_playing()
+        if current is None:
+            self._play_nex_background()
+            return
 
+        if current.is_background:
+            self._play_nex_background()
+        elif current.is_advertising:
+            # find nex advertising. keep adv block
+            # if found adv: play it else: next_background
+            pass
+
+    @utils.threads.synchronized(lock)
     def _play(self, item):
         if item is None:
+            self._set_now_playing(None)
             return False
-        if self._player.play(item.filepath):
-            self._set_now_playing(item)
-            return True
-        else:
-            return False
+        self._player.play(item.filepath)
+        self._set_now_playing(item)
+
+    @utils.threads.synchronized(lock)
+    def _stop(self):
+        self._set_now_playing(None)
+        self._player.stop()
+
+    @utils.threads.synchronized(lock)
+    def _play_nex_background(self):
+        if self._playlist is not None:
+            self._play(self._playlist.next_background())
 
     @utils.threads.synchronized(lock)
     def _set_now_playing(self, item):
@@ -55,7 +78,10 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
 
     def _loop(self):
         while not self._stop_flag:
-            time.sleep(2)
+            current = self._get_now_playing()
+            if current is None:
+                self._play_nex_background()
+            time.sleep(3)
 
     def __del__(self):
         self._stop_flag = True

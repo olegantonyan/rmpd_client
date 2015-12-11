@@ -11,8 +11,7 @@ import mediaplayer.playlist.item as item
 
 class Playlist(object):
     def __init__(self):
-        self._loader = mediaplayer.playlist.loader.Loader()
-        self._data = self._loader.load()
+        self._data = mediaplayer.playlist.loader.Loader().load()
         self._background = self._background_items()
         self._advertising = self._advertising_items()
         self._current_position = 0  # utils.state.State().current_track_num
@@ -27,7 +26,7 @@ class Playlist(object):
     def save_position(self):
         pass  # utils.state.State().current_track_num = self._current_position
 
-    def next(self):
+    def next_background(self):
         next_item = self._find_next_appropriate(self._current_position + 1, len(self._background))
         if next_item is not None:
             return next_item
@@ -36,7 +35,7 @@ class Playlist(object):
             return next_item
         return None
 
-    def current(self):
+    def current_background(self):
         current_item = self._background[self._current_position]
         if current_item.is_appropriate_at(self._thetime()):
             return current_item
