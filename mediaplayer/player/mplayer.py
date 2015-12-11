@@ -14,6 +14,7 @@ class MPlayer(object):
         mplayer.Player.cmd_prefix = mplayer.CmdPrefix.PAUSING_KEEP
         if utils.config.Config().mplayer_executable() is not None:
             mplayer.Player.exec_path = utils.config.Config().mplayer_executable()
+        mplayer.Player.introspect()
         self._player = mplayer.Player()
         self._player.args = ['-really-quiet', '-msglevel', 'global=6']
 
