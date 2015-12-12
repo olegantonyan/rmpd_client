@@ -41,6 +41,7 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
     def _play(self, item):
         if item is None:
             self._set_now_playing(None)
+            self._player.stop()
             return False
         self._player.play(item.filepath)
         self._set_now_playing(item)
@@ -69,12 +70,7 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
         current = self._get_now_playing()
 
         if command == 'start_playlist':
-            item = self._playlist.current_background()
-            if item is None:
-                self._set_now_playing(None)
-                self._player.stop()
-            else:
-                self._play(item)
+            self._play(self._playlist.current_background())
             return
         if command == 'track_finished':
             self._set_now_playing(None)
