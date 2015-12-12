@@ -5,13 +5,15 @@ import utils.files
 import utils.datetime
 import random
 
-import mediaplayer.playlist.loader
-import mediaplayer.playlist.item as item
+import mediaplayer.playlist.loader as loader
+import mediaplayer.playlist.item as playlist_item
+import mediaplayer.player.state as state
 
 
 class Playlist(object):
     def __init__(self):
-        self._data = mediaplayer.playlist.loader.Loader().load()
+        self._state = state.State()
+        self._data = loader.Loader().load()
         self._background = self._background_items()
         self._advertising = self._advertising_items()
         self._current_background_position = 0  # utils.state.State().current_track_num
@@ -50,6 +52,12 @@ class Playlist(object):
     def next_advertising(self):
         pass
 
+    def playbacks_remain_today(self, item):
+        return item.playbacks_per_day - self._state.fetch_playbacks_count(item.id, self._thetime())
+
+    def increment_playbacks_count(self, item):
+        self._state.increment_playbacks_count(item, self._thetime())
+
     def _find_next_appropriate(self, collection, start_pos, end_pos):
         thetime = self._thetime()
         for i in range(start_pos, end_pos):
@@ -73,7 +81,7 @@ class Playlist(object):
         return list(filter(lambda i: i.is_advertising, self._all_items()))
 
     def _all_items(self):
-        return [item.Item(i) for i in self._data['items']]
+        return [playlist_item.Item(i) for i in self._data['items']]
 
 
 
