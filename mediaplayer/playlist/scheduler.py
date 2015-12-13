@@ -30,12 +30,17 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
     def set_playlist(self, playlist):
         log.info("start playlist")
         self._playlist = playlist
-        self._schedule('start_playlist')
+        self._play(self._playlist.current_background())
+        self._schedule()
 
     @utils.threads.synchronized(lock)
     def onfinished(self, **kwargs):
-        log.debug("track finished {f}".format(f=kwargs.get('filepath', '')))
-        self._schedule('track_finished')
+        log.info("track finished {f}".format(f=kwargs.get('filepath', '')))
+        current_track = self._get_now_playing()
+        if self._playlist is not None:
+            self._playlist.onfinished(current_track)
+        self._set_now_playing(None)
+        self._schedule()
 
     @utils.threads.synchronized(lock)
     def _play(self, item):
@@ -60,26 +65,24 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
     def _loop(self):
         while not self._stop_flag:
             try:
-                command = self._rx.get(block=True, timeout=2)
+                self._rx.get(block=True, timeout=2)
             except queue.Empty:
-                command = None
+                pass
             if self._playlist is not None:
-                self._scheduler(command)
+                self._scheduler()
 
-    def _scheduler(self, command):
-        current = self._get_now_playing()
+    def _scheduler(self):
+        current_track = self._get_now_playing()
 
-        if command == 'start_playlist':
-            self._play(self._playlist.current_background())
-            return
-        if command == 'track_finished':
-            self._set_now_playing(None)
-
-        if current is not None and current.is_advertising:
-            self._playlist.increment_playbacks_count(current)
-
-        if current is None:
-            self._play(self._playlist.next_background())
+        next_advertising = self._playlist.next_advertising()
+        if next_advertising is not None:
+            if current_track is None or current_track.is_background:
+                self._play(next_advertising)
+        else:
+            next_background = self._playlist.next_background()
+            if next_background is not None:
+                if current_track is None:
+                    self._play(next_background)
 
     def __del__(self):
         self._stop_flag = True

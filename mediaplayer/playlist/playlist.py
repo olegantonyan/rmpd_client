@@ -31,11 +31,9 @@ class Playlist(object):
     def next_background(self):
         next_item, index = self._find_next_appropriate(self._background, self._current_background_position + 1, len(self._background))
         if next_item is not None:
-            self._current_background_position = index
             return next_item
         next_item, index = self._find_next_appropriate(self._background, 0, self._current_background_position)
         if next_item is not None:
-            self._current_background_position = index
             return next_item
         return None
 
@@ -46,17 +44,19 @@ class Playlist(object):
         else:
             return None
 
-    def current_advertising(self):
-        pass
-
     def next_advertising(self):
-        pass
+        return None
 
     def playbacks_remain_today(self, item):
         return item.playbacks_per_day - self._state.fetch_playbacks_count(item.id, self._thetime())
 
-    def increment_playbacks_count(self, item):
-        self._state.increment_playbacks_count(item, self._thetime())
+    def onfinished(self, item):
+        if item is None:
+            return
+        if item.is_advertising:
+            self._state.increment_playbacks_count(item, self._thetime())
+        elif item.is_background:
+            self._current_background_position = self._background_item_position(item)
 
     def _find_next_appropriate(self, collection, start_pos, end_pos):
         thetime = self._thetime()
@@ -65,6 +65,11 @@ class Playlist(object):
             if next_item.is_appropriate_at(thetime):
                 return next_item, i
         return None, None
+
+    def _background_item_position(self, itm):
+        for index, i in enumerate(self._background):
+            if i.id == itm.id:
+                return index
 
     def _thetime(self):
         return utils.datetime.now()
@@ -82,7 +87,3 @@ class Playlist(object):
 
     def _all_items(self):
         return [playlist_item.Item(i) for i in self._data['items']]
-
-
-
-
