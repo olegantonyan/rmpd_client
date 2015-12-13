@@ -70,6 +70,21 @@ class Item(object):
         return self.playbacks_per_day / (end_hour - begin_hour)
 
     @property
+    def time_delta_in_seconds(self):
+        if self.is_background:
+            return 0
+        to_secs = lambda tm: tm.hour * 3600 + tm.minute * 60 + tm.second
+        return to_secs(self.end_time) - to_secs(self.begin_time)
+
+    @property
+    def period_in_seconds(self):
+        if self.is_background:
+            return 0
+        if self.playbacks_per_day == 0:
+            return 0
+        return int(self.time_delta_in_seconds / self.playbacks_per_day)
+
+    @property
     def filepath(self):
         return utils.files.full_file_localpath(self.filename)
 
@@ -81,4 +96,4 @@ class Item(object):
     def _parse_date(self, arg):
         if arg is None:
             return None
-        return datetime.datetime.strptime(arg, '%Y-%m-%d').date()
+        return datetime.datetime.strptime(arg, '%d.%m.%Y').date()

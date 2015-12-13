@@ -38,6 +38,9 @@ class State(db.DbWrapper, metaclass=utils.singleton.Singleton):
             return 0
         return res['result'][0][0]
 
+    def reset(self):
+        self.execute("DELETE FROM player_state")
+
     def create_db(self):
         self.execute("""
                      CREATE TABLE IF NOT EXISTS player_state (
