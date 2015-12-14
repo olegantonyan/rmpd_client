@@ -47,7 +47,7 @@ class State(db.DbWrapper, metaclass=utils.singleton.Singleton):
                      [id]                           INTEGER PRIMARY KEY NOT NULL,
                      [media_item_advertising_id]    INTEGER NOT NULL,
                      [date]                         DATE NOT NULL,
-                     [playbacks_count]              INTEGER NOT NULL,
+                     [scheduled_time]               TIME NOT NULL,
                      [created_at]                   TIMESTAMP NOT NULL,
                      [updated_at]                   TIMESTAMP NOT NULL)
                      """)

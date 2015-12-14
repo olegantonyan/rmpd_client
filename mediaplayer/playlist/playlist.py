@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import random
-import datetime
 
 import mediaplayer.playlist.loader as loader
 import mediaplayer.playlist.item as playlist_item
@@ -17,17 +16,13 @@ class Playlist(object):
         self._data = loader.Loader().load()
         self._background = self._background_items()
         self._advertising = self._advertising_items()
-        self._current_background_position = 0  # utils.state.State().current_track_num
-        if self._current_background_position >= len(self._background):
-            self._current_background_position = 0
-            self.save_position()
+        self._current_background_position = 0
+        self._current_advertising = (None, None)  # (item, scheduled_time)
+        self._advertising_states = []
 
     @staticmethod
     def reset_position():
         state.State().reset()
-
-    def save_position(self):
-        pass  # utils.state.State().current_track_num = self._current_position
 
     def next_background(self):
         next_item, index = self._find_next_appropriate(self._background,
@@ -55,32 +50,19 @@ class Playlist(object):
         if len(appropriate_now) == 0:
             return None
         for i in appropriate_now:
-            period = i.period_in_seconds
-            played_today = self._state.fetch_playbacks_count(i.id, thetime)
-            begin_time = i.begin_time
-            dt = datetime.datetime(year=thetime.year,
-                                   month=thetime.month,
-                                   day=thetime.day,
-                                   hour=begin_time.hour,
-                                   minute=begin_time.minute,
-                                   second=begin_time.second,
-                                   tzinfo=thetime.tzinfo)
-            next_play_time = dt + datetime.timedelta(seconds=(period * played_today))
-            print("******")
-            print(i.filename)
-            print(next_play_time)
-            print("******")
-            if thetime >= next_play_time:
+            next_play_time = i.next_play_time(thetime)
+            if i == self._current_advertising[0] and next_play_time == self._current_advertising[1]:
+                continue
+            if i.next_play_time(thetime) >= thetime:
+                self._current_advertising = (i, next_play_time)
                 return i
-
-    def playbacks_remain_today(self, item):
-        return item.playbacks_per_day - self._state.fetch_playbacks_count(item.id, self._thetime())
 
     def onfinished(self, item):
         if item is None:
             return
         if item.is_advertising:
-            self._state.increment_playbacks_count(item.id, self._thetime())
+            self._current_advertising = (None, None)
+            #self._state.increment_playbacks_count(item.id, self._thetime())
         elif item.is_background:
             self._current_background_position = self._background_item_position(item)
 

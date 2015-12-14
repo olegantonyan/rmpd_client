@@ -3,11 +3,16 @@
 import datetime
 
 import utils.files
+import mediaplayer.playlist.schedule as sched
 
 
 class Item(object):
     def __init__(self, i):
         self._d = i
+        if self.is_advertising:
+            self.schedule = sched.Schedule(self.begin_time, self.end_time, self.playbacks_per_day)
+        else:
+            self.schedule = None
 
     @property
     def filename(self):
@@ -61,28 +66,10 @@ class Item(object):
         else:
             return fit_time()
 
-    @property
-    def playbacks_per_hour(self):
-        if self.is_background:
-            return 0
-        begin_hour = self.begin_time.hour
-        end_hour = self.end_time.hour
-        return self.playbacks_per_day / (end_hour - begin_hour)
-
-    @property
-    def time_delta_in_seconds(self):
-        if self.is_background:
-            return 0
-        to_secs = lambda tm: tm.hour * 3600 + tm.minute * 60 + tm.second
-        return to_secs(self.end_time) - to_secs(self.begin_time)
-
-    @property
-    def period_in_seconds(self):
-        if self.is_background:
-            return 0
-        if self.playbacks_per_day == 0:
-            return 0
-        return int(self.time_delta_in_seconds / self.playbacks_per_day)
+    def next_play_time(self, thetime):
+        if self.is_background or self.schedule is None:
+            return None
+        return self.schedule.next_play_time(thetime)
 
     @property
     def filepath(self):
