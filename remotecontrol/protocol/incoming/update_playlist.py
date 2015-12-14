@@ -6,7 +6,6 @@ import os
 import urllib.parse
 
 import utils.files
-import utils.state
 import utils.config
 import utils.support
 import remotecontrol.protocol.incoming.base_playlist_command as base

@@ -5,7 +5,6 @@ import random
 import mediaplayer.playlist.loader as loader
 import mediaplayer.playlist.item as playlist_item
 import mediaplayer.player.state as state
-import utils.state
 import utils.files
 import utils.datetime
 
