@@ -4,7 +4,6 @@
 from time import sleep
 from sys import stdout, exit
 from logging import basicConfig, getLogger, StreamHandler, Formatter, info, DEBUG, INFO, warning, debug, critical
-from logging.handlers import RotatingFileHandler
 from optparse import OptionParser
 from traceback import format_exc
 from signal import signal, SIGTERM
@@ -21,6 +20,7 @@ import system.watchdog
 
 
 def signal_handler(signum, frame):
+    info("caught signal {s}".format(s=signum))
     mediaplayer.playercontroller.PlayerController().quit()
     hardware.platfrom.set_all_leds_disabled()
     warning("terminated")
@@ -32,11 +32,6 @@ def setup_logger(console_app=False, verbose_log=False):
                 format="[%(asctime)s] %(name)s |%(levelname)s| %(message)s",
                 datefmt="%Y-%m-%d %H:%M:%S",
                 level=(DEBUG if (verbose_log or utils.config.Config().verbose_logging()) else INFO))
-
-    log_handler = RotatingFileHandler(utils.config.Config().logfile(), mode='a', maxBytes=4*1024*1024,
-                                      backupCount=2, encoding=None, delay=0)
-    log = getLogger()
-    log.addHandler(log_handler)
 
     if console_app:
         root_logger = getLogger()
