@@ -51,7 +51,7 @@ def setup_logger(console_app=False, verbose_log=False):
 
 
 def bootstrap(configfile, console_app=False, verbose_log=False):
-    utils.config.Config(configfile)
+    utils.config.Config().set_configfile(configfile)
     setup_logger(console_app, verbose_log)
     info("using config file: '{c}'".format(c=configfile))
     debug("working directory: '{w}'".format(w=getcwd()))
