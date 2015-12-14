@@ -8,7 +8,7 @@ from logging.handlers import RotatingFileHandler
 from optparse import OptionParser
 from traceback import format_exc
 from signal import signal, SIGTERM
-from os import chdir, getcwd, path
+from os import chdir, getcwd
 
 import mediaplayer.playercontroller
 import remotecontrol.protocoldispatcher
