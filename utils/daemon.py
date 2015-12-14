@@ -18,6 +18,7 @@ class Daemon(object):
         self.stdout = stdout
         self.stderr = stderr
         self.pidfile = pidfile
+        self.cwd = None
  
     def daemonize(self):
         """

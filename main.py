@@ -73,11 +73,12 @@ def app():
 
 class DaemonApp(utils.daemon.Daemon):
     def set_working_dir(self, cwd):
-        self.__cwd = cwd
+        self.cwd = cwd
 
     def run(self):
         try:
-            chdir(self.__cwd)
+            if self.cwd is not None:
+                chdir(self.cwd)
             debug("daemon working directory: '{w}'".format(w=getcwd()))
             app()
         except Exception as e:
