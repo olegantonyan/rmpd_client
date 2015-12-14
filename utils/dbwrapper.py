@@ -12,7 +12,9 @@ log = logging.getLogger(__name__)
 def _guard_errors(func):
     def wrap(self, *args):
         try:
-            return func(self, *args)
+            result = func(self, *args)
+            self._error_count = 0
+            return result
         except utils.sqlexecutor.SqlError:
             self._error_count += 1
             log.exception("%s sql error #%s", self._db_path, self._error_count)
