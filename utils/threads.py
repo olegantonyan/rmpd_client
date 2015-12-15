@@ -3,7 +3,7 @@
 import threading
 
 
-def run_in_thread(target, args, daemon=True):
+def run_in_thread(target, args=(), daemon=True):
     t = threading.Thread(target=target, args=args)
     t.setDaemon(daemon)
     t.start()

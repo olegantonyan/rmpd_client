@@ -2,6 +2,7 @@
 
 import logging
 import os
+import time
 import threading
 
 import utils.singleton
@@ -19,7 +20,8 @@ class Watcher(object, metaclass=utils.singleton.Singleton):
         self._callbacks = None
         self._guard = guard.Guard()
         self._expected_state = ('stopped', {})
-        self._check_state()
+        self._stop_flag = False
+        utils.threads.run_in_thread(self._check_state)
 
     def play(self, filepath):
         if filepath is None:
@@ -75,20 +77,20 @@ class Watcher(object, metaclass=utils.singleton.Singleton):
         return self._expected_state
 
     def _check_state(self):
-        try:
-            expected_state = self._get_expected_state()
-            actual_state = self._guard.execute('state')
-            if expected_state[0] == 'playing':
-                if actual_state == 'stopped':
-                    filepath = expected_state[1]['filepath']
-                    log.debug('finished track {f}'.format(f=filepath))
-                    self._set_expected_state('stopped')
-                    self._onstop(filepath)
-                    self._run_callback('onfinished', filepath=filepath)
-        except:
-            log.exception('error checking player state')
-        finally:
-            utils.threads.run_after_timeout(timeout=0.6, target=self._check_state, daemon=True)
+        while not self._stop_flag:
+            try:
+                expected_state = self._get_expected_state()
+                actual_state = self._guard.execute('state')
+                if expected_state[0] == 'playing':
+                    if actual_state == 'stopped':
+                        filepath = expected_state[1]['filepath']
+                        log.debug('finished track {f}'.format(f=filepath))
+                        self._set_expected_state('stopped')
+                        self._onstop(filepath)
+                        self._run_callback('onfinished', filepath=filepath)
+            except:
+                log.exception('error checking player state')
+            time.sleep(0.7)
 
     def _filename_by_path(self, filepath):
         return os.path.basename(filepath)
@@ -118,4 +120,7 @@ class Watcher(object, metaclass=utils.singleton.Singleton):
             return cb(**kwargs)
         except:
             log.exception("error running {name} callback".format(name=name))
+
+    def __del__(self):
+        self._stop_flag = True
 

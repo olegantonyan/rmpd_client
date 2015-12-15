@@ -92,9 +92,7 @@ def main():
     (opts, args) = parser.parse_args()
 
     if opts.console_app:
-        bootstrap(opts.configfile if opts.configfile else "rmpd.conf",
-                  True,
-                  opts.verbose)
+        bootstrap(opts.configfile if opts.configfile else "rmpd.conf", True, opts.verbose)
         sys.exit(app())
     else:
         if not opts.pidfile:

@@ -21,10 +21,8 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
         self._now_playing = None
         self._rx = queue.Queue()
         self._player.set_callbacks(onfinished=self.onfinished)
-        self._thread = threading.Thread(target=self._loop)
-        self._thread.setDaemon(True)
         self._stop_flag = False
-        self._thread.start()
+        utils.threads.run_in_thread(self._loop)
 
     @utils.threads.synchronized(lock)
     def set_playlist(self, playlist):

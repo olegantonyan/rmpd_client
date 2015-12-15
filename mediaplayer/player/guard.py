@@ -3,12 +3,12 @@
 import importlib
 import logging
 import queue
-import threading
 
 import mediaplayer.player.commands.base_command
 import mediaplayer.player.wrapperplayer
 import utils.singleton
 import utils.support as support
+import utils.threads
 
 log = logging.getLogger(__name__)
 
@@ -19,10 +19,7 @@ class Guard(object, metaclass=utils.singleton.Singleton):
         self._rx = queue.Queue()
         self._tx = queue.Queue()
         self._stop_flag = False
-        self._thread = threading.Thread(target=self._serve)
-        self._thread.setDaemon(True)
-        self._stop_flag = False
-        self._thread.start()
+        utils.threads.run_in_thread(self._serve)
 
     def execute(self, command, **kwargs):
         self._rx.put((command, kwargs))
