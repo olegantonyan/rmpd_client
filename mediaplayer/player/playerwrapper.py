@@ -9,7 +9,7 @@ import mediaplayer.player.pyomxplayer.pyomxplayer
 import utils.config
 
 
-class WrapperPlayer(object):
+class PlayerWrapper(object):
     def __init__(self):
         self._mplayer = mediaplayer.player.mplayer.MPlayer()
         self._omxplayer = mediaplayer.player.pyomxplayer.pyomxplayer.OMXPlayer()

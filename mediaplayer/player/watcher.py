@@ -5,15 +5,15 @@ import os
 import time
 import threading
 
-import utils.singleton
+import utils.singleton as singleton
 import mediaplayer.player.guard as guard
 import remotecontrol.protocoldispatcher as proto
-import utils.threads
+import utils.threads as threads
 
 log = logging.getLogger(__name__)
 
 
-class Watcher(object, metaclass=utils.singleton.Singleton):
+class Watcher(object, metaclass=singleton.Singleton):
     lock = threading.Lock()
 
     def __init__(self):
@@ -21,7 +21,7 @@ class Watcher(object, metaclass=utils.singleton.Singleton):
         self._guard = guard.Guard()
         self._expected_state = ('stopped', {})
         self._stop_flag = False
-        utils.threads.run_in_thread(self._check_state)
+        threads.run_in_thread(self._check_state)
 
     def play(self, filepath):
         if filepath is None:
@@ -64,15 +64,15 @@ class Watcher(object, metaclass=utils.singleton.Singleton):
     def quit(self):
         return self._guard.execute('quit')
 
-    @utils.threads.synchronized(lock)
+    @threads.synchronized(lock)
     def set_callbacks(self, **kwargs):
         self._callbacks = kwargs
 
-    @utils.threads.synchronized(lock)
+    @threads.synchronized(lock)
     def _set_expected_state(self, name, **kwargs):
         self._expected_state = (name, kwargs)
 
-    @utils.threads.synchronized(lock)
+    @threads.synchronized(lock)
     def _get_expected_state(self):
         return self._expected_state
 

@@ -4,12 +4,12 @@ import logging
 import os
 
 import utils.dbwrapper as db
-import utils.singleton
+import utils.singleton as singleton
 
 log = logging.getLogger(__name__)
 
 
-class State(db.DbWrapper, metaclass=utils.singleton.Singleton):
+class State(db.DbWrapper, metaclass=singleton.Singleton):
     def __init__(self):
         db.DbWrapper.__init__(self, os.path.join(os.getcwd(), 'player_state.db3'))
 

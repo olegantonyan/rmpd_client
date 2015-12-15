@@ -4,22 +4,22 @@ import importlib
 import logging
 import queue
 
-import mediaplayer.player.commands.base_command
-import mediaplayer.player.wrapperplayer
-import utils.singleton
+import mediaplayer.player.commands.base_command as base_command
+import mediaplayer.player.playerwrapper as playerwrapper
+import utils.singleton as singleton
 import utils.support as support
-import utils.threads
+import utils.threads as threads
 
 log = logging.getLogger(__name__)
 
 
-class Guard(object, metaclass=utils.singleton.Singleton):
+class Guard(object, metaclass=singleton.Singleton):
     def __init__(self):
         self._player = None
         self._rx = queue.Queue()
         self._tx = queue.Queue()
         self._stop_flag = False
-        utils.threads.run_in_thread(self._serve)
+        threads.run_in_thread(self._serve)
 
     def execute(self, command, **kwargs):
         self._rx.put((command, kwargs))
@@ -36,7 +36,7 @@ class Guard(object, metaclass=utils.singleton.Singleton):
                 result = self._dispatch(command, **kwargs)
                 if command == 'quit':
                     self._deinit_player()
-            except mediaplayer.player.commands.base_command.PlayerError:
+            except base_command.PlayerError:
                 log.exception('reinitializing player after command {name}'.format(name=command))
                 self._deinit_player()
                 self._init_player()
@@ -53,7 +53,7 @@ class Guard(object, metaclass=utils.singleton.Singleton):
         return command_object.call()
 
     def _init_player(self):
-        self._player = mediaplayer.player.wrapperplayer.WrapperPlayer()
+        self._player = playerwrapper.PlayerWrapper()
         return self._player
 
     def _deinit_player(self):
