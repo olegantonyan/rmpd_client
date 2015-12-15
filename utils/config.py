@@ -3,8 +3,8 @@
 import configparser
 import codecs
 
-import utils.singleton
-import utils.crypto
+import utils.singleton as singleton
+import utils.crypto as crypto
 
 KP1 = ('mplayer_executable' * 2)[0:-4]
 KP2 = ('mediafiles_path'*3)[0:-13]
@@ -22,7 +22,7 @@ def _guard_initialization(func):
     return wrap
 
 
-class Config(object, metaclass=utils.singleton.Singleton):
+class Config(object, metaclass=singleton.Singleton):
     def __init__(self):
         self._filename = None
         self._parser = None
@@ -91,8 +91,8 @@ class Config(object, metaclass=utils.singleton.Singleton):
         with codecs.open(self._filename, 'r', encoding='utf-8') as f:
             self._parser.read_file(f)
 
-        self._enc1 = utils.crypto.AESCipher(KP1)
-        self._enc2 = utils.crypto.AESCipher(KP2)
+        self._enc1 = crypto.AESCipher(KP1)
+        self._enc2 = crypto.AESCipher(KP2)
 
         section = 'remote_control'
         self._server_url = self._parser.get(section, 'server_url')
