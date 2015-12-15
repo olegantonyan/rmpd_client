@@ -2,15 +2,15 @@
 
 import datetime
 
-import utils.files
-import mediaplayer.playlist.schedule as sched
+import utils.files as files
+import mediaplayer.playlist.schedule as schedule
 
 
 class Item(object):
     def __init__(self, i):
         self._d = i
         if self.is_advertising:
-            self.schedule = sched.Schedule(self.begin_time, self.end_time, self.playbacks_per_day)
+            self.schedule = schedule.Schedule(self.begin_time, self.end_time, self.playbacks_per_day)
         else:
             self.schedule = None
 
@@ -73,7 +73,7 @@ class Item(object):
 
     @property
     def filepath(self):
-        return utils.files.full_file_localpath(self.filename)
+        return files.full_file_localpath(self.filename)
 
     def _parse_time(self, arg):
         if arg is None:
