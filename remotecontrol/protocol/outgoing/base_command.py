@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import utils.support
-import utils.datetime
+import utils.support as support
+import utils.datetime as datetime
 
 
 class BaseCommand(object):
@@ -16,11 +16,11 @@ class BaseCommand(object):
         return self._send()
 
     def _thetime(self):
-        return utils.datetime.now().strftime('%Y-%m-%dT%H:%M:%S%z')
+        return datetime.now().strftime('%Y-%m-%dT%H:%M:%S%z')
 
     def _send(self):
         full_json = dict(self._json, **{'localtime': self._thetime(), 'command': self._type(), 'message': self._message})
         return self._control_wrapper.send(full_json, self._queued, self._sequence)
 
     def _type(self):
-        return utils.support.camelcase_to_underscore(self.__class__.__name__)
+        return support.camelcase_to_underscore(self.__class__.__name__)

@@ -4,16 +4,16 @@ import threading
 import logging
 import os
 
-import remotecontrol.protocol.incoming.base_playlist_command as base
-import mediaplayer.playercontroller
-import utils.files
-import mediaplayer.playlist.loader as pl
+import remotecontrol.protocol.incoming.base_playlist_command as base_playlist_command
+import mediaplayer.playercontroller as playercontroller
+import utils.files as files
+import mediaplayer.playlist.loader as loader
 
 
 log = logging.getLogger(__name__)
 
 
-class DeletePlaylist(base.BasePlaylistCommand):
+class DeletePlaylist(base_playlist_command.BasePlaylistCommand):
     worker = None
     lock = threading.Lock()
 
@@ -31,7 +31,7 @@ class DeletePlaylist(base.BasePlaylistCommand):
         self._release_worker()
         if ok:
             self._reset_playlist_position()
-            mediaplayer.playercontroller.PlayerController().stop()
+            playercontroller.PlayerController().stop()
         self._send_ack(ok, sequence, message)
 
     def _start_worker(self):
@@ -46,15 +46,15 @@ class DeletePlaylist(base.BasePlaylistCommand):
         self.__class__.lock.release()
 
 
-class Worker(base.BaseWorker):
+class Worker(base_playlist_command.BaseWorker):
     def __init__(self, sequence, onfinish_callback):
-        base.BaseWorker.__init__(self, sequence, onfinish_callback)
+        base_playlist_command.BaseWorker.__init__(self, sequence, onfinish_callback)
         self._error_message = 'error deleting playlist'
         self._success_message = 'playlist deleted successfully'
 
     def _run(self):
-        for f in pl.Loader(self._playlist_fullpath).list_all_files():
-            self._remove_file(utils.files.full_file_localpath(f))
+        for f in loader.Loader(self._playlist_fullpath).list_all_files():
+            self._remove_file(files.full_file_localpath(f))
         self._remove_file(self._playlist_fullpath)
 
     def _remove_file(self, file):

@@ -2,7 +2,7 @@
 
 import os
 
-import utils.shell
+import utils.shell as shell
 
 
 class Watchdog(object):
@@ -10,4 +10,4 @@ class Watchdog(object):
         self._wdt_file = os.path.join(os.getcwd(), "watchdogfile")
 
     def feed(self):
-        utils.shell.execute("touch {f}".format(f=self._wdt_file))
+        shell.execute("touch {f}".format(f=self._wdt_file))

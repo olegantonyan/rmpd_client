@@ -3,19 +3,19 @@
 import os
 import logging
 
-import utils.dbwrapper as db
-import utils.datetime
+import utils.dbwrapper as dbwrapper
+import utils.datetime as datetime
 
 log = logging.getLogger(__name__)
 
 
-class MessageQueue(db.DbWrapper):
+class MessageQueue(dbwrapper.DbWrapper):
     def __init__(self):
-        db.DbWrapper.__init__(self, os.path.join(os.getcwd(), 'message_queue.db3'))
+        dbwrapper.DbWrapper.__init__(self, os.path.join(os.getcwd(), 'message_queue.db3'))
 
     def enqueue(self, data):
         res = self.execute("INSERT OR REPLACE INTO message_queue ([data], [created_at]) VALUES (?, ?)",
-                               (data, utils.datetime.utcnow()))
+                           (data, datetime.utcnow()))
         return res["result"]
 
     def dequeue(self):

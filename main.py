@@ -9,29 +9,29 @@ import traceback
 import signal
 import os
 
-import mediaplayer.playercontroller as playerctrl
-import remotecontrol.protocoldispatcher as protoctrl
-import utils.config
-import utils.daemon
-import utils.threads
-import webui.webui
+import mediaplayer.playercontroller as playercontroller
+import remotecontrol.protocoldispatcher as protocoldispatcher
+import utils.config as config
+import utils.daemon as daemon
+import utils.threads as threads
+import webui.webui as webui
 import hardware
-import system.watchdog
+import system.watchdog as watchdog
 
 
 def signal_handler(signum, frame):
     logging.info("caught signal {s}".format(s=signum))
-    playerctrl.PlayerController().quit()
+    playercontroller.PlayerController().quit()
     hardware.platfrom.set_all_leds_disabled()
     logging.warning("terminated")
     sys.exit(0)
 
 
 def setup_logger(console_app=False, verbose_log=False):
-    logging.basicConfig(filename=utils.config.Config().logfile(),
+    logging.basicConfig(filename=config.Config().logfile(),
                         format="[%(asctime)s] %(name)s |%(levelname)s| %(message)s",
                         datefmt="%Y-%m-%d %H:%M:%S",
-                        level=(logging.DEBUG if (verbose_log or utils.config.Config().verbose_logging()) else logging.INFO))
+                        level=(logging.DEBUG if (verbose_log or config.Config().verbose_logging()) else logging.INFO))
 
     if console_app:
         root_logger = logging.getLogger()
@@ -46,7 +46,7 @@ def setup_logger(console_app=False, verbose_log=False):
 
 
 def bootstrap(configfile, console_app=False, verbose_log=False):
-    utils.config.Config().set_configfile(configfile)
+    config.Config().set_configfile(configfile)
     setup_logger(console_app, verbose_log)
     logging.info("using config file: '{c}'".format(c=configfile))
     logging.debug("working directory: '{w}'".format(w=os.getcwd()))
@@ -54,19 +54,19 @@ def bootstrap(configfile, console_app=False, verbose_log=False):
 
 
 def app():
-    player = playerctrl.PlayerController()
+    player = playercontroller.PlayerController()
     player.start_playlist()
-    proto = protoctrl.ProtocolDispatcher()
-    utils.threads.run_in_thread(webui.webui.start, ['0.0.0.0', 8080])
+    proto = protocoldispatcher.ProtocolDispatcher()
+    threads.run_in_thread(webui.start, ['0.0.0.0', 8080])
     while True:
         track = player.current_track_name()
         pos = player.current_track_posiotion()
         proto.send('now_playing', track=track, percent_position=pos)
-        system.watchdog.Watchdog().feed()
+        watchdog.Watchdog().feed()
         time.sleep(20)
 
 
-class DaemonApp(utils.daemon.Daemon):
+class DaemonApp(daemon.Daemon):
     def set_working_dir(self, cwd):
         self.cwd = cwd
 
@@ -99,7 +99,7 @@ def main():
             parser.error("no pid file specified for daemon mode")
             sys.exit(2)
 
-        daemon = DaemonApp(opts.pidfile)
+        daemonapp = DaemonApp(opts.pidfile)
         if 'start' == opts.daemon_control:
             if not opts.configfile:
                 parser.error("no config file specified")
@@ -108,13 +108,13 @@ def main():
                 parser.error("no working directory specified in daemon mode")
                 sys.exit(2)
             os.chdir(opts.workingdir)  # in main app context
-            daemon.set_working_dir(opts.workingdir)
+            daemonapp.set_working_dir(opts.workingdir)
             bootstrap(opts.configfile, False, opts.verbose)
-            daemon.start()
+            daemonapp.start()
         elif 'stop' == opts.daemon_control:
-            daemon.stop()
+            daemonapp.stop()
         elif 'status' == opts.daemon_control:
-            daemon.status()
+            daemonapp.status()
         elif not opts.daemon_control:
             parser.error("no daemon control options specified, try start or stop".format(opts.daemon_control))
             sys.exit(2)

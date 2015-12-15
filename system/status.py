@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import utils.singleton
+import utils.singleton as singleton
 import hardware
 
 
-class Status(object, metaclass=utils.singleton.Singleton):
+class Status(object, metaclass=singleton.Singleton):
     def __init__(self):
         self.__online = False
         self.__playing = False

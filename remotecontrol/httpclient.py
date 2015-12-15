@@ -9,7 +9,7 @@ import tempfile
 import shutil
 import os
 
-import system.systeminfo
+import system.systeminfo as systeminfo
 
 log = logging.getLogger(__name__)
 logging.getLogger("requests").setLevel(logging.WARNING)
@@ -37,7 +37,7 @@ class HttpClient(object):
                           json=jsondata,
                           auth=requests.auth.HTTPBasicAuth(self._login, self._password),
                           timeout=20,
-                          headers={'X-Sequence-Number': str(sequence_number), 'User-Agent': system.systeminfo.user_agent()},
+                          headers={'X-Sequence-Number': str(sequence_number), 'User-Agent': systeminfo.user_agent()},
                           verify=self_signed_certificate())
         if r.status_code != 200:
             raise RuntimeError("error sending data, status code: {s}".format(s=r.status_code))
@@ -48,7 +48,7 @@ def download_file(url, localpath):
     r = requests.get(url,
                      stream=True,
                      timeout=60,
-                     headers={"User-Agent": system.systeminfo.user_agent()},
+                     headers={"User-Agent": systeminfo.user_agent()},
                      verify=self_signed_certificate())
     temp_file = tempfile.NamedTemporaryFile(delete=False)  # delete is not required since we are moving it afterward
     for chunk in r.iter_content(chunk_size=2048):

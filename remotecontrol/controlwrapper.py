@@ -4,19 +4,19 @@ import logging
 import traceback
 import json
 
-import remotecontrol.httpclient
-import remotecontrol.messagequeue
-import utils.threads
-import system.status
+import remotecontrol.httpclient as httpclient
+import remotecontrol.messagequeue as messagequeue
+import utils.threads as threads
+import system.status as status
 
 log = logging.getLogger(__name__)
 
 
 class ControlWrapper(object):
     def __init__(self, server_url, login, password, receive_protocol_callback):
-        self._proto = remotecontrol.httpclient.HttpClient(server_url, login, password, self.onreceive)
+        self._proto = httpclient.HttpClient(server_url, login, password, self.onreceive)
         self._receive_protocol_callback = receive_protocol_callback
-        self._queue = remotecontrol.messagequeue.MessageQueue()
+        self._queue = messagequeue.MessageQueue()
         self._check_queue()
 
     def send(self, msg, queued=False, seq=0):
@@ -39,7 +39,7 @@ class ControlWrapper(object):
 
     def onreceive(self, msg, seq):
         log.debug("received message: '%s'", str(msg))
-        utils.threads.run_in_thread(target=self._receive_protocol_callback, args=(msg, seq), daemon=True)
+        threads.run_in_thread(target=self._receive_protocol_callback, args=(msg, seq), daemon=True)
 
     def _check_queue(self):
         messageid, data = self._queue.dequeue()
@@ -48,7 +48,7 @@ class ControlWrapper(object):
             if self.send(parsed_data["msg"], False, parsed_data["seq"]):
                 self._queue.remove(messageid)
 
-        utils.threads.run_after_timeout(0.2, self._check_queue)
+        threads.run_after_timeout(0.2, self._check_queue)
 
-    def _set_online_status(self, status):
-        system.status.Status().online = status
+    def _set_online_status(self, stat):
+        status.Status().online = stat

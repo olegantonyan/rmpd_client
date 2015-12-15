@@ -2,13 +2,13 @@
 
 import logging
 
-import utils.shell
+import utils.shell as shell
 
 log = logging.getLogger(__name__)
 
 
 class Control(object):
     def reboot(self):
-        (r, o, e) = utils.shell.execute("sudo reboot")
+        (r, o, e) = shell.execute("sudo reboot")
         log.debug("reboot return code: {r}\n{o}\n{e}".format(r=r, o=o, e=e))
         return r, o, e

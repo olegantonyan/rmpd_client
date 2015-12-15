@@ -5,28 +5,28 @@ import threading
 import logging
 import traceback
 
-import mediaplayer.playlist.playlist as p
-import mediaplayer.playlist.loader as pl
-import remotecontrol.protocol.incoming.base_command
+import mediaplayer.playlist.playlist as playlist
+import mediaplayer.playlist.loader as loader
+import remotecontrol.protocol.incoming.base_command as base_command
 
 log = logging.getLogger(__name__)
 
 
-class BasePlaylistCommand(remotecontrol.protocol.incoming.base_command.BaseCommand):
+class BasePlaylistCommand(base_command.BaseCommand):
     def _save_playlist_file(self):
-        playlist = self._data.get('playlist')
-        if playlist is None:  # old server without 'playlist' key
+        playlst = self._data.get('playlist')
+        if playlst is None:  # old server without 'playlist' key
             return
         localpath = self._playlist_file_path()
-        jsondata = json.dumps(playlist)
+        jsondata = json.dumps(playlst)
         with open(localpath, 'w') as f:
             f.write(jsondata)
 
     def _reset_playlist_position(self):
-        return p.Playlist.reset_position()
+        return playlist.Playlist.reset_position()
 
     def _playlist_file_path(self):
-        return pl.Loader().filepath()
+        return loader.Loader().filepath()
 
     def _send_ack(self, ok, sequence, message):
         self._sender('ack_' + ('ok' if ok else 'fail')).call(sequence=sequence, message=message)
@@ -38,7 +38,7 @@ class BaseWorker(threading.Thread):
         self._sequence = sequence
         self.daemon = True
         self._onfinish = onfinish_callback
-        self._playlist_fullpath = pl.Loader().filepath()
+        self._playlist_fullpath = loader.Loader().filepath()
         self._error_message = 'please set error message in subclass'
         self._success_message = 'please set success message in subclass'
 

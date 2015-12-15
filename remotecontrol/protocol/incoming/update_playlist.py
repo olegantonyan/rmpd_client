@@ -5,18 +5,18 @@ import logging
 import os
 import urllib.parse
 
-import utils.files
-import utils.config
-import utils.support
-import remotecontrol.protocol.incoming.base_playlist_command as base
-import system.status
-import remotecontrol.httpclient as http
-import mediaplayer.playercontroller as player
+import utils.files as files
+import utils.config as config
+import utils.support as support
+import remotecontrol.protocol.incoming.base_playlist_command as base_playlist_command
+import system.status as status
+import remotecontrol.httpclient as httpclient
+import mediaplayer.playercontroller as playercontroller
 
 log = logging.getLogger(__name__)
 
 
-class UpdatePlaylist(base.BasePlaylistCommand):
+class UpdatePlaylist(base_playlist_command.BasePlaylistCommand):
     worker = None
     lock = threading.Lock()
 
@@ -30,16 +30,16 @@ class UpdatePlaylist(base.BasePlaylistCommand):
             return
         media_items = self._legacy_media_items()
         self._sender('update_playlist').call(files=[os.path.basename(i) for i in media_items])
-        system.status.Status().downloading = True
+        status.Status().downloading = True
         return self._start_worker(media_items)
 
     def _onfinish(self, ok, sequence, message):
         self._release_worker()
-        system.status.Status().downloading = False
+        status.Status().downloading = False
         if ok:
             self._save_playlist_file()  # successfully downloaded => save new playlist file
             self._reset_playlist_position()
-            player.PlayerController().start_playlist()
+            playercontroller.PlayerController().start_playlist()
         self._send_ack(ok, sequence, message)
 
     def _start_worker(self, legacy_items):
@@ -60,27 +60,27 @@ class UpdatePlaylist(base.BasePlaylistCommand):
         return [i['url'] for i in self._data['playlist']['items']]
 
 
-class Worker(base.BaseWorker):
+class Worker(base_playlist_command.BaseWorker):
     def __init__(self, media_items, sequence, onfinish_callback):
-        base.BaseWorker.__init__(self, sequence, onfinish_callback)
-        self._media_items = utils.support.list_compact(media_items)
+        base_playlist_command.BaseWorker.__init__(self, sequence, onfinish_callback)
+        self._media_items = support.list_compact(media_items)
         self._error_message = 'error updating playlist'
         self._success_message = 'playlist updated successfully'
 
     def _run(self):
         for i in self._media_items:
             self._download_file(i)
-        self._utilize_nonplaylist_files(self._media_items, utils.files.mediafiles_path())
+        self._utilize_nonplaylist_files(self._media_items, files.mediafiles_path())
 
     def _download_file(self, file):
         url = self._full_file_url(file)
-        localpath = utils.files.full_file_localpath(file)
+        localpath = files.full_file_localpath(file)
         if not os.path.isfile(localpath):
             log.info("downloading file '%s'", url)
-            http.download_file(url, localpath)
+            httpclient.download_file(url, localpath)
 
     def _full_file_url(self, relativeurl):
-        return urllib.parse.urljoin(utils.config.Config().server_url(), relativeurl)
+        return urllib.parse.urljoin(config.Config().server_url(), relativeurl)
 
     def _utilize_nonplaylist_files(self, media_items, media_items_path):
         media_items = [os.path.basename(i) for i in media_items]
@@ -89,4 +89,4 @@ class Worker(base.BaseWorker):
                     and not file.endswith('.log') \
                     and not file.endswith(os.path.basename(self._playlist_fullpath)):
                 log.info("removing file not in current playlist '{f}'".format(f=file))
-                os.remove(utils.files.full_file_localpath(file))
+                os.remove(files.full_file_localpath(file))
