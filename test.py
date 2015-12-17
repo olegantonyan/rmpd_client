@@ -36,6 +36,10 @@ class Item(object):
     def playbacks_count(self):
         return self._c
 
+    def is_appropriate_at(self, thetime):
+        fit_time = lambda: self.begin_time <= thetime.time() <= self.end_time
+        return fit_time()
+
 input_items = [
     Item('9:00:00', '20:00:00', 11),
     Item('10:30:00', '20:00:00', 11),
@@ -66,7 +70,21 @@ print(from_sec(resalls[-1]))
 ranges = [ (value, resalls[index + 1]) for index, value in enumerate(resalls) if index + 1 != len(resalls) ]
 rangest = [ (from_sec(i[0]), from_sec(i[1])) for i in ranges]
 
-for i in rangest:
+def rtos(i):
     s = str(i[0].hour) + ":" + str(i[0].minute) + ":" + str(i[0].second)
     f = str(i[1].hour) + ":" + str(i[1].minute) + ":" + str(i[1].second)
-    print( s + " - " + f)
+    return( s + " - " + f)
+
+print("ranges")
+for i in rangest:
+    print(rtos(i))
+
+ranges_with_items = []
+for i in ranges:
+    t = (i[0] + i[1]) / 2
+    s = from_sec(t)
+    key = rtos(to_sec( s ))
+    print(key)
+    #for j in input_items:
+    #    if j.is_appropriate_at(s):
+    #        ranges_with_items.append( (i, j) )
