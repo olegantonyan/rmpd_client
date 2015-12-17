@@ -7,7 +7,7 @@ import mediaplayer.playlist.item as playlist_item
 import mediaplayer.player.state as state
 import utils.files
 import utils.datetime
-import mediaplayer.playlist.schedule as schedule
+import mediaplayer.playlist.schedule.intervals as intervals
 
 
 class Playlist(object):
@@ -48,10 +48,11 @@ class Playlist(object):
         appropriate_now = [i for i in self._advertising if i.is_appropriate_at(thetime)]
         if len(appropriate_now) == 0:
             return None
-        appropriate_now_with_concurent_indies = \
-            [(i, i.playbacks_per_day - self._state.playbacks_count(i.id, self._thetime())) for i in appropriate_now]
+
+        ranges = intervals.Intervals(appropriate_now)
         print("*****")
-        print(appropriate_now_with_concurent_indies)
+        for i in ranges.intervals:
+            print(i)
         print("*****")
 
     def onfinished(self, item):

@@ -39,8 +39,7 @@ class Schedule(object):
             self._sched_list.append(next_play_time)
 
     def _time_delta_in_seconds(self):
-        to_secs = lambda tm: tm.hour * 3600 + tm.minute * 60 + tm.second
-        return to_secs(self._end_time) - to_secs(self._begin_time)
+        return utils.datetime.time_to_seconds(self._end_time) - utils.datetime.time_to_seconds(self._begin_time)
 
     def _thetime(self):
         return utils.datetime.now()

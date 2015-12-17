@@ -61,11 +61,6 @@ class Item(object):
         else:
             return fit_time()
 
-    def next_play_time(self, thetime):
-        if self.is_background or self.schedule is None:
-            return None
-        return self.schedule.next_play_time(thetime)
-
     @property
     def filepath(self):
         return files.full_file_localpath(self.filename)
@@ -79,3 +74,9 @@ class Item(object):
         if arg is None:
             return None
         return datetime.datetime.strptime(arg, '%d.%m.%Y').date()
+
+    def __str__(self):
+        return self.filename
+
+    def __repr__(self):
+        return self.__str__()
