@@ -15,6 +15,7 @@
 #    print(w._expected_state)
 
 import datetime
+import time
 
 
 class Item(object):
@@ -36,11 +37,9 @@ class Item(object):
         return self._c
 
 input_items = [
-    Item('9:42:01', '20:00:00', 11),
-    Item('9:42:03', '20:15:43', 11),
-    Item('10:00:00', '18:00:00', 16),
-    Item('10:12:00', '18:18:00', 16),
-    Item('11:03:03', '14:00:03', 4),
+    Item('9:00:00', '20:00:00', 11),
+    Item('10:30:00', '20:00:00', 11),
+    Item('12:00:00', '18:00:00', 16),
 ]
 
 def to_sec(tm):
@@ -64,3 +63,10 @@ print(from_sec(resalls[0]))
 print("max:")
 print(from_sec(resalls[-1]))
 
+ranges = [ (value, resalls[index + 1]) for index, value in enumerate(resalls) if index + 1 != len(resalls) ]
+rangest = [ (from_sec(i[0]), from_sec(i[1])) for i in ranges]
+
+for i in rangest:
+    s = str(i[0].hour) + ":" + str(i[0].minute) + ":" + str(i[0].second)
+    f = str(i[1].hour) + ":" + str(i[1].minute) + ":" + str(i[1].second)
+    print( s + " - " + f)
