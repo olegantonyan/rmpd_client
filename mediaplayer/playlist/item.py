@@ -3,16 +3,11 @@
 import datetime
 
 import utils.files as files
-import mediaplayer.playlist.schedule as schedule
 
 
 class Item(object):
     def __init__(self, i):
         self._d = i
-        if self.is_advertising:
-            self.schedule = schedule.Schedule(self.begin_time, self.end_time, self.playbacks_per_day)
-        else:
-            self.schedule = None
 
     @property
     def filename(self):

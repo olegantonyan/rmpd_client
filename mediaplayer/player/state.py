@@ -29,7 +29,7 @@ class State(db.DbWrapper, metaclass=singleton.Singleton):
                          WHERE [media_item_advertising_id]=? AND [date]=?
                          """, (media_item_advertising_id, thetime.date()))
 
-    def fetch_playbacks_count(self, media_item_advertising_id, thetime):
+    def playbacks_count(self, media_item_advertising_id, thetime):
         res = self.execute("""
                            SELECT [playbacks_count] FROM player_state
                            WHERE [media_item_advertising_id]=? AND [date]=?
@@ -47,7 +47,7 @@ class State(db.DbWrapper, metaclass=singleton.Singleton):
                      [id]                           INTEGER PRIMARY KEY NOT NULL,
                      [media_item_advertising_id]    INTEGER NOT NULL,
                      [date]                         DATE NOT NULL,
-                     [scheduled_time]               TIME NOT NULL,
+                     [playbacks_count]              INTEGER NOT NULL,
                      [created_at]                   TIMESTAMP NOT NULL,
                      [updated_at]                   TIMESTAMP NOT NULL)
                      """)

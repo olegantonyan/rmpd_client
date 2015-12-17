@@ -7,6 +7,7 @@ import mediaplayer.playlist.item as playlist_item
 import mediaplayer.player.state as state
 import utils.files
 import utils.datetime
+import mediaplayer.playlist.schedule as schedule
 
 
 class Playlist(object):
@@ -16,7 +17,6 @@ class Playlist(object):
         self._background = self._background_items()
         self._advertising = self._advertising_items()
         self._current_background_position = 0
-        self._current_advertising = (None, None)  # (item, scheduled_time)
         self._advertising_states = []
 
     @staticmethod
@@ -48,20 +48,17 @@ class Playlist(object):
         appropriate_now = [i for i in self._advertising if i.is_appropriate_at(thetime)]
         if len(appropriate_now) == 0:
             return None
-        for i in appropriate_now:
-            next_play_time = i.next_play_time(thetime)
-            if i == self._current_advertising[0] and next_play_time == self._current_advertising[1]:
-                continue
-            if i.next_play_time(thetime) >= thetime:
-                self._current_advertising = (i, next_play_time)
-                return i
+        appropriate_now_with_concurent_indies = \
+            [(i, i.playbacks_per_day - self._state.playbacks_count(i.id, self._thetime())) for i in appropriate_now]
+        print("*****")
+        print(appropriate_now_with_concurent_indies)
+        print("*****")
 
     def onfinished(self, item):
         if item is None:
             return
         if item.is_advertising:
-            self._current_advertising = (None, None)
-            #self._state.increment_playbacks_count(item.id, self._thetime())
+            self._state.increment_playbacks_count(item.id, self._thetime())
         elif item.is_background:
             self._current_background_position = self._background_item_position(item)
 
