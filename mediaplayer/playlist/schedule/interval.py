@@ -9,8 +9,8 @@ class Interval(object):
         self._end_time_seconds = end_time_seconds
         self._items = []
 
-    def add_item(self, i):
-        self._items.append(i)
+    def add_item(self, i, playbacks_in_interval):
+        self._items.append((i, playbacks_in_interval))
 
     @property
     def items(self):

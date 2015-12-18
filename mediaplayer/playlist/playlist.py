@@ -7,7 +7,7 @@ import mediaplayer.playlist.item as playlist_item
 import mediaplayer.player.state as state
 import utils.files
 import utils.datetime
-import mediaplayer.playlist.schedule.intervals as intervals
+import mediaplayer.playlist.schedule.schedule as schedule
 
 
 class Playlist(object):
@@ -49,7 +49,7 @@ class Playlist(object):
         if len(appropriate_now) == 0:
             return None
 
-        ranges = intervals.Intervals(appropriate_now)
+        ranges = schedule.Schedule(self._advertising)
         print("*****")
         for i in ranges.intervals:
             print(i)
