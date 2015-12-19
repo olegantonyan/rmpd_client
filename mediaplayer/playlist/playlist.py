@@ -18,6 +18,7 @@ class Playlist(object):
         self._advertising = self._advertising_items()
         self._current_background_position = 0
         self._advertising_states = []
+        self._schedule = schedule.Schedule(self._advertising)
 
     @staticmethod
     def reset_position():
@@ -49,9 +50,8 @@ class Playlist(object):
         if len(appropriate_now) == 0:
             return None
 
-        ranges = schedule.Schedule(self._advertising)
         print("*****")
-        for i in ranges.intervals:
+        for i in self._schedule.intervals:
             print(i)
         print("*****")
 
