@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+import itertools
+
+
 import utils.datetime
 import mediaplayer.playlist.schedule.interval as interval
 
@@ -23,6 +26,10 @@ class Schedule(object):
     @property
     def ether_end_seconds(self):
         return max(self._all_times_seconds_sorted_uniq)
+
+    @property
+    def scheduled_times(self):
+        return list(itertools.chain.from_iterable([i.scheduled_times for i in self.intervals]))
 
     def _fill_intervals_with_items(self):
         for j in self._items:
@@ -60,7 +67,8 @@ class Schedule(object):
             intrval_playbacks = round((j.end_time_seconds - j.begin_time_seconds) / all_time_period)
             for i in self._intervals:
                 if i.begin_time_seconds == j.begin_time_seconds and i.end_time_seconds == j.end_time_seconds:
-                    i.add_item(itm, intrval_playbacks)
+                    if intrval_playbacks != 0:
+                        i.add_item(itm, intrval_playbacks)
 
 
 

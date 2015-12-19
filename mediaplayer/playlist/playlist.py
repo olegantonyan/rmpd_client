@@ -52,8 +52,16 @@ class Playlist(object):
 
         print("*****")
         for i in self._schedule.intervals:
-            print(str(i) + "____ " + i.total_playbacks_count)
+            print(str(i) + "____ " + str(i.total_playbacks_count) + " ____ " + str(i.period))
+            print(i.scheduled_times)
         print("*****")
+
+        print("%%%%%%%%%%%%%%%%")
+        #print(self._schedule.scheduled_times)
+        for i in self._schedule.scheduled_times:
+            print(utils.datetime.time_to_string(i))
+        print(len(self._schedule.scheduled_times))
+        print("%%%%%%%%%%%%%%%%")
 
     def onfinished(self, item):
         if item is None:

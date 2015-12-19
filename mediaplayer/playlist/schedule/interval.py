@@ -34,7 +34,15 @@ class Interval(object):
 
     @property
     def total_playbacks_count(self):
-        return sum(i[0] for i in self._items)
+        return sum(i[1] for i in self.items)
+
+    @property
+    def period(self):
+        return round((self.end_time_seconds - self.begin_time_seconds) / self.total_playbacks_count)
+
+    @property
+    def scheduled_times(self):
+        return [utils.datetime.time_from_seconds(self.begin_time_seconds + self.period * index) for index in range(self.total_playbacks_count)]
 
     def __str__(self):
         return "{b}-{e} {itms}".format(b=utils.datetime.time_to_string(self.begin_time_object),
