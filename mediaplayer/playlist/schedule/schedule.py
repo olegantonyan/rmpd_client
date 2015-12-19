@@ -25,12 +25,8 @@ class Schedule(object):
         return max(self._all_times_seconds_sorted_uniq)
 
     def _fill_intervals_with_items(self):
-        for i in self.intervals:
-            mean_in_interval_seconds = (i.begin_time_seconds + i.end_time_seconds) / 2
-            mean_in_interval_object = utils.datetime.time_from_seconds(mean_in_interval_seconds)
-            for j in self._items:
-                if j.is_appropriate_at(utils.datetime.datetime_from_time(mean_in_interval_object)):
-                    i.add_item(j, self._playbacks_in_interval(j, i))
+        for j in self._items:
+            self._fill_playbacks_in_intervals(j)
 
     def _calculate_intervals(self, all_times_seconds_sorted_uniq):
         return [interval.Interval(value, all_times_seconds_sorted_uniq[index + 1])
@@ -38,31 +34,33 @@ class Schedule(object):
                 if index + 1 != len(all_times_seconds_sorted_uniq)]
 
     def _begin_times_seconds(self):
-        return [utils.datetime.time_to_seconds(i.begin_time) for i in self._items]
+        return [self._time_to_seconds(i.begin_time) for i in self._items]
 
     def _end_times_seconds(self):
-        return [utils.datetime.time_to_seconds(i.end_time) for i in self._items]
+        return [self._time_to_seconds(i.end_time) for i in self._items]
+
+    def _time_to_seconds(self, tm):
+        return utils.datetime.time_to_seconds(tm)
 
     def _all_times_seconds(self):
         return self._begin_times_seconds() + self._end_times_seconds()
 
-    def _time_delta_in_seconds_all_time(self, itm):
-        return utils.datetime.time_to_seconds(itm.end_time) - utils.datetime.time_to_seconds(itm.begin_time)
-
-    def _time_delta_in_seconds_interval(self, intvl):
-        return intvl.end_time_seconds - intvl.begin_time_seconds
-
-    def _time_delta_outside_intrval(self, itm, intvl):
-        return self._time_delta_in_seconds_all_time(itm) - self._time_delta_in_seconds_interval(intvl)
-
-    def _period_in_seconds_all_time(self, itm):
+    def _fill_playbacks_in_intervals(self, itm):
+        times_in_item_play_time = list(filter(lambda x:
+                                              self._time_to_seconds(itm.begin_time) <= x <= self._time_to_seconds(itm.end_time),
+                                              self._all_times_seconds_sorted_uniq))
+        fit_intrevals = self._calculate_intervals(times_in_item_play_time)
+        if fit_intrevals[0].begin_time_object != itm.begin_time or fit_intrevals[-1].end_time_object != itm.end_time:
+            raise RuntimeError('item {i} does not fit into intervals ({b}..{e})'.format(i=itm, b=fit_intrevals[0], e=fit_intrevals[-1]))
         if itm.playbacks_per_day == 0:
-            return 0
-        return int(self._time_delta_in_seconds_all_time(itm) / itm.playbacks_per_day)
-
-    def _playbacks_in_interval(self, itm, interval):
-        delta = self._time_delta_in_seconds_all_time(itm)
-        return self._time_delta_outside_intrval(itm, interval)
+            return
+        all_time_seconds = fit_intrevals[-1].end_time_seconds - fit_intrevals[0].begin_time_seconds
+        all_time_period = round(all_time_seconds / itm.playbacks_per_day)
+        for j in fit_intrevals:
+            intrval_playbacks = round((j.end_time_seconds - j.begin_time_seconds) / all_time_period)
+            for i in self._intervals:
+                if i.begin_time_seconds == j.begin_time_seconds and i.end_time_seconds == j.end_time_seconds:
+                    i.add_item(itm, intrval_playbacks)
 
 
 
