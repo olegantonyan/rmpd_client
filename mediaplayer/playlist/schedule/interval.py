@@ -32,6 +32,10 @@ class Interval(object):
     def end_time_object(self):
         return utils.datetime.time_from_seconds(self.end_time_seconds)
 
+    @property
+    def total_playbacks_count(self):
+        return sum(i[0] for i in self._items)
+
     def __str__(self):
         return "{b}-{e} {itms}".format(b=utils.datetime.time_to_string(self.begin_time_object),
                                        e=utils.datetime.time_to_string(self.end_time_object),

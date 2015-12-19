@@ -52,7 +52,7 @@ class Playlist(object):
 
         print("*****")
         for i in self._schedule.intervals:
-            print(i)
+            print(str(i) + "____ " + i.total_playbacks_count)
         print("*****")
 
     def onfinished(self, item):
