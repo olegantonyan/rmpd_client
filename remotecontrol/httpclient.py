@@ -16,9 +16,6 @@ requests.packages.urllib3.disable_warnings() # for self-signed certificate
 
 import system.systeminfo
 
-def self_signed_certificate():
-    return path.join(path.dirname(__file__), 'server.slon-ds.ru.crt')
-
 class HttpClient(object):
     '''
     Implement HTTP(S) protocol
@@ -40,15 +37,14 @@ class HttpClient(object):
                  json=jsondata, 
                  auth=HTTPBasicAuth(self.__login, self.__password), 
                  timeout=20, 
-                 headers={"X-Sequence-Number": str(sequence_number), "User-Agent": system.systeminfo.user_agent()},
-                 verify=self_signed_certificate()
+                 headers={"X-Sequence-Number": str(sequence_number), "User-Agent": system.systeminfo.user_agent()}
                  )
         if r.status_code != 200:
             raise RuntimeError("error sending data, status code: {s}".format(s=r.status_code))
         return r.json(), r.headers["X-Sequence-Number"]
     
 def download_file(url, localpath):
-    r = get(url, stream=True, timeout=60, headers={"User-Agent": system.systeminfo.user_agent()}, verify=self_signed_certificate())
+    r = get(url, stream=True, timeout=60, headers={"User-Agent": system.systeminfo.user_agent()})
     temp_file = NamedTemporaryFile()
     for chunk in r.iter_content(chunk_size=2048): 
         if chunk: # filter out keep-alive new chunks
