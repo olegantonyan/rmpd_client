@@ -7,17 +7,11 @@ import requests.auth
 import requests.packages.urllib3
 import tempfile
 import shutil
-import os
 
 import system.systeminfo as systeminfo
 
 log = logging.getLogger(__name__)
 logging.getLogger("requests").setLevel(logging.WARNING)
-requests.packages.urllib3.disable_warnings()  # for self-signed certificate
-
-
-def self_signed_certificate():
-    return os.path.join(os.path.dirname(__file__), 'server.slon-ds.ru.crt')
 
 
 class HttpClient(object):
@@ -37,8 +31,7 @@ class HttpClient(object):
                           json=jsondata,
                           auth=requests.auth.HTTPBasicAuth(self._login, self._password),
                           timeout=20,
-                          headers={'X-Sequence-Number': str(sequence_number), 'User-Agent': systeminfo.user_agent()},
-                          verify=self_signed_certificate())
+                          headers={'X-Sequence-Number': str(sequence_number), 'User-Agent': systeminfo.user_agent()})
         if r.status_code != 200:
             raise RuntimeError("error sending data, status code: {s}".format(s=r.status_code))
         return r.json(), r.headers['X-Sequence-Number']
@@ -48,8 +41,7 @@ def download_file(url, localpath):
     r = requests.get(url,
                      stream=True,
                      timeout=60,
-                     headers={"User-Agent": systeminfo.user_agent()},
-                     verify=self_signed_certificate())
+                     headers={"User-Agent": systeminfo.user_agent()})
     temp_file = tempfile.NamedTemporaryFile(delete=False)  # delete is not required since we are moving it afterward
     for chunk in r.iter_content(chunk_size=2048):
         if chunk:  # filter out keep-alive new chunks
