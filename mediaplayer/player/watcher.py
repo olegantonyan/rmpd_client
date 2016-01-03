@@ -90,7 +90,7 @@ class Watcher(object, metaclass=singleton.Singleton):
                         self._run_callback('onfinished', filepath=filepath)
             except:
                 log.exception('error checking player state')
-            time.sleep(0.7)
+            time.sleep(0.3)
 
     def _filename_by_path(self, filepath):
         return os.path.basename(filepath)
