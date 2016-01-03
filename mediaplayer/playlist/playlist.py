@@ -16,7 +16,6 @@ class Playlist(object):
         self._background = self._background_items()
         self._advertising = self._advertising_items()
         self._current_background_position = 0
-        self._advertising_states = []
 
     @staticmethod
     def reset_position():
@@ -47,13 +46,16 @@ class Playlist(object):
         appropriate_now = [i for i in self._advertising if i.is_appropriate_at(thetime)]
         if len(appropriate_now) == 0:
             return None
+        for i in appropriate_now:
+            if i.is_required_at(thetime):
+                return i
         return None
 
     def onfinished(self, item):
         if item is None:
             return
         if item.is_advertising:
-            self._state.increment_playbacks_count(item.id, self._thetime())
+            pass  # self._state.increment_playbacks_count(item.id, self._thetime())
         elif item.is_background:
             self._current_background_position = self._background_item_position(item)
 

@@ -63,7 +63,7 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
     def _loop(self):
         while not self._stop_flag:
             try:
-                self._rx.get(block=True, timeout=2)
+                self._rx.get(block=True, timeout=1)
             except queue.Empty:
                 pass
             if self._playlist is not None:

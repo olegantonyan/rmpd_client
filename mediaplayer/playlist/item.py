@@ -3,7 +3,7 @@
 import datetime
 
 import utils.files as files
-
+import utils.datetime
 
 class Item(object):
     def __init__(self, i):
@@ -61,9 +61,24 @@ class Item(object):
         else:
             return fit_time()
 
+    def is_required_at(self, thetime):
+        if not self.is_advertising:
+            return False
+        now = utils.datetime.time_to_seconds(thetime)
+        low = now - 2
+        high = low + 2
+        for i in self.schedule:
+            if low <= utils.datetime.time_to_seconds(i) <= high:
+                return True
+        return False
+
     @property
     def filepath(self):
         return files.full_file_localpath(self.filename)
+
+    @property
+    def schedule(self):
+        return [self._parse_time(i) for i in self._d['schedule']]
 
     def _parse_time(self, arg):
         if arg is None:
