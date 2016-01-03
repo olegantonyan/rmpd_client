@@ -7,7 +7,6 @@ import mediaplayer.playlist.item as playlist_item
 import mediaplayer.player.state as state
 import utils.files
 import utils.datetime
-import mediaplayer.playlist.schedule.schedule as schedule
 
 
 class Playlist(object):
@@ -18,7 +17,6 @@ class Playlist(object):
         self._advertising = self._advertising_items()
         self._current_background_position = 0
         self._advertising_states = []
-        self._schedule = schedule.Schedule(self._advertising)
 
     @staticmethod
     def reset_position():
@@ -49,19 +47,7 @@ class Playlist(object):
         appropriate_now = [i for i in self._advertising if i.is_appropriate_at(thetime)]
         if len(appropriate_now) == 0:
             return None
-
-        print("*****")
-        for i in self._schedule.intervals:
-            print(str(i) + "____ " + str(i.total_playbacks_count) + " ____ " + str(i.period))
-            print(i.scheduled_times)
-        print("*****")
-
-        print("%%%%%%%%%%%%%%%%")
-        #print(self._schedule.scheduled_times)
-        for i in self._schedule.scheduled_times:
-            print(utils.datetime.time_to_string(i))
-        print(len(self._schedule.scheduled_times))
-        print("%%%%%%%%%%%%%%%%")
+        return None
 
     def onfinished(self, item):
         if item is None:

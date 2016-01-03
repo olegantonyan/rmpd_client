@@ -3,8 +3,11 @@ Disable blank screen
   sed -i s/POWERDOWN_TIME=30/POWERDOWN_TIME=0/g /etc/kbd/config
   
 Update/install soft
-  apt-get update && apt-get dist-upgrade && apt-get install watchdog mplayer python3-pip git-core libpcre3 fonts-freefont-ttf fbset netplug libpcre3-dev libpcrecpp0 libva-dev libva-x11-1 libva1 fbi libssh-4 sudo alsa-utils
+  apt-get update -y && apt-get dist-upgrade -y && apt-get install libssl-dev openssl libsqlite3-dev watchdog mplayer git-core libpcre3 fonts-freefont-ttf fbset netplug libpcre3-dev libpcrecpp0 libva-dev libva-x11-1 libva1 fbi libssh-4 sudo alsa-utils -y
   apt-get purge gpm
+  cd /tmp && wget https://www.python.org/ftp/python/3.4.4/Python-3.4.4.tgz
+  tar xfv Python-3.4.4.tgz && cd Python-3.4.4
+  ./configure && make -j2 && make install && ldconfig
   
   #http://omxplayer.sconde.net/
   wget http://omxplayer.sconde.net/builds/omxplayer_0.3.6~git20150128~18f051d_armhf.deb && dpkg -i omxplayer_0.3.6~git20150128~18f051d_armhf.deb && rm omxplayer_0.3.6~git20150128~18f051d_armhf.deb
