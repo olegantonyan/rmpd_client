@@ -4,14 +4,12 @@ import random
 
 import mediaplayer.playlist.loader as loader
 import mediaplayer.playlist.item as playlist_item
-import mediaplayer.player.state as state
 import utils.files
 import utils.datetime
 
 
 class Playlist(object):
     def __init__(self):
-        self._state = state.State()
         self._data = loader.Loader().load()
         self._background = self._background_items()
         self._advertising = self._advertising_items()
@@ -19,7 +17,7 @@ class Playlist(object):
 
     @staticmethod
     def reset_position():
-        state.State().reset()
+        pass
 
     def next_background(self):
         next_item, index = self._find_next_appropriate(self._background,
@@ -55,7 +53,7 @@ class Playlist(object):
         if item is None:
             return
         if item.is_advertising:
-            pass  # self._state.increment_playbacks_count(item.id, self._thetime())
+            pass
         elif item.is_background:
             self._current_background_position = self._background_item_position(item)
 
