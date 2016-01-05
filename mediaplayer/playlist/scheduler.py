@@ -46,8 +46,8 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
             self._set_now_playing(None)
             self._player.stop()
             return False
-        self._player.play(item.filepath)
         self._set_now_playing(item)
+        self._player.play(item.filepath)
 
     @utils.threads.synchronized(lock)
     def _set_now_playing(self, item):
