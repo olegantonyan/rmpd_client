@@ -1,4 +1,4 @@
-                        ox - 5V
+    power (white/red) - xx - 5V
                         ox - 5V
                         ox - GND
                         oo
