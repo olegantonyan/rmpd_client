@@ -8,6 +8,7 @@ Update/install soft
   cd /tmp && wget https://www.python.org/ftp/python/3.4.4/Python-3.4.4.tgz
   tar xfv Python-3.4.4.tgz && cd Python-3.4.4
   ./configure && make -j2 && make install && ldconfig
+  pip3 install -r /home/rmpd/rmpd_client/requirements.txt
   
   #http://omxplayer.sconde.net/
   wget http://omxplayer.sconde.net/builds/omxplayer_0.3.6~git20150128~18f051d_armhf.deb && dpkg -i omxplayer_0.3.6~git20150128~18f051d_armhf.deb && rm omxplayer_0.3.6~git20150128~18f051d_armhf.deb
