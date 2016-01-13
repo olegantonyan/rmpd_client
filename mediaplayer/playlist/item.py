@@ -54,12 +54,10 @@ class Item(object):
         return self.type == 'advertising'
 
     def is_appropriate_at(self, thetime):
-        fit_time = lambda: self.begin_time <= thetime.time() <= self.end_time
-        fit_date = lambda: self.begin_date <= thetime.date() <= self.end_date
         if self.is_advertising:
-            return fit_time() and fit_date()
+            return self._fit_time(thetime) and self._fit_date(thetime)
         else:
-            return fit_time()
+            return self._fit_time(thetime)
 
     def is_required_at(self, thetime):
         if not self.is_advertising:
@@ -89,6 +87,16 @@ class Item(object):
         if arg is None:
             return None
         return datetime.datetime.strptime(arg, '%d.%m.%Y').date()
+
+    def _fit_time(self, thetime):
+        if self.begin_time is None or self.end_time is None:
+            return True
+        return self.begin_time <= thetime.time() <= self.end_time
+
+    def _fit_date(self, thetime):
+        if self.begin_date is None or self.end_date is None:
+            return True
+        return self.begin_date <= thetime.date() <= self.end_date
 
     def __str__(self):
         return self.filename
