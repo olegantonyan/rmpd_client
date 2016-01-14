@@ -42,12 +42,13 @@ class OMXPlayer(object):
         self.stop()
 
     def isstopped(self):
-        try:
-            return not self._process or not self._process.isalive()
-        except OSError:
-            #  sometimes it throws: isalive() encountered condition where "terminated" is 0,
-            #  but there was no child process. Did someone else call waitpid() on our process?
-            return False
+        for i in range(10):
+            try:
+                return not self._process or not self._process.isalive()
+            except OSError:
+                #  sometimes it throws: isalive() encountered condition where "terminated" is 0,
+                #  but there was no child process. Did someone else call waitpid() on our process?
+                pass
 
     def pause(self):
         if not self._process:

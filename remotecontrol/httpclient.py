@@ -42,7 +42,7 @@ def download_file(url, localpath):
                      stream=True,
                      timeout=60,
                      headers={"User-Agent": systeminfo.user_agent()})
-    temp_file = tempfile.NamedTemporaryFile(delete=False)  # delete is not required since we are moving it afterward
+    temp_file = tempfile.NamedTemporaryFile(delete=False, dir='/var/tmp')  # delete is not required since we are moving it afterward
     for chunk in r.iter_content(chunk_size=2048):
         if chunk:  # filter out keep-alive new chunks
             temp_file.write(chunk)

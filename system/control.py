@@ -12,3 +12,4 @@ class Control(object):
         (r, o, e) = shell.execute("sudo reboot")
         log.debug("reboot return code: {r}\n{o}\n{e}".format(r=r, o=o, e=e))
         return r, o, e
+
