@@ -42,7 +42,7 @@ class OMXPlayer(object):
         self.stop()
 
     def isstopped(self):
-        for i in range(10):
+        for i in range(3):
             try:
                 return not self._process or not self._process.isalive()
             except OSError:
@@ -95,8 +95,8 @@ class OMXPlayer(object):
         return self._fileinfo_parsed.get("duration", None)
 
     def _get_fileinfo(self, filename):
-        (r, o) = self._execute_shell("{ep} -i {f}".format(ep=self.exec_path, f=filename))  # @UnusedVariable
-        return o if r == 0 else None
+        (r, o) = self._execute_shell("{ep} -i {f}".format(ep=self.exec_path, f=filename))
+        return o
 
     def _parse_duration(self, fileinfo):
         duration_rexp = compile(r"((.|\n)*)(Duration:) (\d+:\d+:\d+.\d+)")
