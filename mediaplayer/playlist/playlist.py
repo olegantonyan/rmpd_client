@@ -64,6 +64,11 @@ class Playlist(object):
 
     def _find_next_appropriate(self, collection, start_pos, end_pos):
         thetime = self._thetime()
+        if len(collection) == 1:
+            if collection[0].is_appropriate_at(thetime):
+                return collection[0], 0
+            else:
+                return None, None
         for i in range(start_pos, end_pos):
             next_item = collection[i]
             if next_item.is_appropriate_at(thetime):

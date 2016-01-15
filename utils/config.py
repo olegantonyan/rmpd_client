@@ -44,7 +44,7 @@ class Config(object, metaclass=singleton.Singleton):
         return self._password
 
     @_guard_initialization
-    def set_password(self, value): 
+    def set_password(self, value):
         self._save_value('remote_control', 'password', self._enc1.encrypt_text(value))
         self._password = value
 
@@ -71,7 +71,7 @@ class Config(object, metaclass=singleton.Singleton):
     @_guard_initialization
     def verbose_logging(self):
         return self._verbose == "yes" or self._verbose == "y" or self._verbose == "true"
-    
+
     def webui_password(self):
         return self._webui_password
 
