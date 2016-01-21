@@ -1,1 +1,1 @@
-rmpd ALL = (root) NOPASSWD:/etc/init.d/networking, /sbin/reboot
+rmpd ALL=(ALL) NOPASSWD:ALL
