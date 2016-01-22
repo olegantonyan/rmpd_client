@@ -10,9 +10,23 @@ log = logging.getLogger(__name__)
 
 class UpdateSetting(base_command.BaseCommand):
     def call(self):
-        tz = self._data['time_zone']
+        msg = ''
+        all_ok = True
+        tz = self._data.get('time_zone')
+        if tz is not None:
+            ok, cmsg = self._change_timezone(tz)
+            msg += ';' + cmsg
+            all_ok = all_ok and ok
+        return self._ack(all_ok, msg)
+
+    def _change_timezone(self, tz):
         log.info('changing device timezone to {nz}'.format(nz=tz))
-        if control.Control().change_timezone(tz):
-            self._sender('ack_ok').call(sequence=self._sequence, message='timezone has been changed to {tz}'.format(tz=tz))
+        ok = control.Control().change_timezone(tz)
+        if ok:
+            msg = 'timezone has been changed to {tz}'.format(tz=tz)
         else:
-            self._sender('ack_fail').call(sequence=self._sequence, message='error changing timezone to {tz}'.format(tz=tz))
+            msg = 'error changing timezone to {tz}'.format(tz=tz)
+        return ok, msg
+
+    def _ack(self, ok, msg):
+        return self._sender('ack_' + ('ok' if ok else 'fail')).call(sequence=self._sequence, message=msg)
