@@ -4,20 +4,16 @@ import configparser
 import codecs
 
 import utils.singleton as singleton
-import utils.crypto as crypto
-
-KP1 = ('mplayer_executable' * 2)[0:-4]
-KP2 = ('mediafiles_path'*3)[0:-13]
 
 
-class ConfigFIleNotSpecifiedError(RuntimeError):
+class ConfigFileNotSpecifiedError(RuntimeError):
     pass
 
 
 def _guard_initialization(func):
     def wrap(self, *args):
         if self._parser is None or self._filename is None:
-            raise ConfigFIleNotSpecifiedError("you have to specify config file with 'set_configfile()' method")
+            raise ConfigFileNotSpecifiedError("you have to specify config file with 'set_configfile()' method")
         return func(self, *args)
     return wrap
 
@@ -42,11 +38,6 @@ class Config(object, metaclass=singleton.Singleton):
     @_guard_initialization
     def password(self):
         return self._password
-
-    @_guard_initialization
-    def set_password(self, value):
-        self._save_value('remote_control', 'password', self._enc1.encrypt_text(value))
-        self._password = value
 
     @_guard_initialization
     def logfile(self):
@@ -77,7 +68,7 @@ class Config(object, metaclass=singleton.Singleton):
 
     @_guard_initialization
     def set_webui_password(self, value):
-        self._save_value('webui', 'password', self._enc2.encrypt_text(value))
+        self._save_value('webui', 'password', value)
         self._webui_password = value
 
     @_guard_initialization
@@ -91,16 +82,10 @@ class Config(object, metaclass=singleton.Singleton):
         with codecs.open(self._filename, 'r', encoding='utf-8') as f:
             self._parser.read_file(f)
 
-        self._enc1 = crypto.AESCipher(KP1)
-        self._enc2 = crypto.AESCipher(KP2)
-
         section = 'remote_control'
         self._server_url = self._parser.get(section, 'server_url')
         self._login = self._parser.get(section, 'login')
-        try:
-            self._password = self._enc1.decrypt_text(self._parser.get(section, 'password'))
-        except:
-            self._password = ""
+        self._password = self._parser.get(section, 'password')
 
         section = 'logging'
         self._logfile = self._parser.get(section, 'logfile')
@@ -113,7 +98,5 @@ class Config(object, metaclass=singleton.Singleton):
         self._omplayer_arguments = self._parser.get(section, 'omxplayer_arguments')
 
         section = 'webui'
-        try:
-            self._webui_password = self._enc2.decrypt_text(self._parser.get(section, 'password'))
-        except:
-            self._webui_password = ""
+        self._webui_password = self._parser.get(section, 'password')
+
