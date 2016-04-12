@@ -55,10 +55,7 @@ class Item(object):
         return self.type == 'advertising'
 
     def is_appropriate_at(self, thetime):
-        if self.is_advertising:
-            return self._fit_time(thetime) and self._fit_date(thetime)
-        else:
-            return self._fit_time(thetime)
+        return self._fit_time(thetime) and self._fit_date(thetime)
 
     def is_required_at(self, thetime):
         if not self.is_advertising:
