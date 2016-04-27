@@ -2,6 +2,7 @@
 
 import configparser
 import codecs
+import os
 
 import utils.singleton as singleton
 
@@ -90,7 +91,10 @@ class Config(object, metaclass=singleton.Singleton):
         self._server_url = self._parser.get(section, 'server_url')
         self._login = self._parser.get(section, 'login')
         self._password = self._parser.get(section, 'password')
-        self._message_queue = self._parser.get(section, 'message_queue')
+        try:
+            self._message_queue = self._parser.get(section, 'message_queue')
+        except (KeyError, configparser.NoOptionError):
+            self._message_queue = os.path.join(os.getcwd(), 'message_queue.db3')
 
         section = 'logging'
         self._logfile = self._parser.get(section, 'logfile')
