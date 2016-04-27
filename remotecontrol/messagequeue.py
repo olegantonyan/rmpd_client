@@ -5,13 +5,15 @@ import logging
 
 import utils.dbwrapper as dbwrapper
 import utils.datetime as datetime
+import utils.config as config
 
 log = logging.getLogger(__name__)
 
 
 class MessageQueue(dbwrapper.DbWrapper):
     def __init__(self):
-        dbwrapper.DbWrapper.__init__(self, os.path.join(os.getcwd(), 'message_queue.db3'))
+        db_path = config.Config().message_queue()
+        dbwrapper.DbWrapper.__init__(self, db_path or os.path.join(os.getcwd(), 'message_queue.db3'))
 
     def enqueue(self, data):
         res = self.execute("INSERT OR REPLACE INTO message_queue ([data], [created_at]) VALUES (?, ?)",

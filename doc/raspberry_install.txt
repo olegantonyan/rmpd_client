@@ -1,6 +1,7 @@
 Disable blank screen
   sed -i s/BLANK_TIME=30/BLANK_TIME=0/g /etc/kbd/config
   sed -i s/POWERDOWN_TIME=30/POWERDOWN_TIME=0/g /etc/kbd/config
+  #/boot/cmdline.txt consoleblank=0
   
 Update/install soft
   apt-get update -y && apt-get dist-upgrade -y && apt-get install libssl-dev openssl libsqlite3-dev watchdog mplayer git-core libpcre3 fonts-freefont-ttf fbset netplug libpcre3-dev libpcrecpp0 libva-dev libva-x11-1 libva1 fbi libssh-4 sudo alsa-utils ntpdate -y
@@ -48,6 +49,12 @@ User/group
   usermod -a -G video rmpd
   usermod -a -G users rmpd
   echo 'SUBSYSTEM=="vchiq",GROUP="video",MODE="0660"' > /etc/udev/rules.d/10-vchiq-permissions.rules
+
+Fsck
+  echo "FSCKFIX=yes" >> /etc/default/rcS
+
+NTP
+  # tinker panic 0 #/etc/ntp.conf
   
 Install rmpd
   mkdir /var/lib/rmpd

@@ -11,4 +11,4 @@
 # Description: Remote Media Player Daemon
 ### END INIT INFO
 
-su - rmpd -c "/home/rmpd/rmpd_client/rmpd.bin.sh $1"
+su - rmpd -c "/home/rmpd/rmpd_client/rmpd.sh $1"
