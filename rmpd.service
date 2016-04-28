@@ -3,10 +3,11 @@ Description=rmpd client
 Wants=network.target
 
 [Service]
-ExecStart=/usr/bin/python3 /home/rmpd/rmpd_client/main.py -t
+ExecStart=/usr/bin/python3 /home/rmpd/rmpd_client/main.py -t -c /home/rmpd/rmpd_client/rmpd.conf
 User=rmpd
-WorkingDirectory=/home/rmpd/rmpd_client/
+WorkingDirectory=/var/lib/rmpd/
 Restart=always
+
 
 [Install]
 WantedBy=multi-user.target
