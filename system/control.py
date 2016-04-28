@@ -26,13 +26,31 @@ class Control(object):
             sign = '+'
         posix_gmt_tz = 'Etc/GMT{sign}{value}'.format(sign=sign, value=int(value))
         cli = "sudo sh -c 'echo \"{gmt_tz}\" > /etc/timezone'".format(gmt_tz=posix_gmt_tz)
-        (r, o, e) = shell.execute_shell(cli)
+        try:
+            self.remount_rootfs()
+            (r, o, e) = shell.execute_shell(cli)
+            if r != 0:
+                log.error('error setting timezone: {e}\n{o}'.format(e=e, o=o))
+                return False
+            (r, o, e) = shell.execute("sudo dpkg-reconfigure -f noninteractive tzdata")
+            if r != 0:
+                log.error('error changing timezone: {e}\n{o}'.format(e=e, o=o))
+                return False
+            log.debug('change timezone result: {r}\n{o}\n{e}'.format(r=r, o=o, e=e))
+            return True
+        finally:
+            self.remount_rootfs(False)
+
+    def is_rootfs_readonly(self):
+        (r, o, e) = shell.execute("awk '$4~/(^|,)ro($|,)/' /proc/mounts")
+        return len(o) > 0
+
+    def remount_rootfs(self, rw=True):
+        if not rw and self.is_rootfs_readonly():
+            return True
+        if rw and not self.is_rootfs_readonly():
+            return True
+        (r, o, e) = shell.execute("sudo mount -o remount,{mode} /".format(mode=('rw' if rw else 'ro')))
         if r != 0:
-            log.error('error setting timezone: {e}\n{o}'.format(e=e, o=o))
-            return False
-        (r, o, e) = shell.execute("sudo dpkg-reconfigure -f noninteractive tzdata")
-        if r != 0:
-            log.error('error changing timezone: {e}\n{o}'.format(e=e, o=o))
-            return False
-        log.debug('change timezone result: {r}\n{o}\n{e}'.format(r=r, o=o, e=e))
-        return True
+            log.error('fs remount failed: {e}\n{o}'.format(e=e, o=o))
+        return r == 0

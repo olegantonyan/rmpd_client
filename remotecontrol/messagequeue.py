@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import os
 
 import utils.dbwrapper as dbwrapper
 import utils.datetime as datetime
-import utils.config as config
 
 log = logging.getLogger(__name__)
 
 
 class MessageQueue(dbwrapper.DbWrapper):
     def __init__(self):
-        db_path = config.Config().message_queue()
+        db_path = os.path.join(os.getcwd(), 'message_queue.db3')
         dbwrapper.DbWrapper.__init__(self, db_path)
 
     def enqueue(self, data):

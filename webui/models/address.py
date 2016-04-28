@@ -8,6 +8,7 @@ import webui.models.debinterface.constants
 import webui.models.debinterface.interfaces
 import hardware
 import system.systeminfo
+import system.control
 
 log = logging.getLogger(__name__)
 
@@ -58,6 +59,7 @@ class Address(object):
             self._error = "Not changed"
             return True
         try:
+            system.control.Control().remount_rootfs()
             for i in self._all_ifaces.adapters:
                 if self._iface == i.ifAttributes.get('name', ''):
                     if self._iface_config['source'] not in ['dhcp', 'static']:
@@ -91,6 +93,8 @@ class Address(object):
             self._error = "Error saving IP addr: " + str(e)
             log.exception("error saving ip addr")
             return False
+        finally:
+            system.control.Control().remount_rootfs(False)
 
     def error(self):
         return self._error
