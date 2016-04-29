@@ -1,0 +1,8 @@
+[Unit]
+Description=run logrotate on boot
+
+[Service]
+ExecStart=/usr/sbin/logrotate -f /etc/logrotate.conf
+
+[Install]
+WantedBy=multi-user.target
