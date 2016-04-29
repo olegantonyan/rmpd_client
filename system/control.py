@@ -42,13 +42,16 @@ class Control(object):
             self.remount_rootfs(False)
 
     def is_rootfs_readonly(self):
-        (r, o, e) = shell.execute("awk '$4~/(^|,)ro($|,)/' /proc/mounts")
+        (r, o, e) = shell.execute_shell('mount | grep "on / type ext4 (ro,"')
         return len(o) > 0
 
     def remount_rootfs(self, rw=True):
+        log.debug('remount rootfs')
         if not rw and self.is_rootfs_readonly():
+            log.debug('rootfs is already read-only')
             return True
         if rw and not self.is_rootfs_readonly():
+            log.debug('rootfs is already read-write')
             return True
         (r, o, e) = shell.execute("sudo mount -o remount,{mode} /".format(mode=('rw' if rw else 'ro')))
         if r != 0:
