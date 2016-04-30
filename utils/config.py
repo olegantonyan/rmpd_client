@@ -2,7 +2,7 @@
 
 import configparser
 import codecs
-import os
+import system.control
 
 import utils.singleton as singleton
 
@@ -74,9 +74,13 @@ class Config(object, metaclass=singleton.Singleton):
 
     @_guard_initialization
     def _save_value(self, section, option, value):
-        self._parser.set(section, option, str(value))
-        with codecs.open(self._filename, 'w', encoding='utf-8') as f:
-            self._parser.write(f)
+        try:
+            system.control.Control().remount_rootfs()
+            self._parser.set(section, option, str(value))
+            with codecs.open(self._filename, 'w', encoding='utf-8') as f:
+                self._parser.write(f)
+        finally:
+            system.control.Control().remount_rootfs(False)
 
     def _parse(self):
         self._parser = configparser.ConfigParser()
