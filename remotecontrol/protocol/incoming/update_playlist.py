@@ -28,7 +28,7 @@ class UpdatePlaylist(base_playlist_command.BasePlaylistCommand):
         if self.__class__.busy():
             log.warning("trying to start update worker while another one is active")
             return
-        media_items = self._legacy_media_items()
+        media_items = self._media_items()
         self._sender('update_playlist').call(files=[os.path.basename(i) for i in media_items])
         status.Status().downloading = True
         return self._start_worker(media_items)
@@ -52,9 +52,6 @@ class UpdatePlaylist(base_playlist_command.BasePlaylistCommand):
         self.__class__.lock.acquire()
         self.__class__.worker = None
         self.__class__.lock.release()
-
-    def _legacy_media_items(self):
-        return self._data['items']
 
     def _media_items(self):
         return [i['url'] for i in self._data['playlist']['items']]
