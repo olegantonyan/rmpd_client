@@ -1,0 +1,5 @@
+#!/bin/bash
+
+/bin/ping -c1 time.nist.gov && /usr/sbin/ntpdate -s time.nist.gov
+
+exit 0

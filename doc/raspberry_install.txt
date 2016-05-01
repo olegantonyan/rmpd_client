@@ -55,6 +55,8 @@ Fsck
 
 NTP
   # tinker panic 0 #/etc/ntp.conf
+  echo "* * * * * root /home/rmpd/rmpd_client/tools/timesync" >> /etc/crontab
+  systemctl disable ntp
   
 Install rmpd
   mkdir /var/lib/rmpd
