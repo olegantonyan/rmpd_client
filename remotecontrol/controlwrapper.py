@@ -14,6 +14,7 @@ log = logging.getLogger(__name__)
 
 class ControlWrapper(object):
     def __init__(self, server_url, login, password, receive_protocol_callback):
+        self._reset_log_errors_count()
         self._proto = httpclient.HttpClient(server_url, login, password, self.onreceive)
         self._receive_protocol_callback = receive_protocol_callback
         self._queue = messagequeue.MessageQueue()
@@ -30,9 +31,10 @@ class ControlWrapper(object):
             try:
                 self._proto.send(msg, seq)
                 self._set_online_status(True)
+                self._reset_log_errors_count()
                 return True
             except:
-                log.error("error sending message: '{s}'".format(s=str(msg)))
+                self._log_error(msg)
                 log.debug(traceback.format_exc())
                 self._set_online_status(False)
                 return False
@@ -52,3 +54,14 @@ class ControlWrapper(object):
 
     def _set_online_status(self, stat):
         status.Status().online = stat
+
+    def _log_error(self, msg):
+        if self._log_errors_count >= 5:  # optimize log write operations when offline
+            return
+        log.error("error sending message: '{s}'".format(s=str(msg)))
+        self._log_errors_count += 1
+        if self._log_errors_count >= 5:
+            log.warn("subsequent send errors omitted until appearing online")
+
+    def _reset_log_errors_count(self):
+        self._log_errors_count = 0
