@@ -41,16 +41,29 @@ class BaseWorker(threading.Thread):
         self._playlist_fullpath = loader.Loader().filepath()
         self._error_message = 'please set error message in subclass'
         self._success_message = 'please set success message in subclass'
+        self._terminate = False
 
     def run(self):
         try:
             self._run()
             log.info(self._success_message)
             self._onfinish(True, self._sequence, self._success_message)
+        except WorkerTerminated:
+            log.warn('terminated')
         except:
             log.error("{msg}\n{ex}".format(msg=self._error_message, ex=traceback.format_exc()))
             self._onfinish(False, self._sequence, self._error_message)
 
+    def terminate(self):
+        self._terminate = True
+
+    def _check_terminate(self):
+        if self._terminate:
+            raise WorkerTerminated
+
     def _run(self):
         raise NotImplementedError('override this method in subclass')
 
+
+class WorkerTerminated(RuntimeError):
+    pass

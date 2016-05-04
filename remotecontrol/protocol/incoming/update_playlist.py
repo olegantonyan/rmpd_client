@@ -26,8 +26,9 @@ class UpdatePlaylist(base_playlist_command.BasePlaylistCommand):
 
     def call(self):
         if self.__class__.busy():
-            log.warning("trying to start update worker while another one is active")
-            return
+            log.warning("trying to start update worker while another one is active, terminating")
+            self._terminate_worker()
+            status.Status().downloading = False
         media_items = self._media_items()
         self._sender('update_playlist').call(files=[os.path.basename(i) for i in media_items])
         status.Status().downloading = True
@@ -42,9 +43,9 @@ class UpdatePlaylist(base_playlist_command.BasePlaylistCommand):
             playercontroller.PlayerController().start_playlist()
         self._send_ack(ok, sequence, message)
 
-    def _start_worker(self, legacy_items):
+    def _start_worker(self, items):
         self.__class__.lock.acquire()
-        self.__class__.worker = Worker(legacy_items, self._sequence, self._onfinish)
+        self.__class__.worker = Worker(items, self._sequence, self._onfinish)
         self.__class__.lock.release()
         return self.__class__.worker.start()
 
@@ -52,6 +53,10 @@ class UpdatePlaylist(base_playlist_command.BasePlaylistCommand):
         self.__class__.lock.acquire()
         self.__class__.worker = None
         self.__class__.lock.release()
+
+    def _terminate_worker(self):
+        self.__class__.worker.terminate()
+        self._release_worker()
 
     def _media_items(self):
         return [i['url'] for i in self._data['playlist']['items']]
@@ -67,6 +72,7 @@ class Worker(base_playlist_command.BaseWorker):
     def _run(self):
         for i in self._media_items:
             self._download_file(i)
+            self._check_terminate()
         self._utilize_nonplaylist_files(self._media_items, files.mediafiles_path())
 
     def _download_file(self, file):

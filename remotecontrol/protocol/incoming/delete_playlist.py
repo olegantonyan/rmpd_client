@@ -23,8 +23,8 @@ class DeletePlaylist(base_playlist_command.BasePlaylistCommand):
 
     def call(self):
         if self.__class__.busy():
-            log.warning("trying to start delete worker while another one is active")
-            return
+            log.warning("trying to start delete worker while another one is active, terminating")
+            self._terminate_worker()
         return self._start_worker()
 
     def _onfinish(self, ok, sequence, message):
@@ -45,6 +45,10 @@ class DeletePlaylist(base_playlist_command.BasePlaylistCommand):
         self.__class__.worker = None
         self.__class__.lock.release()
 
+    def _terminate_worker(self):
+        self.__class__.worker.terminate()
+        self._release_worker()
+
 
 class Worker(base_playlist_command.BaseWorker):
     def __init__(self, sequence, onfinish_callback):
@@ -55,6 +59,7 @@ class Worker(base_playlist_command.BaseWorker):
     def _run(self):
         for f in loader.Loader(self._playlist_fullpath).list_all_files():
             self._remove_file(files.full_file_localpath(f))
+            self._check_terminate()
         self._remove_file(self._playlist_fullpath)
 
     def _remove_file(self, file):

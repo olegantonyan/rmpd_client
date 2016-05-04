@@ -44,10 +44,9 @@ class Watcher(object, metaclass=singleton.Singleton):
 
     def stop(self):
         current_expected_state = self._get_expected_state()
-        if current_expected_state[0] != 'stopped':
-            self._guard.execute('stop')
-            self._set_expected_state('stopped')
-            self._onstop(current_expected_state[1].get('filepath'))
+        self._guard.execute('stop')
+        self._set_expected_state('stopped')
+        self._onstop(current_expected_state[1].get('filepath'))
 
     def time_pos(self):
         return self._guard.execute('time_pos')
