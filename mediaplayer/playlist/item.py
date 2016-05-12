@@ -6,6 +6,18 @@ import utils.files as files
 import utils.datetime
 
 
+def parse_time(arg):
+    if arg is None:
+        return None
+    return datetime.datetime.strptime(arg, '%H:%M:%S').time()
+
+
+def parse_date(arg):
+    if arg is None:
+        return None
+    return datetime.datetime.strptime(arg, '%d.%m.%Y').date()
+
+
 class Item(object):
     def __init__(self, i):
         self._d = i
@@ -28,19 +40,19 @@ class Item(object):
 
     @property
     def begin_time(self):
-        return self._parse_time(self._d['begin_time'])
+        return parse_time(self._d['begin_time'])
 
     @property
     def end_time(self):
-        return self._parse_time(self._d['end_time'])
+        return parse_time(self._d['end_time'])
 
     @property
     def begin_date(self):
-        return self._parse_date(self._d['begin_date'])
+        return parse_date(self._d['begin_date'])
 
     @property
     def end_date(self):
-        return self._parse_date(self._d['end_date'])
+        return parse_date(self._d['end_date'])
 
     @property
     def playbacks_per_day(self):
@@ -63,7 +75,7 @@ class Item(object):
         now = utils.datetime.time_to_seconds(thetime)
         low = now - 2
         high = low + 2
-        for i in self.schedule:
+        for i in self.schedule_at(thetime):
             if low <= utils.datetime.time_to_seconds(i) <= high:
                 return True
         return False
@@ -73,18 +85,14 @@ class Item(object):
         return files.full_file_localpath(self.filename)
 
     @property
-    def schedule(self):
-        return [self._parse_time(i) for i in self._d['schedule']]
+    def schedule_intervals(self):
+        return [ScheduleInterval(i) for i in self._d['schedule_intervals']]
 
-    def _parse_time(self, arg):
-        if arg is None:
-            return None
-        return datetime.datetime.strptime(arg, '%H:%M:%S').time()
-
-    def _parse_date(self, arg):
-        if arg is None:
-            return None
-        return datetime.datetime.strptime(arg, '%d.%m.%Y').date()
+    def schedule_at(self, date):
+        for i in self.schedule_intervals:
+            if i.date_interval[0] <= date.date() <= i.date_interval[1]:
+                return i.schedule
+        return []
 
     def _fit_time(self, thetime):
         if self.begin_time is None or self.end_time is None:
@@ -101,3 +109,16 @@ class Item(object):
 
     def __repr__(self):
         return self.__str__()
+
+
+class ScheduleInterval(object):
+    def __init__(self, raw_dict):
+        self._raw_dict = raw_dict
+
+    @property
+    def date_interval(self):
+        return parse_date(self._raw_dict['date_interval']['begin']), parse_date(self._raw_dict['date_interval']['end'])
+
+    @property
+    def schedule(self):
+        return [parse_time(i) for i in self._raw_dict['schedule']]
