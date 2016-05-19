@@ -73,8 +73,8 @@ class Item(object):
         if not self.is_advertising:
             return False
         now = utils.datetime.time_to_seconds(thetime)
-        low = now - 2
-        high = low + 2
+        low = now - 1
+        high = low + 1
         for i in self.schedule_at(thetime):
             if low <= utils.datetime.time_to_seconds(i) <= high:
                 return True
