@@ -35,8 +35,7 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
     def onfinished(self, **kwargs):
         log.info("track finished {f}".format(f=kwargs.get('filepath', '')))
         current_track = self._get_now_playing()
-        if self._playlist is not None:
-            self._playlist.onfinished(current_track)
+        self._notify_playlist_on_track_end(current_track)
         self._set_now_playing(None)
         self._schedule()
 
@@ -57,6 +56,10 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
     def _get_now_playing(self):
         return self._now_playing
 
+    def _notify_playlist_on_track_end(self, track):
+        if self._playlist is not None:
+            self._playlist.onfinished(track)
+
     def _schedule(self, arg=None):
         self._rx.put(arg)
 
@@ -75,6 +78,7 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
         next_advertising = self._playlist.next_advertising()
         if next_advertising is not None:
             if current_track is None or current_track.is_background:
+                self._notify_playlist_on_track_end(current_track)
                 self._play(next_advertising)
         else:
             next_background = self._playlist.next_background()
