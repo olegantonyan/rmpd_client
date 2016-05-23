@@ -42,7 +42,7 @@ class OMXPlayer(object):
         self.stop()
 
     def isstopped(self):
-        for i in range(3):
+        for i in range(5):
             try:
                 return not self._process or not self._process.isalive()
             except OSError:

@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 
 
 class Watcher(object, metaclass=singleton.Singleton):
-    lock = threading.Lock()
+    lock = threading.RLock()
 
     def __init__(self):
         self._callbacks = None
@@ -23,6 +23,7 @@ class Watcher(object, metaclass=singleton.Singleton):
         self._stop_flag = False
         threads.run_in_thread(self._check_state)
 
+    @threads.synchronized(lock)
     def play(self, filepath):
         if filepath is None:
             return False
@@ -42,12 +43,13 @@ class Watcher(object, metaclass=singleton.Singleton):
             self._run_callback('onfinished', filepath=filepath)
             return False
 
+    @threads.synchronized(lock)
     def stop(self):
         current_expected_state = self._get_expected_state()
-        self._guard.execute('stop')
-        self._set_expected_state('stopped')
         if current_expected_state[1].get('filepath'):
             self._onstop(current_expected_state[1].get('filepath'))
+        self._guard.execute('stop')
+        self._set_expected_state('stopped')
 
     def time_pos(self):
         return self._guard.execute('time_pos')
@@ -79,6 +81,7 @@ class Watcher(object, metaclass=singleton.Singleton):
     def _check_state(self):
         while not self._stop_flag:
             try:
+                self.__class__.lock.acquire()
                 expected_state = self._get_expected_state()
                 actual_state = self._guard.execute('state')
                 if expected_state[0] == 'playing':
@@ -90,6 +93,8 @@ class Watcher(object, metaclass=singleton.Singleton):
                         self._run_callback('onfinished', filepath=filepath)
             except:
                 log.exception('error checking player state')
+            finally:
+                self.__class__.lock.release()
             time.sleep(0.7)
 
     def _filename_by_path(self, filepath):

@@ -29,7 +29,7 @@ class MPlayer(object):
 
     def play(self, filename):
         self._player.loadfile(filename)
-        self.fullscreen(True)
+        # self.fullscreen(True)
 
     def pause(self):
         self._player.pause()
