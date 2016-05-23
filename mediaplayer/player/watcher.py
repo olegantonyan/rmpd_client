@@ -31,7 +31,9 @@ class Watcher(object, metaclass=singleton.Singleton):
         current_expected_state = self._get_expected_state()
         if current_expected_state[0] == 'playing':
             self._guard.execute('stop')
-            self._onstop(current_expected_state[1]['filepath'])
+            current_filepath = current_expected_state[1]['filepath']
+            # self._run_callback('onfinished', filepath=current_filepath)
+            self._onstop(current_filepath)
 
         if self._guard.execute('play', filepath=filepath):
             self._onplay(filepath)
