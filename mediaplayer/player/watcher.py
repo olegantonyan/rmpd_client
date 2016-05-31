@@ -81,7 +81,6 @@ class Watcher(object, metaclass=singleton.Singleton):
     def _check_state(self):
         while not self._stop_flag:
             try:
-                self.__class__.lock.acquire()
                 expected_state = self._get_expected_state()
                 actual_state = self._guard.execute('state')
                 if expected_state[0] == 'playing':
@@ -93,8 +92,6 @@ class Watcher(object, metaclass=singleton.Singleton):
                         self._run_callback('onfinished', filepath=filepath)
             except:
                 log.exception('error checking player state')
-            finally:
-                self.__class__.lock.release()
             time.sleep(0.7)
 
     def _filename_by_path(self, filepath):
@@ -115,6 +112,7 @@ class Watcher(object, metaclass=singleton.Singleton):
         log.debug("on error: " + filename + " : " + message)
         proto.ProtocolDispatcher().send('playback_error', filename=filename, message=message)
 
+    @threads.synchronized(lock)
     def _run_callback(self, name, **kwargs):
         if self._callbacks is None:
             return
