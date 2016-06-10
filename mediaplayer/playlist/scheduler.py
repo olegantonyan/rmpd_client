@@ -22,6 +22,7 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
         self._rx = queue.Queue()
         self._player.set_callbacks(onfinished=self.onfinished)
         self._stop_flag = False
+        self._preempted_item = None
         utils.threads.run_in_thread(self._loop)
 
     @utils.threads.synchronized(lock)
@@ -33,7 +34,9 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
 
     @utils.threads.synchronized(lock)
     def onfinished(self, **kwargs):
-        log.info("track finished {f}".format(f=kwargs.get('filepath', '')))
+        finished_track = kwargs.get('item')
+        if finished_track is not None:
+            log.info("track finished {f}".format(f=finished_track.filepath))
         current_track = self._get_now_playing()
         self._notify_playlist_on_track_end(current_track)
         self._set_now_playing(None)
@@ -46,7 +49,15 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
             self._player.stop()
             return False
         self._set_now_playing(item)
-        self._player.play(item.filepath)
+        if self._player.isplaying():
+            self._player.suspend()
+            self._preempt(self._get_now_playing(), self._player.time_pos())  # assert self._get_now_playing() == self._player._get_expected_state()[1]
+        return self._player.play(item)
+
+    @utils.threads.synchronized(lock)
+    def _resume(self, item, position):
+        self._set_now_playing(item)
+        return self._player.resume(item, position)
 
     @utils.threads.synchronized(lock)
     def _set_now_playing(self, item):
@@ -78,13 +89,29 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
         next_advertising = self._playlist.next_advertising()
         if next_advertising is not None:
             if current_track is None or current_track.is_background:
-                self._notify_playlist_on_track_end(current_track)
+                if current_track is None:
+                    self._notify_playlist_on_track_end(current_track)
                 self._play(next_advertising)
         else:
-            next_background = self._playlist.next_background()
-            if next_background is not None:
+            preempted = self._preempted()
+            if preempted:
                 if current_track is None:
-                    self._play(next_background)
+                    self._resume(preempted[0], preempted[1])
+                    self._reset_preempted()
+            else:
+                next_background = self._playlist.next_background()
+                if next_background is not None:
+                    if current_track is None:
+                        self._play(next_background)
+
+    def _preempt(self, item, time_pos):
+        self._preempted_item = (item, time_pos)
+
+    def _preempted(self):
+        return self._preempted_item
+
+    def _reset_preempted(self):
+        self._preempted_item = None
 
     def __del__(self):
         self._stop_flag = True

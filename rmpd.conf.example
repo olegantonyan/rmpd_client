@@ -10,7 +10,7 @@ verbose = yes
 [player]
 mplayer_executable = mplayer
 omxplayer_executable = omxplayer
-omxplayer_arguments = -o both
+omxplayer_arguments = -o both --blank --no-osd
 mediafiles_path = /var/lib/rmpd/mediafiles
 
 [webui]

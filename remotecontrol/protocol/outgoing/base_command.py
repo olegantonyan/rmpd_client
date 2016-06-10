@@ -24,3 +24,6 @@ class BaseCommand(object):
 
     def _type(self):
         return support.camelcase_to_underscore(self.__class__.__name__)
+
+    def _track_message(self, item):
+        return {'id': item.id, 'filename': item.filename}

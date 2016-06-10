@@ -9,10 +9,10 @@ log = logging.getLogger(__name__)
 
 class TrackEnd(base_command.BaseCommand):
     def call(self, **kwargs):
-        filename = kwargs.get('filename')
-        if filename is None:
+        item = kwargs.get('item')
+        if item is None:
             log.error("track is none")
             return
-        self._message = filename
+        self._message = self._track_message(item)
         return super().call()
 

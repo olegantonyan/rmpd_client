@@ -22,18 +22,19 @@ class OMXPlayer(object):
         self._process = None
         self._position_thread = None
 
-    def play(self, mediafile):
+    def play(self, mediafile, start_pos=0):
         if not self.isstopped():
             self.stop()
         self._fileinfo = self._get_fileinfo(mediafile)
         # New omxplayer builds will need this flag to report status
-        cmd = "{ep} -s {a} {f}".format(ep=self.exec_path, a=self.args, f=mediafile)
+        arg = "{a} --pos {p}".format(p=self._seconds_to_hhmmss(start_pos), a=self.args)
+        cmd = "{ep} -s {a} {f}".format(ep=self.exec_path, a=arg, f=mediafile)
         self._process = spawn(cmd)
         self._position_thread = Thread(target=self._get_position)
         self._position_thread.start()
         self._filename = mediafile
         while not self._process.isalive():
-            sleep(0.15)
+            sleep(0.05)
 
     def __del__(self):
         self.stop()
@@ -133,3 +134,10 @@ class OMXPlayer(object):
         process = Popen(popen_cli, stdout=PIPE, stderr=STDOUT, cwd=getcwd())
         out, err = process.communicate()
         return process.returncode, out.decode('utf-8')
+
+    def _seconds_to_hhmmss(self, secs):
+        h = int(secs / 3600)
+        rem = (secs % 3600)
+        m = int(rem / 60)
+        s = int(rem % 60)
+        return "{hours:02d}:{minutes:02d}:{seconds:02d}".format(hours=h, minutes=m, seconds=s)
