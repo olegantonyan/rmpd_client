@@ -27,9 +27,10 @@ class MPlayer(object):
     def play_list(self, playlist):
         self._player.loadlist(playlist)
 
-    def play(self, filename):
+    def play(self, filename, start_position=0):
         self._player.loadfile(filename)
-        # self.fullscreen(True)
+        if start_position != 0:
+            self.seek(int(start_position), self.SEEK_MODE_SECONDS_ABSOLUTE)
 
     def pause(self):
         self._player.pause()

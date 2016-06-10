@@ -44,8 +44,8 @@ class PlayerWrapper(object):
             return True
         return False
 
-    def play(self, filename):
-        return self._player(filename).play(filename)
+    def play(self, filename, start_position=0):
+        return self._player(filename).play(filename, start_position)
 
     def pause(self):
         return self._player().pause()

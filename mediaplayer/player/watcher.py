@@ -42,20 +42,16 @@ class Watcher(object, metaclass=singleton.Singleton):
             return False
 
     @threads.synchronized(lock)
-    def suspend(self):
-        current_expected_state = self._get_expected_state()
-        self._guard.execute('stop')
-        item = current_expected_state[1]['item']
-        self._onsuspend(item)
-        return item
-
-    @threads.synchronized(lock)
     def resume(self, item, position_seconds):
         if item is None or position_seconds is None:
             return False
 
+        if self.isplaying():
+            log.error('cannot resume from playing state')
+            return False
+
         if self._guard.execute('play', filepath=item.filepath, start_position=position_seconds):
-            self._onresume(item)
+            self._onresume(item, position_seconds)
             self._set_expected_state('playing', item=item)
             return True
         else:
@@ -63,6 +59,16 @@ class Watcher(object, metaclass=singleton.Singleton):
             log.error('error resuming track {f}'.format(f=item.filepath))
             self._run_callback('onerror', item=item)
             return False
+
+    @threads.synchronized(lock)
+    def suspend(self):
+        current_expected_state = self._get_expected_state()
+        current_time_pos = self.time_pos()
+        self._guard.execute('stop')
+        item = current_expected_state[1]['item']
+        self._onsuspend(item, current_time_pos)
+        self._set_expected_state('stopped')
+        return item
 
     @threads.synchronized(lock)
     def isplaying(self):
@@ -134,11 +140,11 @@ class Watcher(object, metaclass=singleton.Singleton):
         log.debug("on error: " + item.filename + " : " + message)
         proto.ProtocolDispatcher().send('playback_error', item=item, message=message)
 
-    def _onsuspend(self, item):
-        log.debug("on suspend: " + item.filename)
+    def _onsuspend(self, item, position_seconds):
+        log.info("on suspend: " + item.filename + " (at {} seconds)".format(position_seconds))
 
-    def _onresume(self, item):
-        log.debug("on resume: " + item.filename)
+    def _onresume(self, item, position_seconds):
+        log.info("on resume: " + item.filename + " (from {} seconds)".format(position_seconds))
 
     @threads.synchronized(lock)
     def _run_callback(self, name, **kwargs):

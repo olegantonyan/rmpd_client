@@ -29,6 +29,8 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
     def set_playlist(self, playlist):
         log.info("start playlist")
         self._playlist = playlist
+        if self._player.isplaying():
+            self._play(None)
         self._play(self._playlist.current_background())
         self._schedule()
 
@@ -36,7 +38,7 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
     def onfinished(self, **kwargs):
         finished_track = kwargs.get('item')
         if finished_track is not None:
-            log.info("track finished {f}".format(f=finished_track.filepath))
+            log.info("track finished {f}".format(f=finished_track.filename))
         current_track = self._get_now_playing()
         self._notify_playlist_on_track_end(current_track)
         self._set_now_playing(None)
@@ -48,10 +50,10 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
             self._set_now_playing(None)
             self._player.stop()
             return False
-        self._set_now_playing(item)
         if self._player.isplaying():
-            self._player.suspend()
             self._preempt(self._get_now_playing(), self._player.time_pos())  # assert self._get_now_playing() == self._player._get_expected_state()[1]
+            self._player.suspend()
+        self._set_now_playing(item)
         return self._player.play(item)
 
     @utils.threads.synchronized(lock)
