@@ -98,6 +98,7 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
             preempted = self._preempted()
             if preempted:
                 if current_track is None:
+                    log.info("track resumed '{}' at {}".format(preempted[0].filename, preempted[1]))
                     self._resume(preempted[0], preempted[1])
                     self._reset_preempted()
             else:
@@ -107,6 +108,7 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
                         self._play(next_background)
 
     def _preempt(self, item, time_pos):
+        log.info("track suspended '{}' at {}".format(item.filename, time_pos))
         self._preempted_item = (item, time_pos)
 
     def _preempted(self):

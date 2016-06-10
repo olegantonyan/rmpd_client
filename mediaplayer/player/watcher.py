@@ -141,10 +141,12 @@ class Watcher(object, metaclass=singleton.Singleton):
         proto.ProtocolDispatcher().send('playback_error', item=item, message=message)
 
     def _onsuspend(self, item, position_seconds):
-        log.info("on suspend: " + item.filename + " (at {} seconds)".format(position_seconds))
+        log.debug("on suspend: " + item.filename + " (at {} seconds)".format(position_seconds))
+        proto.ProtocolDispatcher().send('track_suspend', item=item, position_seconds=position_seconds)
 
     def _onresume(self, item, position_seconds):
-        log.info("on resume: " + item.filename + " (from {} seconds)".format(position_seconds))
+        log.debug("on resume: " + item.filename + " (from {} seconds)".format(position_seconds))
+        proto.ProtocolDispatcher().send('track_resume', item=item, position_seconds=position_seconds)
 
     @threads.synchronized(lock)
     def _run_callback(self, name, **kwargs):
