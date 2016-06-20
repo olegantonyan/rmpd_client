@@ -1,8 +1,8 @@
     power (white/red) - xx - 5V
-                        ox - 5V
-                        ox - GND
+                  SDA - ox - 5V
+                  SCL - ox - GND
                         oo
-                        oo
+                  GND - oo
                         oo
                         oo
    22 network (green) - xo

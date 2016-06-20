@@ -136,6 +136,7 @@ class OMXPlayer(object):
         return process.returncode, out.decode('utf-8')
 
     def _seconds_to_hhmmss(self, secs):
+        secs = int(secs)
         h = int(secs / 3600)
         rem = (secs % 3600)
         m = int(rem / 60)
