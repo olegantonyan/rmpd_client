@@ -57,3 +57,26 @@ class Control(object):
         if r != 0:
             log.error('fs remount failed: {e}\n{o}'.format(e=e, o=o))
         return r == 0
+
+    def is_hwclock_present(self):
+        (r, o, e) = shell.execute("sudo hwclock -r")
+        return r == 0
+
+    def set_time(self, tm):
+        log.debug("set the time to {}".format(tm))
+        (r, o, e) = shell.execute("sudo date --set='{}'".format(tm))
+        if r != 0:
+            log.error("error setting the time: {e}\n{o}".format(e=e, o=o))
+        return r == 0
+
+    def set_hwclock_to_system_time(self):
+        log.debug("setting hwclock to system time")
+        if not self.is_hwclock_present():
+            return False
+        self.remount_rootfs(True)
+        (r, o, e) = shell.execute("sudo hwclock -w")
+        self.remount_rootfs(False)
+        if r != 0:
+            log.error("error setting hardware clock to system time: {e}\n{o}".format(e=e, o=o))
+        return r == 0
+

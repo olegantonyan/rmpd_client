@@ -15,3 +15,6 @@ mediafiles_path = /var/lib/rmpd/mediafiles
 
 [webui]
 password = admin
+
+[clockd]
+enable = yes

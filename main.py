@@ -17,6 +17,7 @@ import utils.threads as threads
 import webui.webui as webui
 import hardware
 import system.watchdog as watchdog
+import clockd.clockd as clockd
 
 
 def signal_handler(signum, frame):
@@ -54,6 +55,8 @@ def bootstrap(configfile, console_app=False, verbose_log=False):
 
 
 def app():
+    if config.Config().enable_clockd:
+        threads.run_in_thread(clockd.Clockd().run)
     player = playercontroller.PlayerController()
     player.start_playlist()
     proto = protocoldispatcher.ProtocolDispatcher()

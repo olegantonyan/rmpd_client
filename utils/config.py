@@ -62,8 +62,9 @@ class Config(object, metaclass=singleton.Singleton):
 
     @_guard_initialization
     def verbose_logging(self):
-        return self._verbose == "yes" or self._verbose == "y" or self._verbose == "true"
+        return self._boolean_attr(self._verbose)
 
+    @_guard_initialization
     def webui_password(self):
         return self._webui_password
 
@@ -71,6 +72,10 @@ class Config(object, metaclass=singleton.Singleton):
     def set_webui_password(self, value):
         self._save_value('webui', 'password', value)
         self._webui_password = value
+
+    @_guard_initialization
+    def enable_clockd(self):
+        return self._boolean_attr(self._enable_clockd)
 
     @_guard_initialization
     def _save_value(self, section, option, value):
@@ -81,6 +86,9 @@ class Config(object, metaclass=singleton.Singleton):
                 self._parser.write(f)
         finally:
             system.control.Control().remount_rootfs(False)
+
+    def _boolean_attr(self, attr):
+        return attr == 'yes' or attr == 'y' or attr == 'true'
 
     def _parse(self):
         self._parser = configparser.ConfigParser()
@@ -104,4 +112,7 @@ class Config(object, metaclass=singleton.Singleton):
 
         section = 'webui'
         self._webui_password = self._parser.get(section, 'password')
+
+        section = 'clockd'
+        self._enable_clockd = self._parser.get(section, 'enable', fallback='no')
 

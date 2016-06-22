@@ -6,3 +6,4 @@ pycrypto==2.6.1
 pytz==2015.7
 requests==2.8.1
 tzlocal==1.2
+ntplib==0.3.3
