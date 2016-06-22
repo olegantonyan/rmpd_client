@@ -64,7 +64,7 @@ class Control(object):
 
     def set_time(self, tm):
         log.debug("set the time to {}".format(tm))
-        (r, o, e) = shell.execute("sudo date --set='{}'".format(tm))
+        (r, o, e) = shell.execute_shell('sudo date -s "{}"'.format(tm))
         if r != 0:
             log.error("error setting the time: {e}\n{o}".format(e=e, o=o))
         return r == 0
