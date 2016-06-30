@@ -30,7 +30,7 @@ class Clockd(object):
                 self._once_syncronized = True
 
             if self._once_syncronized:
-                time.sleep(60)
+                time.sleep(3600)
             else:
                 time.sleep(2)
 
