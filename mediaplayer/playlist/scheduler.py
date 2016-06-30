@@ -51,13 +51,13 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
             self._preempt(self._get_now_playing(), self._player.time_pos())  # assert self._get_now_playing() == self._player._get_expected_state()[1]
             self._player.suspend()
         ok = self._player.play(item)
-        if ok:
-            self._set_now_playing(item)
+        self._set_now_playing(item if ok else None)
         return ok
 
     def _resume(self, item, position):
-        self._set_now_playing(item)
-        return self._player.resume(item, position)
+        ok = self._player.resume(item, position)
+        self._set_now_playing(item if ok else None)
+        return ok
 
     @utils.threads.synchronized(lock)
     def _set_now_playing(self, item):
