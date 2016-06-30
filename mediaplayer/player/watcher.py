@@ -97,7 +97,6 @@ class Watcher(object, metaclass=singleton.Singleton):
     def quit(self):
         return self._guard.execute('quit')
 
-    @threads.synchronized(lock)
     def set_callbacks(self, **kwargs):
         self._callbacks = kwargs
 
@@ -112,6 +111,7 @@ class Watcher(object, metaclass=singleton.Singleton):
     def _check_state(self):
         while not self._stop_flag:
             try:
+                self.lock.acquire()
                 expected_state = self._get_expected_state()
                 actual_state = self._guard.execute('state')
                 if expected_state[0] == 'playing':
@@ -123,6 +123,8 @@ class Watcher(object, metaclass=singleton.Singleton):
                         self._run_callback('onfinished', item=item)
             except:
                 log.exception('error checking player state')
+            finally:
+                self.lock.release()
             time.sleep(0.5)
 
     def _filename_by_path(self, filepath):
@@ -148,7 +150,6 @@ class Watcher(object, metaclass=singleton.Singleton):
         log.debug("on resume: " + item.filename + " (from {} seconds)".format(position_seconds))
         proto.ProtocolDispatcher().send('track_resume', item=item, position_seconds=position_seconds)
 
-    @threads.synchronized(lock)
     def _run_callback(self, name, **kwargs):
         if self._callbacks is None:
             return
