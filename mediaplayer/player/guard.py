@@ -16,8 +16,8 @@ log = logging.getLogger(__name__)
 class Guard(object, metaclass=singleton.Singleton):
     def __init__(self):
         self._player = None
-        self._rx = queue.Queue()
-        self._tx = queue.Queue()
+        self._rx = queue.Queue(maxsize=1)
+        self._tx = queue.Queue(maxsize=1)
         self._stop_flag = False
         threads.run_in_thread(self._serve)
 
