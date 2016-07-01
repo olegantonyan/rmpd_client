@@ -18,6 +18,7 @@ import webui.webui as webui
 import hardware
 import system.watchdog as watchdog
 import clockd.clockd as clockd
+import system.wallpaper as wallpaper
 
 
 def signal_handler(signum, frame):
@@ -61,6 +62,7 @@ def app():
     player.start_playlist()
     proto = protocoldispatcher.ProtocolDispatcher()
     threads.run_in_thread(webui.start, ['0.0.0.0', 8080])
+    wallpaper.Wallpaper().load()
     while True:
         track = player.current_track_name()
         pos = player.current_track_posiotion()

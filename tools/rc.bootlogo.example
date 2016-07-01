@@ -1,5 +1,0 @@
-#!/bin/sh
-
-fbi $(dirname $(readlink -f $0))/slon-ds-image.png --noverbose -T 1 &
-
-exit 0

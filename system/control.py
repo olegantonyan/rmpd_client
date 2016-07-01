@@ -80,3 +80,4 @@ class Control(object):
             log.error("error setting hardware clock to system time: {e}\n{o}".format(e=e, o=o))
         return r == 0
 
+
