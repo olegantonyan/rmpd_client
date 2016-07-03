@@ -5,6 +5,7 @@ import os
 import utils.shell as shell
 import utils.singleton
 import hardware
+import utils.config as config
 
 
 class Wallpaper(object, metaclass=utils.singleton.Singleton):
@@ -39,4 +40,4 @@ class Wallpaper(object, metaclass=utils.singleton.Singleton):
         return os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tools', 'slon-ds-image.png')
 
     def custom_image_path(self):
-        return os.path.join(os.getcwd(), 'wallpaper')
+        return config.Config().wallpaper_path()

@@ -17,3 +17,5 @@ logs/*
 tmp/*
 .idea/
 watchdogfile
+wallpaper
+rmpd-client-*.tar.gz
