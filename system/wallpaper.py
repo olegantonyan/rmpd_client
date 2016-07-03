@@ -14,7 +14,10 @@ class Wallpaper(object, metaclass=utils.singleton.Singleton):
 
     def load(self):
         if os.path.isfile(self.custom_image_path()):
-            return self.show(self.custom_image_path())
+            if self.show(self.custom_image_path()):
+                return True
+            else:
+                return self.show(self.default_image_path())
         else:
             return self.show(self.default_image_path())
 
