@@ -4,6 +4,7 @@ import os
 
 import utils.shell as shell
 import utils.singleton
+import hardware
 
 
 class Wallpaper(object, metaclass=utils.singleton.Singleton):
@@ -11,12 +12,14 @@ class Wallpaper(object, metaclass=utils.singleton.Singleton):
         self._cpid = None
 
     def load(self):
-        if os.path.isfile(self._custom_image_path()):
-            self.show(self._custom_image_path())
+        if os.path.isfile(self.custom_image_path()):
+            return self.show(self.custom_image_path())
         else:
-            self.show(self._default_image_path())
+            return self.show(self.default_image_path())
 
     def show(self, filepath):
+        if hardware.platfrom.__name__ != 'raspberry':
+            return True
         if self._cpid is not None:
             self.hide()
         (r, o, e, p) = shell.execute_child_pid("sudo fbi {} --noverbose -T 1".format(filepath))
@@ -32,8 +35,8 @@ class Wallpaper(object, metaclass=utils.singleton.Singleton):
             self._cpid = None
         return r == 0
 
-    def _default_image_path(self):
+    def default_image_path(self):
         return os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tools', 'slon-ds-image.png')
 
-    def _custom_image_path(self):
-        return os.path.join(os.getcwd(), 'wallpaper.png')
+    def custom_image_path(self):
+        return os.path.join(os.getcwd(), 'wallpaper')

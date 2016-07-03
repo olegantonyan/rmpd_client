@@ -56,13 +56,13 @@ def bootstrap(configfile, console_app=False, verbose_log=False):
 
 
 def app():
-    if config.Config().enable_clockd:
+    wallpaper.Wallpaper().load()
+    if config.Config().enable_clockd():
         threads.run_in_thread(clockd.Clockd().run)
     player = playercontroller.PlayerController()
     player.start_playlist()
     proto = protocoldispatcher.ProtocolDispatcher()
     threads.run_in_thread(webui.start, ['0.0.0.0', 8080])
-    wallpaper.Wallpaper().load()
     while True:
         track = player.current_track_name()
         pos = player.current_track_posiotion()
