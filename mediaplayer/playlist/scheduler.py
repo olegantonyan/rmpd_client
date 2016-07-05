@@ -48,8 +48,11 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
             self._player.stop()
             return False
         if self._player.isplaying():
-            self._preempt(self._get_now_playing(), self._player.time_pos())  # assert self._get_now_playing() == self._player._get_expected_state()[1]
-            self._player.suspend()
+            if item.is_advertising:
+                self._preempt(self._get_now_playing(), self._player.time_pos())  # assert self._get_now_playing() == self._player._get_expected_state()[1]
+                self._player.suspend()
+            else:
+                self._player.stop()
         ok = self._player.play(item)
         self._set_now_playing(item if ok else None)
         return ok
