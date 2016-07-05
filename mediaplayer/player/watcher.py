@@ -21,7 +21,7 @@ class Watcher(object, metaclass=singleton.Singleton):
         self._guard = guard.Guard()
         self._expected_state = ('stopped', {})
         self._stop_flag = False
-        threads.run_in_thread(self._check_state)
+        threads.run_in_thread(self._check_state_loop)
 
     @threads.synchronized(lock)
     def play(self, item):
@@ -108,24 +108,28 @@ class Watcher(object, metaclass=singleton.Singleton):
     def _get_expected_state(self):
         return self._expected_state
 
-    def _check_state(self):
+    def _check_state_loop(self):
         while not self._stop_flag:
             try:
-                self.lock.acquire()
-                expected_state = self._get_expected_state()
-                actual_state = self._guard.execute('state')
-                if expected_state[0] == 'playing':
-                    if actual_state == 'stopped':
-                        item = expected_state[1]['item']
-                        log.debug('finished track {f}'.format(f=item.filepath))
-                        self._set_expected_state('stopped')
-                        self._onstop(item)
-                        self._run_callback('onfinished', item=item)
+                finished_item = self._check_state_get_finished()
+                if finished_item is not None:
+                    self._onstop(finished_item)
+                    self._run_callback('onfinished', item=finished_item)
             except:
                 log.exception('error checking player state')
-            finally:
-                self.lock.release()
             time.sleep(0.5)
+
+    @threads.synchronized(lock)
+    def _check_state_get_finished(self):
+        expected_state = self._get_expected_state()
+        actual_state = self._guard.execute('state')
+        if expected_state[0] == 'playing':
+            if actual_state == 'stopped':
+                item = expected_state[1]['item']
+                log.debug('finished track {f}'.format(f=item.filepath))
+                self._set_expected_state('stopped')
+                return item
+        return None
 
     def _filename_by_path(self, filepath):
         return os.path.basename(filepath)
