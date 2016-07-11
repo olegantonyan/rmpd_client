@@ -9,6 +9,7 @@ import utils.singleton as singleton
 import mediaplayer.player.guard as guard
 import utils.threads as threads
 import remotecontrol.protocoldispatcher as proto
+import mediaplayer.player.watchdog as wdt
 
 log = logging.getLogger(__name__)
 
@@ -21,6 +22,7 @@ class Watcher(object, metaclass=singleton.Singleton):
         self._guard = guard.Guard()
         self._expected_state = ('stopped', {})
         self._stop_flag = False
+        self._watchdog = wdt.Watchdog()
         threads.run_in_thread(self._check_state_loop)
 
     @threads.synchronized(lock)
@@ -50,9 +52,16 @@ class Watcher(object, metaclass=singleton.Singleton):
             log.error('cannot resume from playing state')
             return False
 
+        if not self._watchdog.is_ok_to_resume(position_seconds):
+            self._onerror(item, 'resumed position is the same as previous, the player probably hangs')
+            log.error('resumed position is the same as previous, the player probably hangs: {}'.format(item.filename))
+            self._run_callback('onerror', item=item)
+            return False
+
         if self._guard.execute('play', filepath=item.filepath, start_position=position_seconds):
             self._onresume(item, position_seconds)
             self._set_expected_state('playing', item=item)
+            self._watchdog.resumed_at(position_seconds)
             return True
         else:
             self._onerror(item, 'unable to resume playback, reinitializing player')
@@ -63,7 +72,7 @@ class Watcher(object, metaclass=singleton.Singleton):
     @threads.synchronized(lock)
     def suspend(self):
         current_expected_state = self._get_expected_state()
-        current_time_pos = self.time_pos()
+        current_time_pos = int(self.time_pos())
         self._guard.execute('stop')
         item = current_expected_state[1]['item']
         self._onsuspend(item, current_time_pos)
@@ -140,10 +149,12 @@ class Watcher(object, metaclass=singleton.Singleton):
 
     def _onstop(self, item):
         log.debug("on stop: " + item.filename)
+        self._watchdog.reset()
         proto.ProtocolDispatcher().send('track_end', item=item)
 
     def _onerror(self, item, message):
         log.debug("on error: " + item.filename + " : " + message)
+        self._watchdog.reset()
         proto.ProtocolDispatcher().send('playback_error', item=item, message=message)
 
     def _onsuspend(self, item, position_seconds):

@@ -59,7 +59,11 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
 
     def _resume(self, item, position):
         ok = self._player.resume(item, position)
-        self._set_now_playing(item if ok else None)
+        if ok:
+            self._set_now_playing(item)
+        else:
+            self._set_now_playing(None)
+            self._reset_preempted()
         return ok
 
     @utils.threads.synchronized(lock)
@@ -109,6 +113,7 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
                         self._play(next_background)
 
     def _preempt(self, item, time_pos):
+        time_pos = int(time_pos)
         log.info("track suspended '{}' at {}".format(item.filename, time_pos))
         self._preempted_item = (item, time_pos)
 
