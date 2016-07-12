@@ -54,7 +54,11 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
             else:
                 self._player.stop()
         ok = self._player.play(item)
-        self._set_now_playing(item if ok else None)
+        if ok:
+            self._set_now_playing(item)
+        else:
+            self._set_now_playing(None)
+            self._notify_playlist_on_track_end(item)
         return ok
 
     def _resume(self, item, position):
@@ -64,6 +68,7 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
         else:
             self._set_now_playing(None)
             self._reset_preempted()
+            self._notify_playlist_on_track_end(item)
         return ok
 
     @utils.threads.synchronized(lock)
