@@ -52,7 +52,7 @@ class Watcher(object, metaclass=singleton.Singleton):
             log.error('cannot resume from playing state')
             return False
 
-        if not self._watchdog.is_ok_to_resume(position_seconds):
+        if not self._watchdog.is_ok_to_resume(item, position_seconds):
             self._onerror(item, 'resumed position is the same as previous, the player probably hangs')
             log.error('resumed position is the same as previous, the player probably hangs: {}'.format(item.filename))
             self._run_callback('onerror', item=item)
@@ -61,7 +61,7 @@ class Watcher(object, metaclass=singleton.Singleton):
         if self._guard.execute('play', filepath=item.filepath, start_position=position_seconds):
             self._onresume(item, position_seconds)
             self._set_expected_state('playing', item=item)
-            self._watchdog.resumed_at(position_seconds)
+            self._watchdog.resumed_at(item, position_seconds)
             return True
         else:
             self._onerror(item, 'unable to resume playback, reinitializing player')
@@ -149,7 +149,6 @@ class Watcher(object, metaclass=singleton.Singleton):
 
     def _onstop(self, item):
         log.debug("on stop: " + item.filename)
-        self._watchdog.reset()
         proto.ProtocolDispatcher().send('track_end', item=item)
 
     def _onerror(self, item, message):
