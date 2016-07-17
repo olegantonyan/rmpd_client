@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import threading
+import logging
+import traceback
+
+
+log = logging.getLogger(__name__)
 
 
 def run_in_thread(target, args=(), daemon=True):
@@ -17,10 +22,16 @@ def run_after_timeout(timeout, target, daemon=True):
     return t
 
 
-def synchronized(lock):
+def synchronized(lock, timeout=5):
     def wrap(f):
         def new_func(*args, **kw):
-            with lock:
-                return f(*args, **kw)
+            acquired = lock.acquire(timeout=timeout)
+            if not acquired:
+                log.error("failed to acquire lock after {timeout} seconds\n{stack}".format(timeout=timeout, stack='\n'.join(traceback.format_stack())))
+                log.error("function '{}' will be called without a lock!".format(f.__name__))
+            result = f(*args, **kw)
+            if acquired:
+                lock.release()
+            return result
         return new_func
     return wrap

@@ -27,7 +27,7 @@ class Playlist(object):
             return next_item
         next_item, index = self._find_next_appropriate(self._background,
                                                        0,
-                                                       self._current_background_position)
+                                                       self._current_background_position + 1)
         if next_item is not None:
             return next_item
         return None
