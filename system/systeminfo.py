@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import platform
+import os
 
 import version
 
@@ -18,3 +19,11 @@ def user_agent():
                                                                              py=platform.python_version(),
                                                                              di=linux_disto()[0],
                                                                              div=linux_disto()[1])
+
+
+def free_space(path):
+    st = os.statvfs(path)
+    free = st.f_bavail * st.f_frsize
+    # total = st.f_blocks * st.f_frsize
+    # used = (st.f_blocks - st.f_bfree) * st.f_frsize
+    return free

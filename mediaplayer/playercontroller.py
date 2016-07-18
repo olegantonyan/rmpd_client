@@ -5,7 +5,7 @@ import logging
 
 import mediaplayer.playlist.scheduler as scheduler
 import mediaplayer.player.watcher as watcher
-import utils.config as config
+import utils.files as files
 import remotecontrol.protocoldispatcher as protocoldispatcher
 import mediaplayer.playlist.loader as loader
 import mediaplayer.playlist.playlist as playlist
@@ -19,7 +19,7 @@ class PlayerController(object):
         self._scheduler = scheduler.Scheduler()
     
     def start_playlist(self):
-        mediafiles_fullpath = config.Config().mediafiles_path()
+        mediafiles_fullpath = files.mediafiles_path()
         if not os.path.exists(mediafiles_fullpath):
             os.makedirs(mediafiles_fullpath)
         
