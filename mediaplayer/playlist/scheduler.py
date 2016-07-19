@@ -33,6 +33,7 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
         self._play(self._playlist.current_background())
         self._schedule()
 
+    @utils.threads.synchronized(lock)
     def onfinished(self, **kwargs):
         finished_track = kwargs.get('item')
         if finished_track is not None:
@@ -95,6 +96,7 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
             if self._playlist is not None:
                 self._scheduler()
 
+    @utils.threads.synchronized(lock)
     def _scheduler(self):
         current_track = self._get_now_playing()
 
