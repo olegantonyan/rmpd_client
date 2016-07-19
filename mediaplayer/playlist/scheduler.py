@@ -64,6 +64,7 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
         return ok
 
     def _set_now_playing(self, item):
+        log.debug('set now playing {}'.format(str(item)))
         self._now_playing = item
 
     def _get_now_playing(self):
@@ -114,12 +115,14 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
         else:
             preempted = self._preempted()
             if preempted:
+                log.debug("preempted track: {p}, current: {c}".format(p=preempted[0].filename, c=current_track))
                 if current_track is None:
                     log.info("track resumed '{}' at {}".format(preempted[0].filename, preempted[1]))
                     self._resume(preempted[0], preempted[1])
                     self._reset_preempted()
             else:
                 next_background = self._playlist.next_background()
+                log.debug("next background: {n}, current: {c}".format(n=next_background, c=current_track))
                 if next_background is not None:
                     if current_track is None:
                         self._play(next_background)
@@ -133,6 +136,7 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
         return self._preempted_item
 
     def _reset_preempted(self):
+        log.debug('reset preempted state')
         self._preempted_item = None
 
     def __del__(self):

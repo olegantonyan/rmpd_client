@@ -28,6 +28,7 @@ class Watcher(object, metaclass=singleton.Singleton):
     @threads.synchronized(lock)
     def play(self, item):
         if item is None:
+            log.error('cannot resume none item')
             return False
 
         if self.isplaying():
@@ -46,6 +47,7 @@ class Watcher(object, metaclass=singleton.Singleton):
     @threads.synchronized(lock)
     def resume(self, item, position_seconds):
         if item is None or position_seconds is None:
+            log.error('cannot resume none item or position ({i} at {p})'.format(i=str(item), p=str(position_seconds)))
             return False
 
         if self.isplaying():
