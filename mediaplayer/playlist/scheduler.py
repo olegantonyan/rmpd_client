@@ -13,8 +13,6 @@ log = logging.getLogger(__name__)
 
 
 class Scheduler(object, metaclass=utils.singleton.Singleton):
-    lock = threading.RLock()
-
     def __init__(self):
         self._player = player.Watcher()
         self._playlist = None
@@ -28,20 +26,13 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
     def set_playlist(self, playlist):
         log.info("start playlist")
         self._playlist = playlist
-        if self._player.isplaying():
-            self._play(None)
-        self._play(self._playlist.current_background())
-        self._schedule()
+        self._schedule('start_playlist')
 
-    @utils.threads.synchronized(lock)
     def onfinished(self, **kwargs):
         finished_track = kwargs.get('item')
         if finished_track is not None:
             log.info("track finished {f}".format(f=finished_track.filename))
-        current_track = self._get_now_playing()
-        self._notify_playlist_on_track_end(current_track)
-        self._set_now_playing(None)
-        self._schedule()
+        self._schedule('track_finished')
 
     def _play(self, item):
         if item is None:
@@ -72,11 +63,9 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
             self._notify_playlist_on_track_end(item)
         return ok
 
-    @utils.threads.synchronized(lock)
     def _set_now_playing(self, item):
         self._now_playing = item
 
-    @utils.threads.synchronized(lock)
     def _get_now_playing(self):
         return self._now_playing
 
@@ -89,14 +78,30 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
 
     def _loop(self):
         while not self._stop_flag:
+            command = None
             try:
-                self._rx.get(block=True, timeout=1)
+                command = self._rx.get(block=True, timeout=1)
             except queue.Empty:
                 pass
+
+            if command == 'start_playlist':
+                self._start_playlist()
+            elif command == 'track_finished':
+                self._track_finished()
+
             if self._playlist is not None:
                 self._scheduler()
 
-    @utils.threads.synchronized(lock)
+    def _track_finished(self):
+        current_track = self._get_now_playing()
+        self._notify_playlist_on_track_end(current_track)
+        self._set_now_playing(None)
+
+    def _start_playlist(self):
+        if self._player.isplaying():
+            self._play(None)
+        self._play(self._playlist.current_background())
+
     def _scheduler(self):
         current_track = self._get_now_playing()
 
