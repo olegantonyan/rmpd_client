@@ -72,26 +72,32 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
 
     def _notify_playlist_on_track_end(self, track):
         if self._playlist is not None:
-            self._playlist.onfinished(track)
+            try:
+                self._playlist.onfinished(track)
+            except:
+                log.exception('error notifying playlist on track finished')
 
     def _schedule(self, arg=None):
         self._rx.put(arg)
 
     def _loop(self):
         while not self._stop_flag:
-            command = None
             try:
                 command = self._rx.get(block=True, timeout=1)
+                if command == 'start_playlist':
+                    self._start_playlist()
+                elif command == 'track_finished':
+                    self._track_finished()
             except queue.Empty:
                 pass
-
-            if command == 'start_playlist':
-                self._start_playlist()
-            elif command == 'track_finished':
-                self._track_finished()
-
-            if self._playlist is not None:
-                self._scheduler()
+            except:
+                log.exception('error processing scheduler command')
+            finally:
+                if self._playlist is not None:
+                    try:
+                        self._scheduler()
+                    except:
+                        log.exception('error running scheduler')
 
     def _track_finished(self):
         current_track = self._get_now_playing()
@@ -108,6 +114,7 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
 
         next_advertising = self._playlist.next_advertising()
         if next_advertising is not None:
+            # log.debug("next advertising: {a}, current: {c}".format(a=next_advertising, c=current_track))
             if current_track is None or current_track.is_background:
                 if current_track is None:
                     self._notify_playlist_on_track_end(current_track)
@@ -115,14 +122,14 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
         else:
             preempted = self._preempted()
             if preempted:
-                log.debug("preempted track: {p}, current: {c}".format(p=preempted[0].filename, c=current_track))
+                # log.debug("preempted track: {p}, current: {c}".format(p=preempted[0].filename, c=current_track))
                 if current_track is None:
                     log.info("track resumed '{}' at {}".format(preempted[0].filename, preempted[1]))
                     self._resume(preempted[0], preempted[1])
                     self._reset_preempted()
             else:
                 next_background = self._playlist.next_background()
-                log.debug("next background: {n}, current: {c}".format(n=next_background, c=current_track))
+                # log.debug("next background: {n}, current: {c}".format(n=next_background, c=current_track))
                 if next_background is not None:
                     if current_track is None:
                         self._play(next_background)
