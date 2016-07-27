@@ -34,13 +34,13 @@ class BasePlaylistCommand(base_command.BaseCommand):
 
 class BaseWorker(threading.Thread):
     def __init__(self, sequence, onfinish_callback):
-        threading.Thread.__init__(self)
+        super().__init__()
         self._sequence = sequence
         self.daemon = True
         self._onfinish = onfinish_callback
         self._playlist_fullpath = loader.Loader().filepath()
         self._error_message = 'please set error message in subclass'
-        self._success_message = 'please set success message in subclass'
+        self._success_message = 'please set verify message in subclass'
         self._terminate = False
 
     def run(self):

@@ -2,37 +2,42 @@
 
 import utils.singleton as singleton
 import hardware
+import system.self_update as self_update
 
 
 class Status(object, metaclass=singleton.Singleton):
     def __init__(self):
-        self.__online = False
-        self.__playing = False
-        self.__downloading = False
+        self._online = False
+        self._playing = False
+        self._downloading = False
+        self._self_update_once = True
 
     @property
     def online(self):
-        return self.__online
+        return self._online
 
     @online.setter
     def online(self, state):
-        self.__online = state
+        self._online = state
         hardware.platfrom.set_network_led(state)
+        if state and self._self_update_once:
+            self_update.SelfUpdate().verify()
+            self._self_update_once = False
 
     @property
     def playing(self):
-        return self.__playing
+        return self._playing
 
     @playing.setter
     def playing(self, state):
-        self.__playing = state
+        self._playing = state
         hardware.platfrom.set_player_led(state)
 
     @property
     def downloading(self):
-        return self.__downloading
+        return self._downloading
 
     @downloading.setter
     def downloading(self, state):
-        self.__downloading = state
+        self._downloading = state
         hardware.platfrom.set_network_blink_led(state)

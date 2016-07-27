@@ -2,13 +2,12 @@
 
 import logging
 import os
-import urllib.parse
 import threading
 
 import remotecontrol.protocol.incoming.base_command as base_command
 import system.wallpaper as wallpaper
 import remotecontrol.httpclient as httpclient
-import utils.config as config
+import utils.files as files
 
 log = logging.getLogger(__name__)
 
@@ -47,10 +46,7 @@ class Worker(threading.Thread):
     def _download_file(self, url, localpath):
         if os.path.isfile(localpath):
             os.remove(localpath)
-        httpclient.download_file(self._full_file_url(url), localpath)
-
-    def _full_file_url(self, relativeurl):
-        return urllib.parse.urljoin(config.Config().server_url(), relativeurl)
+        httpclient.download_file(files.full_url_by_relative(url), localpath)
 
     def _remove_file(self, file):
         try:

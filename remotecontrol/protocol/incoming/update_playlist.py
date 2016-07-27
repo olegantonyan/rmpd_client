@@ -3,10 +3,8 @@
 import threading
 import logging
 import os
-import urllib.parse
 
 import utils.files as files
-import utils.config as config
 import utils.support as support
 import remotecontrol.protocol.incoming.base_playlist_command as base_playlist_command
 import system.status as status
@@ -64,7 +62,7 @@ class UpdatePlaylist(base_playlist_command.BasePlaylistCommand):
 
 class Worker(base_playlist_command.BaseWorker):
     def __init__(self, media_items, sequence, onfinish_callback):
-        base_playlist_command.BaseWorker.__init__(self, sequence, onfinish_callback)
+        super().__init__(sequence, onfinish_callback)
         self._media_items = support.list_compact(media_items)
         self._error_message = 'error updating playlist'
         self._success_message = 'playlist updated successfully'
@@ -76,14 +74,11 @@ class Worker(base_playlist_command.BaseWorker):
         self._utilize_nonplaylist_files(self._media_items, files.mediafiles_path())
 
     def _download_file(self, file):
-        url = self._full_file_url(file)
+        url = files.full_url_by_relative(file)
         localpath = files.full_file_localpath(file)
         if not os.path.isfile(localpath):
             log.info("downloading file '%s'", url)
             httpclient.download_file(url, localpath)
-
-    def _full_file_url(self, relativeurl):
-        return urllib.parse.urljoin(config.Config().server_url(), relativeurl)
 
     def _utilize_nonplaylist_files(self, media_items, media_items_path):
         media_items = [os.path.basename(i) for i in media_items]

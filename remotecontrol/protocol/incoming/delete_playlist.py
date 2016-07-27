@@ -52,7 +52,7 @@ class DeletePlaylist(base_playlist_command.BasePlaylistCommand):
 
 class Worker(base_playlist_command.BaseWorker):
     def __init__(self, sequence, onfinish_callback):
-        base_playlist_command.BaseWorker.__init__(self, sequence, onfinish_callback)
+        super().__init__(sequence, onfinish_callback)
         self._error_message = 'error deleting playlist'
         self._success_message = 'playlist deleted successfully'
 
