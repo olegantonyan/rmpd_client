@@ -2,8 +2,10 @@
 
 import logging
 import os
-import remotecontrol.protocoldispatcher as proto
+
+
 import version
+
 
 log = logging.getLogger(__name__)
 
@@ -19,6 +21,7 @@ class SelfUpdate(object):
         self._sequence_number_file.write(sequence_number)
 
     def verify(self):
+        import remotecontrol.protocoldispatcher as proto  # to fix AttributeError: 'module' object has no attribute
         if self._statefile.is_processing():
             log.info('update successfully finished')
             self._statefile.remove()

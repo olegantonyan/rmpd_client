@@ -19,7 +19,6 @@ import hardware
 import system.watchdog as watchdog
 import clockd.clockd as clockd
 import system.wallpaper as wallpaper
-import system.update as update
 
 
 def signal_handler(signum, frame):
@@ -65,7 +64,6 @@ def app():
     proto = protocoldispatcher.ProtocolDispatcher()
     threads.run_in_thread(webui.start, ['0.0.0.0', 8080])
     while True:
-        update.Backup().run()
         track = player.current_track_name()
         pos = player.current_track_posiotion()
         proto.send('now_playing', track=track, percent_position=pos)

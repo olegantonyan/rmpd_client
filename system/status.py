@@ -21,7 +21,7 @@ class Status(object, metaclass=singleton.Singleton):
         self._online = state
         hardware.platfrom.set_network_led(state)
         if state and self._self_update_once:
-            self_update.SelfUpdate().verify()
+            #self_update.SelfUpdate().verify()
             self._self_update_once = False
 
     @property
