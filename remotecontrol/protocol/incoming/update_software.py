@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 
 class UpdateSoftware(base_command.BaseCommand):
     def call(self):
-        url = self._data.get('distr_url')
+        url = self._data.get('distribution_url')
         full_url = files.full_url_by_relative(url)
         filename = os.path.basename(url)
         full_localpath = os.path.join('/tmp', filename)
