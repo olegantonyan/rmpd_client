@@ -22,7 +22,7 @@ class UpdateSoftware(base_command.BaseCommand):
 
     def _download(self, url, localpath, seq):
         try:
-            log.info('starting software update download from % to %s', url, localpath)
+            log.info('starting software update download from %s to %s', url, localpath)
             if os.path.isfile(localpath):
                 os.remove(localpath)
             httpclient.download_file(url, localpath)
