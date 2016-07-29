@@ -108,7 +108,7 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
         if self._player.isplaying():
             self._play(None)
         self._reset_preempted()
-        start_item = self._playlist.next_background()
+        start_item = self._playlist.fisrt_background()
         if start_item is None:
             log.info('no appropriate track to start playlist from')
         self._play(start_item)

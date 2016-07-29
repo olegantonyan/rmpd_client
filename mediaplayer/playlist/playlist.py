@@ -32,6 +32,12 @@ class Playlist(object):
             return next_item
         return None
 
+    def fisrt_background(self):  # start playlist from this item
+        next_item, index = self._find_next_appropriate(self._background,
+                                                       0,
+                                                       len(self._background))
+        return next_item
+
     def next_advertising(self):
         thetime = self._thetime()
         appropriate_now = [i for i in self._advertising if i.is_appropriate_at(thetime)]
