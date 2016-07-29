@@ -20,7 +20,7 @@ class Guard(object, metaclass=singleton.Singleton):
         self._rx = queue.Queue()
         self._tx = queue.Queue()
         self._stop_flag = False
-        self._atomic_lock = threading.RLock()
+        self._atomic_lock = threading.Lock()
         threads.run_in_thread(self._serve)
 
     def execute(self, command, **kwargs):

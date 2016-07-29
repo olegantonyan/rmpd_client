@@ -23,14 +23,14 @@ class Watcher(object, metaclass=singleton.Singleton):
         self._watchdog = wdt.Watchdog()
         self._rx = queue.Queue()
         self._tx = queue.Queue()
-        self._atomic_lock = threading.RLock()
+        self._atomic_lock = threading.Lock()
         threads.run_in_thread(self._check_state_loop)
 
     def play(self, item):
         return self._execute('play', {'item': item})
 
     def resume(self, item, position_seconds):
-        return self._execute('resume', {'item' : item, 'position_seconds': position_seconds})
+        return self._execute('resume', {'item': item, 'position_seconds': position_seconds})
 
     def suspend(self):
         return self._execute('suspend')
@@ -90,7 +90,7 @@ class Watcher(object, metaclass=singleton.Singleton):
                 self._check_state()
             except:
                 log.exception('error running player watcher command')
-                self._tx.put(result)
+                self._tx.put(None)
 
     def _check_state(self):
         try:
