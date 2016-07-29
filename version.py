@@ -1,4 +1,4 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-VERSION = "0.4.17"
+VERSION = "0.4.18"

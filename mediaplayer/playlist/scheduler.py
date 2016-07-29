@@ -107,6 +107,7 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
     def _start_playlist(self):
         if self._player.isplaying():
             self._play(None)
+        self._reset_preempted()
         self._play(self._playlist.current_background())
 
     def _scheduler(self):
