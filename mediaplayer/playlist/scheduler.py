@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import threading
 import queue
 
 import utils.singleton
@@ -107,11 +106,13 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
     def _start_playlist(self):
         if self._player.isplaying():
             self._play(None)
+        self._set_now_playing(None)  # for sure
         self._reset_preempted()
         start_item = self._playlist.fisrt_background()
         if start_item is None:
             log.info('no appropriate track to start playlist from')
-        self._play(start_item)
+        else:
+            self._play(start_item)
 
     def _scheduler(self):
         current_track = self._get_now_playing()
