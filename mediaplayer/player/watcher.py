@@ -145,7 +145,7 @@ class Watcher(object, metaclass=singleton.Singleton):
 
     def _play(self, item):
         if item is None:
-            log.error('cannot resume none item')
+            log.error('cannot play none item')
             return False
 
         if self._isplaying():
