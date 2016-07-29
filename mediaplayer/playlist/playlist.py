@@ -32,18 +32,6 @@ class Playlist(object):
             return next_item
         return None
 
-    def current_background(self):
-        if len(self._background) == 0:
-            return None
-        if len(self._background) < (self._current_background_position - 1):
-            self._current_background_position = 0
-            return None
-        current_item = self._background[self._current_background_position]
-        if current_item.is_appropriate_at(self._thetime()):
-            return current_item
-        else:
-            return None
-
     def next_advertising(self):
         thetime = self._thetime()
         appropriate_now = [i for i in self._advertising if i.is_appropriate_at(thetime)]
