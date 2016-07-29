@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import os
 import threading
 import queue
 
@@ -111,9 +110,6 @@ class Watcher(object, metaclass=singleton.Singleton):
                 self._set_expected_state('stopped')
                 return item
         return None
-
-    def _filename_by_path(self, filepath):
-        return os.path.basename(filepath)
 
     def _onplay(self, item):
         log.debug("on play: " + item.filename)
