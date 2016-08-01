@@ -31,6 +31,10 @@ class Item(object):
         return self._d['id']
 
     @property
+    def media_item_id(self):
+        return self._d['media_item_id']
+
+    @property
     def type(self):
         return self._d['type']
 
