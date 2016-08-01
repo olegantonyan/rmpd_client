@@ -119,13 +119,10 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
 
         if current_track is not None and current_track.is_background:
             thetime = utils.datetime.now()
-            if not current_track.is_appropriate_at(thetime):
-                next_background = self._playlist.next_background()
-                if next_background is None or (next_background is not None and next_background.media_item_id != current_track.media_item_id):
-                    # don't switch to midnight rollover
-                    self._track_finished()
-                    log.info('track stopped because it is out of time range')
-                    self._play(None)
+            if not current_track.is_appropriate_at(thetime) and not current_track.is_wait_for_the_end:
+                self._track_finished()
+                log.info('track stopped because it is out of time range')
+                self._play(None)
 
         next_advertising = self._playlist.next_advertising()
         if next_advertising is not None:

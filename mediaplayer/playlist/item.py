@@ -31,10 +31,6 @@ class Item(object):
         return self._d['id']
 
     @property
-    def media_item_id(self):
-        return self._d['media_item_id']
-
-    @property
     def type(self):
         return self._d['type']
 
@@ -91,6 +87,10 @@ class Item(object):
     @property
     def schedule_intervals(self):
         return [ScheduleInterval(i) for i in self._d['schedule_intervals']]
+
+    @property
+    def is_wait_for_the_end(self):
+        return self._d['wait_for_the_end']
 
     def schedule_at(self, date):
         for i in self.schedule_intervals:
