@@ -54,7 +54,7 @@ class Playlist(object):
         if item.is_advertising:
             pass
         elif item.is_background:
-            self._current_background_position = self._background_item_position(item)
+            self._current_background_position = self._background_item_position(item) or 0
 
     def _find_next_appropriate(self, collection, start_pos, end_pos):
         thetime = self._thetime()
