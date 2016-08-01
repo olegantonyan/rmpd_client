@@ -117,9 +117,14 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
     def _scheduler(self):
         current_track = self._get_now_playing()
 
+        if current_track is not None and current_track.is_background:
+            if not current_track.is_appropriate_at(utils.datetime.now()):
+                self._track_finished()
+                log.info('track stopped because it is out of time range')
+                self._play(None)
+
         next_advertising = self._playlist.next_advertising()
         if next_advertising is not None:
-            # log.debug("next advertising: {a}, current: {c}".format(a=next_advertising, c=current_track))
             if current_track is None or current_track.is_background:
                 if current_track is None:
                     self._notify_playlist_on_track_end(current_track)
@@ -127,14 +132,12 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
         else:
             preempted = self._preempted()
             if preempted:
-                # log.debug("preempted track: {p}, current: {c}".format(p=preempted[0].filename, c=current_track))
                 if current_track is None:
                     log.info("track resumed '{}' at {}".format(preempted[0].filename, preempted[1]))
                     self._resume(preempted[0], preempted[1])
                     self._reset_preempted()
             else:
                 next_background = self._playlist.next_background()
-                # log.debug("next background: {n}, current: {c}".format(n=next_background, c=current_track))
                 if next_background is not None:
                     if current_track is None:
                         self._play(next_background)
