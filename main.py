@@ -40,7 +40,7 @@ def setup_logger(console_app=False, verbose_log=False):
         root_logger = logging.getLogger()
         child_logger = logging.StreamHandler(sys.stdout)
         child_logger.setLevel(logging.DEBUG)
-        formatter = logging.Formatter("[%(asctime)s] %(name)s |%(levelname)s| %(message)s", "%Y-%m-%d %H:%M:%S")
+        formatter = logging.Formatter("[%(asctime)s] %(name)s[%(threadName)s/%(thread)d] |%(levelname)s| %(message)s", "%Y-%m-%d %H:%M:%S")
         child_logger.setFormatter(formatter)
         root_logger.addHandler(child_logger)
         logging.info("started as console application")
