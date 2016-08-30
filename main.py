@@ -19,6 +19,7 @@ import hardware
 import system.watchdog as watchdog
 import clockd.clockd as clockd
 import system.wallpaper as wallpaper
+import hdmihotplug.hdmihotplug as hdmihotplug
 
 
 def signal_handler(signum, frame):
@@ -59,6 +60,7 @@ def app():
     wallpaper.Wallpaper().load()
     if config.Config().enable_clockd():
         threads.run_in_thread(clockd.Clockd().run)
+    threads.run_in_thread(hdmihotplug.HdmiHotplug(onchange_callback=wallpaper.Wallpaper().load).run)
     player = playercontroller.PlayerController()
     player.start_playlist()
     proto = protocoldispatcher.ProtocolDispatcher()
