@@ -20,7 +20,7 @@ class UpdateWallpaper(base_command.BaseCommand):
     def _onfinish(self, ok, sequence):
         if ok:
             ok = wallpaper.Wallpaper().load()
-        return self._sender('ack_' + ('ok' if ok else 'fail')).call(sequence=sequence, message='set wallpaper')
+        return self._ack(ok, 'set wallpaper', sequence)
 
 
 class Worker(threading.Thread):

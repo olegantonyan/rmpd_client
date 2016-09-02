@@ -32,7 +32,7 @@ class DeletePlaylist(base_playlist_command.BasePlaylistCommand):
         if ok:
             self._reset_playlist_position()
             playercontroller.PlayerController().stop()
-        self._send_ack(ok, sequence, message)
+        self._ack(ok, message, sequence)
 
     def _start_worker(self):
         self.__class__.lock.acquire()

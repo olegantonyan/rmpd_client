@@ -39,7 +39,7 @@ class UpdatePlaylist(base_playlist_command.BasePlaylistCommand):
             self._save_playlist_file()  # successfully downloaded => save new playlist file
             self._reset_playlist_position()
             playercontroller.PlayerController().start_playlist()
-        self._send_ack(ok, sequence, message)
+        self._ack(ok, message, sequence)
 
     def _start_worker(self, items):
         self.__class__.lock.acquire()

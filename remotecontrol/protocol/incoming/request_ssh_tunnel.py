@@ -19,7 +19,7 @@ class RequestSshTunnel(base_command.BaseCommand):
                     dur=self._data['duration'])
         m = "opening ssh tunnel: '{cli}'".format(cli=cli)
         log.info(m)
-        self._sender('ack_ok').call(sequence=self._sequence, message=m)
+        self._ack(True, m)
         r, o, e = shell.execute(cli)
         # self._sender('ack').call(ok=(r == 0), sequence=self._sequence, message=(m + ";" + str(o) + ";" + str(e)))
         log.info("ssh tunnel result: {r}, stdout: {o}, stderr: {e}".format(r=r, o=o, e=e))

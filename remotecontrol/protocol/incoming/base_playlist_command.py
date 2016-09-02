@@ -28,9 +28,6 @@ class BasePlaylistCommand(base_command.BaseCommand):
     def _playlist_file_path(self):
         return loader.Loader().filepath()
 
-    def _send_ack(self, ok, sequence, message):
-        self._sender('ack_' + ('ok' if ok else 'fail')).call(sequence=sequence, message=message)
-
 
 class BaseWorker(threading.Thread):
     def __init__(self, sequence, onfinish_callback):

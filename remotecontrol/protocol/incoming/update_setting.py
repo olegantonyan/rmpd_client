@@ -27,6 +27,3 @@ class UpdateSetting(base_command.BaseCommand):
         else:
             msg = 'error changing timezone to {tz}'.format(tz=tz)
         return ok, msg
-
-    def _ack(self, ok, msg):
-        return self._sender('ack_' + ('ok' if ok else 'fail')).call(sequence=self._sequence, message=msg)

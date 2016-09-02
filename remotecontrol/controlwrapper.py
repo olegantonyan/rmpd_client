@@ -41,7 +41,7 @@ class ControlWrapper(object):
 
     def onreceive(self, msg, seq):
         log.debug("received message: '%s'", str(msg))
-        threads.run_in_thread(target=self._receive_protocol_callback, args=(msg, seq), daemon=True)
+        threads.run_in_thread(target=self._receive_protocol_callback, args=(msg, seq))
 
     def _check_queue(self):
         messageid, data = self._queue.dequeue()
