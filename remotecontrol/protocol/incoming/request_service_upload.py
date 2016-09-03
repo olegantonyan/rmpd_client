@@ -27,7 +27,7 @@ class WorkerThread(threading.Thread):
     def run(self):
         ok = True
         try:
-            service_upload.ServiceUpload().call()
+            service_upload.ServiceUpload('manual_request').call()
         except:
             log.exception('error running service upload')
             ok = False

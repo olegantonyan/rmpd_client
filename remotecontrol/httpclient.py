@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import urllib
+import urllib.parse
 import requests
 import requests.auth
 import requests.packages.urllib3
@@ -49,3 +49,13 @@ def download_file(url, localpath):
             temp_file.write(chunk)
             temp_file.flush()
     shutil.move(temp_file.name, localpath)
+
+
+def submit_multipart_form(url, data, files, login, password):
+    r = requests.post(url,
+                      files=files,
+                      data=data,
+                      timeout=60,
+                      auth=requests.auth.HTTPBasicAuth(login, password),
+                      headers={"User-Agent": systeminfo.user_agent()})
+    return r.status_code == 200 or r.status_code == 201
