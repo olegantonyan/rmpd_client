@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import zipfile
+import tarfile
 import logging
 import os
 
@@ -31,13 +31,12 @@ class ServiceUpload(object):
         return datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
 
     def _generate_destination_filepath(self):
-        return '/tmp/service_upload_python_' + self._timestamp() + '.zip'
+        return '/tmp/service_upload_python_' + self._timestamp()
 
     def _arvive(self, directory):
-        dst = self._generate_destination_filepath()
-        archive = zipfile.ZipFile(dst, "w", zipfile.ZIP_DEFLATED)
-        self._zip_directory(directory, os.path.basename(os.path.normpath(directory)), archive)
-        archive.close()
+        dst = self._generate_destination_filepath() + '.tar.gz'
+        with tarfile.open(dst, mode='w:gz') as archive:
+            archive.add(directory)
         return dst
 
     def _upload(self, filepath):
@@ -46,16 +45,6 @@ class ServiceUpload(object):
         login = config.Config().login()
         password = config.Config().password()
         return httpclient.submit_multipart_form(files.full_url_by_relative('/deviceapi/service_upload'), data, fils, login, password)
-
-    def _zip_directory(self, path, relname, archive):
-        paths = os.listdir(path)
-        for p in paths:
-            p1 = os.path.join(path, p)
-            p2 = os.path.join(relname, p)
-            if os.path.isdir(p1):
-                self._zip_directory(p1, p2, archive)
-            else:
-                archive.write(p1, p2)
 
     def _logs_directory(self):
         return os.path.dirname(config.Config().logfile())
