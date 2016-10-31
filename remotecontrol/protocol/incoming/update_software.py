@@ -8,6 +8,7 @@ import system.self_update as self_update
 import utils.threads as threads
 import remotecontrol.httpclient as httpclient
 import utils.files as files
+import system.rw_fs as rw_fs
 
 log = logging.getLogger(__name__)
 
@@ -23,9 +24,10 @@ class UpdateSoftware(base_command.BaseCommand):
     def _download(self, url, localpath, seq):
         try:
             log.info('starting software update download from %s to %s', url, localpath)
-            if os.path.isfile(localpath):
-                os.remove(localpath)
-            httpclient.download_file(url, localpath)
+            with rw_fs.Storage():
+                if os.path.isfile(localpath):
+                    os.remove(localpath)
+                httpclient.download_file(url, localpath)
             self_update.SelfUpdate().downloaded(localpath, seq)
         except:
             log.exception('error downloading software update')

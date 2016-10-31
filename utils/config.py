@@ -6,6 +6,7 @@ import os
 
 import system.control
 import utils.singleton as singleton
+import system.rw_fs as rw_fs
 
 
 class ConfigFileNotSpecifiedError(RuntimeError):
@@ -84,13 +85,10 @@ class Config(object, metaclass=singleton.Singleton):
 
     @_guard_initialization
     def _save_value(self, section, option, value):
-        try:
-            system.control.Control().remount_rootfs()
+        with rw_fs.Root():
             self._parser.set(section, option, str(value))
             with codecs.open(self._filename, 'w', encoding='utf-8') as f:
                 self._parser.write(f)
-        finally:
-            system.control.Control().remount_rootfs(False)
 
     def _boolean_attr(self, attr):
         return attr == 'yes' or attr == 'y' or attr == 'true'

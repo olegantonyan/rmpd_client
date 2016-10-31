@@ -8,6 +8,7 @@ import utils.datetime as datetime
 import utils.config as config
 import remotecontrol.httpclient as httpclient
 import utils.files as files
+import system.rw_fs as rw_fs
 
 log = logging.getLogger(__name__)
 
@@ -34,10 +35,11 @@ class ServiceUpload(object):
         return '/tmp/service_upload_python_' + self._timestamp()
 
     def _arvive(self, directory):
-        dst = self._generate_destination_filepath() + '.tar.gz'
-        with tarfile.open(dst, mode='w:gz') as archive:
-            archive.add(directory)
-        return dst
+        with rw_fs.Storage():
+            dst = self._generate_destination_filepath() + '.tar.gz'
+            with tarfile.open(dst, mode='w:gz') as archive:
+                archive.add(directory)
+            return dst
 
     def _upload(self, filepath):
         data = {'reason': self._reason}

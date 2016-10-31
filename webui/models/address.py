@@ -9,6 +9,7 @@ import webui.models.debinterface.interfaces
 import hardware
 import system.systeminfo
 import system.control
+import system.rw_fs as rw_fs
 
 log = logging.getLogger(__name__)
 
@@ -58,43 +59,41 @@ class Address(object):
         if not self._iface_config_changed:
             self._error = "Not changed"
             return True
-        try:
-            system.control.Control().remount_rootfs()
-            for i in self._all_ifaces.adapters:
-                if self._iface == i.ifAttributes.get('name', ''):
-                    if self._iface_config['source'] not in ['dhcp', 'static']:
-                        self._error = "Invalid address source"
-                        return False
-                    i.ifAttributes['source'] = self._iface_config['source']
-                    if not i.ifAttributes['source'] == 'dhcp':
-                        if self._validate_ip(self._iface_config['addr']):
-                            i.ifAttributes['address'] = self._iface_config['addr']
-                        else:
-                            self._error = "No static IP address specified"
+        with rw_fs.Root():
+            try:
+                for i in self._all_ifaces.adapters:
+                    if self._iface == i.ifAttributes.get('name', ''):
+                        if self._iface_config['source'] not in ['dhcp', 'static']:
+                            self._error = "Invalid address source"
                             return False
-                        if self._validate_ip(self._iface_config['netmask']):
-                            i.ifAttributes['netmask'] = self._iface_config['netmask']
-                        else:
-                            self._error = "No netmask specified"
-                            return False
-                        if self._validate_ip(self._iface_config['gateway']):
-                            i.ifAttributes['gateway'] = self._iface_config['gateway']
-                        else:
-                            self._error = "No gateway specified"
-                            return False
-                        if len(self._iface_config['nameservers']) > 0 and len(self._iface_config['nameservers'][0]) > 0:
-                            i.ifAttributes['dns-nameservers'] = ' '.join(self._iface_config['nameservers'])
-                        else:
-                            i.ifAttributes['dns-nameservers'] = i.ifAttributes['gateway']
-            self._all_ifaces.writeInterfaces()
-            log.warning("new network configuration written")
-            return True
-        except Exception as e:
-            self._error = "Error saving IP addr: " + str(e)
-            log.exception("error saving ip addr")
-            return False
-        finally:
-            system.control.Control().remount_rootfs(False)
+                        i.ifAttributes['source'] = self._iface_config['source']
+                        if not i.ifAttributes['source'] == 'dhcp':
+                            if self._validate_ip(self._iface_config['addr']):
+                                i.ifAttributes['address'] = self._iface_config['addr']
+                            else:
+                                self._error = "No static IP address specified"
+                                return False
+                            if self._validate_ip(self._iface_config['netmask']):
+                                i.ifAttributes['netmask'] = self._iface_config['netmask']
+                            else:
+                                self._error = "No netmask specified"
+                                return False
+                            if self._validate_ip(self._iface_config['gateway']):
+                                i.ifAttributes['gateway'] = self._iface_config['gateway']
+                            else:
+                                self._error = "No gateway specified"
+                                return False
+                            if len(self._iface_config['nameservers']) > 0 and len(self._iface_config['nameservers'][0]) > 0:
+                                i.ifAttributes['dns-nameservers'] = ' '.join(self._iface_config['nameservers'])
+                            else:
+                                i.ifAttributes['dns-nameservers'] = i.ifAttributes['gateway']
+                self._all_ifaces.writeInterfaces()
+                log.warning("new network configuration written")
+                return True
+            except Exception as e:
+                self._error = "Error saving IP addr: " + str(e)
+                log.exception("error saving ip addr")
+                return False
 
     def error(self):
         return self._error

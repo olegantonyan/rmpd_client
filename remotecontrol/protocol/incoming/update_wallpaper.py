@@ -8,6 +8,7 @@ import remotecontrol.protocol.incoming.base_command as base_command
 import system.wallpaper as wallpaper
 import remotecontrol.httpclient as httpclient
 import utils.files as files
+import system.rw_fs as rw_fs
 
 log = logging.getLogger(__name__)
 
@@ -44,12 +45,14 @@ class Worker(threading.Thread):
             self._onfinish(False, self._sequence)
 
     def _download_file(self, url, localpath):
-        if os.path.isfile(localpath):
-            os.remove(localpath)
-        httpclient.download_file(files.full_url_by_relative(url), localpath)
+        with rw_fs.Storage():
+            if os.path.isfile(localpath):
+                os.remove(localpath)
+            httpclient.download_file(files.full_url_by_relative(url), localpath)
 
     def _remove_file(self, file):
-        try:
-            os.remove(file)
-        except FileNotFoundError:
-            pass
+        with rw_fs.Storage():
+            try:
+                os.remove(file)
+            except FileNotFoundError:
+                pass

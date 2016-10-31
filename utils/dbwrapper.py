@@ -13,7 +13,7 @@ def _guard_errors(func):
     def wrap(self, *args):
         try:
             result = func(self, *args)
-            self._error_count = 0
+            # self._error_count = 0
             return result
         except utils.sqlexecutor.SqlError:
             self._error_count += 1
@@ -33,15 +33,19 @@ class DbWrapper(object):
         try:
             self.create_db()
         except:
-            self._error_count += 1
+            self._reinit_db()
 
     def _reinit_db(self):
-        log.warning('re-initializing {f}'.format(f=self._db_path))
-        self._db = None
-        os.rename(self._db_path, self._db_path + "_" + str(utils.datetime.now()))
-        self._db = utils.sqlexecutor.SqlExecutor(self._db_path)
-        self.create_db()
-        self._error_count = 0
+        try:
+            log.warning('re-initializing {f}'.format(f=self._db_path))
+            self._db.close()
+            os.rename(self._db_path, self._db_path + "_" + str(utils.datetime.now()))
+        except:
+            pass
+        finally:
+            self._db = utils.sqlexecutor.SqlExecutor(self._db_path)
+            self.create_db()
+            self._error_count = 0
 
     @_guard_errors
     def execute(self, statement, values=()):

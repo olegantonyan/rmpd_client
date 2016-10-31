@@ -5,7 +5,7 @@ import os
 
 
 import version
-
+import system.rw_fs as rw_fs
 
 log = logging.getLogger(__name__)
 
@@ -48,12 +48,14 @@ class CustomFile(object):
             return None
 
     def write(self, data):
-        with open(self._path, 'w') as f:
-            f.write(data)
+        with rw_fs.Storage():
+            with open(self._path, 'w') as f:
+                f.write(data)
 
     def remove(self):
         if os.path.exists(self._path):
-            os.remove(self._path)
+            with rw_fs.Storage():
+                os.remove(self._path)
 
 
 class SequenceNumberFile(CustomFile):

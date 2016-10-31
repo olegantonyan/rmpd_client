@@ -3,6 +3,7 @@
 import logging
 import threading
 import queue
+import time
 
 import utils.singleton as singleton
 import mediaplayer.player.guard as guard
@@ -73,20 +74,22 @@ class Watcher(object, metaclass=singleton.Singleton):
         while not self._stop_flag:
             result = None
             try:
-                command, kwargs = self._rx.get(block=True, timeout=0.5)
-                if command == 'play':
-                    result = self._play(kwargs['item'])
-                elif command == 'resume':
-                    result = self._resume(kwargs['item'], kwargs['position_seconds'])
-                elif command == 'suspend':
-                    result = self._suspend()
-                elif command == 'stop':
-                    result = self._stop()
-                elif command == 'isplaying':
-                    result = self._isplaying()
-                self._tx.put(result)
-            except queue.Empty:
-                self._check_state()
+                if self._rx.empty():
+                    time.sleep(0.5)
+                    self._check_state()
+                else:
+                    command, kwargs = self._rx.get_nowait()
+                    if command == 'play':
+                        result = self._play(kwargs['item'])
+                    elif command == 'resume':
+                        result = self._resume(kwargs['item'], kwargs['position_seconds'])
+                    elif command == 'suspend':
+                        result = self._suspend()
+                    elif command == 'stop':
+                        result = self._stop()
+                    elif command == 'isplaying':
+                        result = self._isplaying()
+                    self._tx.put(result)
             except:
                 log.exception('error running player watcher command')
                 self._tx.put(None)

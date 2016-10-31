@@ -50,7 +50,7 @@ class ControlWrapper(object):
             if self.send(parsed_data["msg"], False, parsed_data["seq"]):
                 self._queue.remove(messageid)
 
-        threads.run_after_timeout(0.05, self._check_queue)
+        threads.run_after_timeout(0.01, self._check_queue)
 
     def _set_online_status(self, stat):
         status.Status().online = stat

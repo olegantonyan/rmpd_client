@@ -4,6 +4,7 @@ import logging
 import system.systeminfo
 
 import utils.shell as shell
+import system.rw_fs as rw_fs
 
 log = logging.getLogger(__name__)
 
@@ -26,8 +27,7 @@ class Control(object):
             sign = '+'
         posix_gmt_tz = 'Etc/GMT{sign}{value}'.format(sign=sign, value=int(value))
         cli = "sudo sh -c 'echo \"{gmt_tz}\" > /etc/timezone'".format(gmt_tz=posix_gmt_tz)
-        try:
-            self.remount_rootfs()
+        with rw_fs.Root():
             (r, o, e) = shell.execute_shell(cli)
             if r != 0:
                 log.error('error setting timezone: {e}\n{o}'.format(e=e, o=o))
@@ -38,25 +38,6 @@ class Control(object):
                 return False
             log.debug('change timezone result: {r}\n{o}\n{e}'.format(r=r, o=o, e=e))
             return True
-        finally:
-            self.remount_rootfs(False)
-
-    def is_rootfs_readonly(self):
-        (r, o, e) = shell.execute_shell('mount | grep "on / type ext4 (ro,"')
-        return len(o) > 0
-
-    def remount_rootfs(self, rw=True):
-        log.debug('remount rootfs')
-        if not rw and self.is_rootfs_readonly():
-            log.debug('rootfs is already read-only')
-            return True
-        if rw and not self.is_rootfs_readonly():
-            log.debug('rootfs is already read-write')
-            return True
-        (r, o, e) = shell.execute("sudo mount -o remount,{mode} /".format(mode=('rw' if rw else 'ro')))
-        if r != 0:
-            log.error('fs remount failed: {e}\n{o}'.format(e=e, o=o))
-        return r == 0
 
     def is_hwclock_present(self):
         (r, o, e) = shell.execute("sudo hwclock -r")
@@ -73,11 +54,10 @@ class Control(object):
         log.debug("setting hwclock to system time")
         if not self.is_hwclock_present():
             return False
-        self.remount_rootfs(True)
-        (r, o, e) = shell.execute("sudo hwclock -w")
-        self.remount_rootfs(False)
-        if r != 0:
-            log.error("error setting hardware clock to system time: {e}\n{o}".format(e=e, o=o))
-        return r == 0
+        with rw_fs.Root():
+            (r, o, e) = shell.execute("sudo hwclock -w")
+            if r != 0:
+                log.error("error setting hardware clock to system time: {e}\n{o}".format(e=e, o=o))
+            return r == 0
 
 

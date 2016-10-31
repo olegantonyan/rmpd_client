@@ -8,6 +8,7 @@ import remotecontrol.protocol.incoming.base_playlist_command as base_playlist_co
 import mediaplayer.playercontroller as playercontroller
 import utils.files as files
 import mediaplayer.playlist.loader as loader
+import system.rw_fs as rw_fs
 
 
 log = logging.getLogger(__name__)
@@ -63,7 +64,8 @@ class Worker(base_playlist_command.BaseWorker):
         self._remove_file(self._playlist_fullpath)
 
     def _remove_file(self, file):
-        try:
-            os.remove(file)
-        except FileNotFoundError:
-            pass
+        with rw_fs.Storage():
+            try:
+                os.remove(file)
+            except FileNotFoundError:
+                pass

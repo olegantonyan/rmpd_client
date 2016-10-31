@@ -18,6 +18,7 @@ class SqlExecutor(object):
         self._thread = threading.Thread(target=self._serve)
         self._thread.setDaemon(True)
         self._stop_flag = False
+        self._exec_timeout = 30
         self._thread.start()
 
     def _serve(self):
@@ -32,19 +33,29 @@ class SqlExecutor(object):
                 self._tx.put({"result": result, "ok": True, "error_message": ""})
             except:
                 self._tx.put({"result": [], "ok": False, "error_message": traceback.format_exc()})
+        try:
+            self._conn.close()
+        except:
+            pass
 
     def execute(self, statement, values=()):
         self._rx.put((statement, values))
-        res = self._tx.get()
+        try:
+            res = self._tx.get(block=True, timeout=self._exec_timeout)
+        except queue.Empty:
+            raise SqlError("sql execution timed out ({s} seconds)".format(s=self._exec_timeout))
         if not res['ok']:
             raise SqlError("error while executing sql '{s}' with values '{v}'\n{m}".format(s=statement,
                                                                                            v=str(values),
                                                                                            m=res['error_message']))
         return res
 
-    def __del__(self):
+    def close(self):
         self._stop_flag = True
         try:
             self.execute("SELECT TIME()")  # force execution to fetch from queue
         except:
             pass
+
+    def __del__(self):
+        self.close()
