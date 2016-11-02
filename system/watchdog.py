@@ -10,4 +10,5 @@ class Watchdog(object):
         self._wdt_file = os.path.join(os.getcwd(), "watchdogfile")
 
     def feed(self):
-        shell.execute("touch {f}".format(f=self._wdt_file))
+        pass
+        # shell.execute("touch {f}".format(f=self._wdt_file))

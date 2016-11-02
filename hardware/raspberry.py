@@ -5,6 +5,7 @@ import sys
 import hardware
 import utils.shell
 import utils.threads
+import utils.files as files
 
 
 class PlatformRaspberry(hardware.Platform):
@@ -78,3 +79,7 @@ class PlatformRaspberry(hardware.Platform):
     def _read_pin(self, pin):
         (r, o, e) = utils.shell.execute("gpio -g read {pin}".format(pin=pin))
         return int(o)
+
+    def fix_file_permissions(self, path):
+        files.chown_to_current(path)
+        files.chmod(path, '777')  # can't solve this on OS level

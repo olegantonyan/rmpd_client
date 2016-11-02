@@ -4,7 +4,6 @@ import configparser
 import codecs
 import os
 
-import system.control
 import utils.singleton as singleton
 import system.rw_fs as rw_fs
 
@@ -48,7 +47,7 @@ class Config(object, metaclass=singleton.Singleton):
 
     @_guard_initialization
     def mediafiles_path(self):
-        return self._mediafiles_path
+        return os.path.join(self._storage_path, 'mediafiles')
 
     @_guard_initialization
     def mplayer_executable(self):
@@ -81,7 +80,15 @@ class Config(object, metaclass=singleton.Singleton):
 
     @_guard_initialization
     def wallpaper_path(self):
-        return self._wallpaper_path
+        return os.path.join(self._storage_path, 'wallpaper')
+
+    @_guard_initialization
+    def storage_path(self):
+        return self._storage_path
+
+    @_guard_initialization
+    def temp_path(self):
+        return os.path.join(self._storage_path, 'tmp')
 
     @_guard_initialization
     def _save_value(self, section, option, value):
@@ -108,11 +115,10 @@ class Config(object, metaclass=singleton.Singleton):
         self._verbose = self._parser.get(section, 'verbose')
 
         section = 'player'
-        self._mediafiles_path = self._parser.get(section, 'mediafiles_path')
+        self._storage_path = self._parser.get(section, 'storage_path', fallback=os.getcwd())
         self._mplayer_executable = self._parser.get(section, 'mplayer_executable')
         self._omplayer_executable = self._parser.get(section, 'omxplayer_executable')
         self._omplayer_arguments = self._parser.get(section, 'omxplayer_arguments')
-        self._wallpaper_path = self._parser.get(section, 'wallpaper_path', fallback=os.path.join(os.getcwd(), 'wallpaper'))
 
         section = 'webui'
         self._webui_password = self._parser.get(section, 'password')

@@ -27,4 +27,7 @@ class PlatformPc(hardware.Platform):
         hardware.log.debug("PC platform, network blink: {s}".format(s=state))
         
     def restart_networking(self):
-        hardware.log.debug("PC platform, restart networking")  
+        hardware.log.debug("PC platform, restart networking")
+
+    def fix_file_permissions(self, path):
+        hardware.log.debug("PC platform, fix_file_permissions: {s}".format(s=path))

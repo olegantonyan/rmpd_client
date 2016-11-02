@@ -11,7 +11,7 @@ verbose = yes
 mplayer_executable = mplayer
 omxplayer_executable = omxplayer
 omxplayer_arguments = -o both --blank --no-osd
-mediafiles_path = /var/lib/rmpd/mediafiles
+storage_path = /var/lib/rmpd/
 
 [webui]
 password = admin

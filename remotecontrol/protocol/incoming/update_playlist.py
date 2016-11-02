@@ -10,7 +10,6 @@ import remotecontrol.protocol.incoming.base_playlist_command as base_playlist_co
 import system.status as status
 import remotecontrol.httpclient as httpclient
 import mediaplayer.playercontroller as playercontroller
-import system.rw_fs as rw_fs
 
 log = logging.getLogger(__name__)
 
@@ -69,11 +68,10 @@ class Worker(base_playlist_command.BaseWorker):
         self._success_message = 'playlist updated successfully'
 
     def _run(self):
-        with rw_fs.Storage():
-            for i in self._media_items:
-                self._download_file(i)
-                self._check_terminate()
-            self._utilize_nonplaylist_files(self._media_items, files.mediafiles_path())
+        for i in self._media_items:
+            self._download_file(i)
+            self._check_terminate()
+        self._utilize_nonplaylist_files(self._media_items, files.mediafiles_path())
 
     def _download_file(self, file):
         url = files.full_url_by_relative(file)

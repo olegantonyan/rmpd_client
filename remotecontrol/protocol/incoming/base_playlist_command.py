@@ -8,6 +8,8 @@ import traceback
 import mediaplayer.playlist.playlist as playlist
 import mediaplayer.playlist.loader as loader
 import remotecontrol.protocol.incoming.base_command as base_command
+import mediaplayer.playercontroller as playercontroller
+import system.rw_fs as rw_fs
 
 log = logging.getLogger(__name__)
 
@@ -19,8 +21,9 @@ class BasePlaylistCommand(base_command.BaseCommand):
             return
         localpath = self._playlist_file_path()
         jsondata = json.dumps(playlst)
-        with open(localpath, 'w') as f:
-            f.write(jsondata)
+        with rw_fs.Storage():
+            with open(localpath, 'w') as f:
+                f.write(jsondata)
 
     def _reset_playlist_position(self):
         return playlist.Playlist.reset_position()
@@ -42,7 +45,8 @@ class BaseWorker(threading.Thread):
 
     def run(self):
         try:
-            self._run()
+            with rw_fs.Storage():
+                self._run()
             log.info(self._success_message)
             self._onfinish(True, self._sequence, self._success_message)
         except WorkerTerminated:

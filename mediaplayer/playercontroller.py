@@ -9,6 +9,7 @@ import utils.files as files
 import remotecontrol.protocoldispatcher as protocoldispatcher
 import mediaplayer.playlist.loader as loader
 import mediaplayer.playlist.playlist as playlist
+import system.rw_fs as rw_fs
 
 log = logging.getLogger(__name__)
 
@@ -21,7 +22,8 @@ class PlayerController(object):
     def start_playlist(self):
         mediafiles_fullpath = files.mediafiles_path()
         if not os.path.exists(mediafiles_fullpath):
-            os.makedirs(mediafiles_fullpath)
+            with rw_fs.Storage(restart_player=False):
+                files.mkdir(mediafiles_fullpath)
         
         playlist_fullpath = loader.Loader().filepath()
         if not os.path.exists(playlist_fullpath):

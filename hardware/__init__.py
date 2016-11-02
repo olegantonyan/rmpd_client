@@ -31,6 +31,9 @@ class Platform(object):
     
     def restart_networking(self):
         print("restart network stub")
+
+    def fix_file_permissions(self, path):
+        print("stub fix_file_permissions " + path)
     
 platfrom = Platform()
     

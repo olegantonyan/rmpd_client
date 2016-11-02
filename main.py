@@ -20,6 +20,8 @@ import system.watchdog as watchdog
 import clockd.clockd as clockd
 import system.wallpaper as wallpaper
 import hdmihotplug.hdmihotplug as hdmihotplug
+import utils.files as files
+import system.rw_fs as rw_fs
 
 
 def signal_handler(signum, frame):
@@ -31,7 +33,10 @@ def signal_handler(signum, frame):
 
 
 def setup_logger(console_app=False, verbose_log=False):
-    logging.basicConfig(filename=config.Config().logfile(),
+    logfile = config.Config().logfile()
+    logdir = os.path.dirname(logfile)
+    files.mkdir(logdir)
+    logging.basicConfig(filename=logfile,
                         format="[%(asctime)s] %(name)s |%(levelname)s| %(message)s",
                         datefmt="%Y-%m-%d %H:%M:%S",
                         level=(logging.DEBUG if (verbose_log or config.Config().verbose_logging()) else logging.INFO))
@@ -57,19 +62,29 @@ def bootstrap(configfile, console_app=False, verbose_log=False):
 
 
 def app():
+    hardware.platfrom.fix_file_permissions('/tmp')
+    with rw_fs.Storage(restart_player=False):
+        hardware.platfrom.fix_file_permissions(config.Config().storage_path())
+
     wallpaper.Wallpaper().load()
+
     if config.Config().enable_clockd():
         threads.run_in_thread(clockd.Clockd().run)
+
     threads.run_in_thread(hdmihotplug.HdmiHotplug(onchange_callback=wallpaper.Wallpaper().load).run)
+
     player = playercontroller.PlayerController()
     player.start_playlist()
+
     proto = protocoldispatcher.ProtocolDispatcher()
+
     threads.run_in_thread(webui.start, ['0.0.0.0', 8080])
+
     while True:
         track = player.current_track_name()
         pos = player.current_track_posiotion()
         proto.send('now_playing', track=track, percent_position=pos)
-        # watchdog.Watchdog().feed()
+        watchdog.Watchdog().feed()
         time.sleep(20)
 
 

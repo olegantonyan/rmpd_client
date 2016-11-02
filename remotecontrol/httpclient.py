@@ -7,8 +7,11 @@ import requests.auth
 import requests.packages.urllib3
 import tempfile
 import shutil
+import os
 
 import system.systeminfo as systeminfo
+import utils.config as config
+import utils.files as files
 
 log = logging.getLogger(__name__)
 logging.getLogger("requests").setLevel(logging.WARNING)
@@ -43,7 +46,10 @@ def download_file(url, localpath):
                      stream=True,
                      timeout=60,
                      headers={"User-Agent": systeminfo.user_agent()})
-    temp_file = tempfile.NamedTemporaryFile(delete=False, dir='/var/tmp')  # delete is not required since we are moving it afterward
+    temp_dir = config.Config().temp_path()
+    if not os.path.exists(temp_dir):
+        files.mkdir(temp_dir)
+    temp_file = tempfile.NamedTemporaryFile(delete=False, dir=temp_dir)  # delete is not required since we are moving it afterward
     for chunk in r.iter_content(chunk_size=2048):
         if chunk:  # filter out keep-alive new chunks
             temp_file.write(chunk)
