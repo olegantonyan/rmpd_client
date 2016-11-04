@@ -2,7 +2,6 @@
 
 import logging
 import traceback
-import json
 
 import remotecontrol.httpclient as httpclient
 import remotecontrol.messagequeue as messagequeue
@@ -24,7 +23,7 @@ class ControlWrapper(object):
         log.debug("sending message ({q}): '{s}'".format(s=str(msg), q=("queued" if queued else "immed")))
         if queued:
             data = {'msg': msg, 'seq': seq}
-            self._queue.enqueue(json.dumps(data))
+            self._queue.enqueue(data)
             return True
         else:
             # XXX possible thread-safety problem here
@@ -44,11 +43,10 @@ class ControlWrapper(object):
         threads.run_in_thread(target=self._receive_protocol_callback, args=(msg, seq))
 
     def _check_queue(self):
-        messageid, data = self._queue.dequeue()
-        if data is not None and messageid is not None and len(data) > 0:
-            parsed_data = json.loads(data)
-            if self.send(parsed_data["msg"], False, parsed_data["seq"]):
-                self._queue.remove(messageid)
+        data = self._queue.peek()
+        if data is not None:
+            if self.send(data['msg'], False, data['seq']):
+                self._queue.dequeue()
 
         threads.run_after_timeout(0.01, self._check_queue)
 

@@ -35,7 +35,8 @@ def signal_handler(signum, frame):
 def setup_logger(console_app=False, verbose_log=False):
     logfile = config.Config().logfile()
     logdir = os.path.dirname(logfile)
-    files.mkdir(logdir)
+    if hardware.platfrom.__name__ == 'raspberry':
+        files.mkdir(logdir)
     logging.basicConfig(filename=logfile,
                         format="[%(asctime)s] %(name)s |%(levelname)s| %(message)s",
                         datefmt="%Y-%m-%d %H:%M:%S",

@@ -13,7 +13,7 @@ def _guard_errors(func):
     def wrap(self, *args):
         try:
             result = func(self, *args)
-            # self._error_count = 0
+            self._error_count = 0
             return result
         except utils.sqlexecutor.SqlError:
             self._error_count += 1
@@ -29,7 +29,7 @@ class DbWrapper(object):
         self._db_path = dbpath
         self._db = utils.sqlexecutor.SqlExecutor(self._db_path)
         self._error_count = 0
-        self._max_errors = 15
+        self._max_errors = 5
         try:
             self.create_db()
         except:
