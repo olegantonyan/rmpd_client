@@ -39,6 +39,12 @@ class PlayerController(object):
         
     def quit(self):
         self._player.quit()
+
+    def set_scheduler_callback(self, name, target):
+        return self._scheduler.set_callback(name, target)
+
+    def isplaying(self):
+        return self._player.isplaying()
             
     def current_track_name(self):
         return self._player.filename()

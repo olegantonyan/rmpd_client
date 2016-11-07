@@ -2,6 +2,7 @@
 
 import logging
 import queue
+import time
 
 import utils.singleton
 import utils.threads
@@ -20,6 +21,7 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
         self._player.set_callbacks(onfinished=self.onfinished)
         self._stop_flag = False
         self._preempted_item = None
+        self._callbacks = {}
         utils.threads.run_in_thread(self._loop)
 
     def set_playlist(self, playlist):
@@ -33,6 +35,18 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
             log.info("track finished {f}".format(f=finished_track.filename))
         self._schedule('track_finished')
 
+    def set_callback(self, name, target):
+        self._callbacks[name] = target
+
+    def _run_callback(self, name, *args):
+        cb = self._callbacks.get(name)
+        if cb is None:
+            return
+        try:
+            return cb(*args)
+        except:
+            log.exception("error running {name} callback".format(name=name))
+
     def _play(self, item):
         if item is None:
             self._set_now_playing(None)
@@ -44,6 +58,7 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
                 self._player.suspend()
             else:
                 self._player.stop()
+        self._run_callback('on_before_play', item)
         ok = self._player.play(item)
         if ok:
             self._set_now_playing(item)

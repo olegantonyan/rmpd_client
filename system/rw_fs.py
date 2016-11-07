@@ -72,14 +72,16 @@ class Storage(RwFs):
 
     def _before_remount_to(self, mode):
         if mode == 'ro' and self._restart_player:
-            import mediaplayer.playercontroller as playercontroller
-            playercontroller.PlayerController().stop()
+            self._player().stop()
             shell.execute('sudo sync')
 
     def _after_remount_to(self, mode):
         if mode == 'ro' and self._restart_player:
-            import mediaplayer.playercontroller as playercontroller
-            playercontroller.PlayerController().start_playlist()
+            self._player().start_playlist()
+
+    def _player(self):
+        import mediaplayer.playercontroller as playercontroller
+        return playercontroller.PlayerController()
 
     @staticmethod
     def path():

@@ -95,6 +95,12 @@ class Config(object, metaclass=singleton.Singleton):
         return self._message_queue_sync_period
 
     @_guard_initialization
+    def set_message_queue_sync_period(self, value):
+        value = int(value)
+        self._save_value('remote_control', 'message_queue_sync_period', value)
+        self._message_queue_sync_period = value
+
+    @_guard_initialization
     def _save_value(self, section, option, value):
         with rw_fs.Root():
             self._parser.set(section, option, str(value))
@@ -113,7 +119,7 @@ class Config(object, metaclass=singleton.Singleton):
         self._server_url = self._parser.get(section, 'server_url')
         self._login = self._parser.get(section, 'login')
         self._password = self._parser.get(section, 'password')
-        self._message_queue_sync_period = max(int(self._parser.get(section, 'message_queue_sync_period', fallback=12)), 3)
+        self._message_queue_sync_period = int(self._parser.get(section, 'message_queue_sync_period', fallback=12))
 
         section = 'logging'
         self._logfile = self._parser.get(section, 'logfile')

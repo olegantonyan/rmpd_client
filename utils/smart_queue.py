@@ -46,12 +46,13 @@ class SmartQueue(object):
         values = ["({id}, '{data}', '{created_at}')".format(id=i['id'], data=json.dumps(i['data']), created_at=i['created_at']) for i in self._deque]
         if len(values) > 0:
             qry = "INSERT OR REPLACE INTO '{table}' ([id], [data], [created_at]) VALUES ".format(table=self._db_params['table'])
+            qry += (', '.join(values) + ';')
             if not os.path.exists(self._db_params['path']):
                 self._db.init_db()
-            qry += (', '.join(values) + ';')
             self._db.exec(qry)
-        ids_to_remove = [str(i['id']) for i in self._deque]
-        self._db.exec("DELETE FROM '{table}' WHERE [id] NOT IN ({ids});".format(table=self._db_params['table'], ids=','.join(ids_to_remove)))
+        if os.path.exists(self._db_params['path']):
+            ids_to_remove = [str(i['id']) for i in self._deque]
+            self._db.exec("DELETE FROM '{table}' WHERE [id] NOT IN ({ids});".format(table=self._db_params['table'], ids=','.join(ids_to_remove)))
 
     def _load(self):
         if self._db is None:
@@ -93,6 +94,8 @@ class Db(object):
         try:
             connection = sqlite3.connect(self._path)
             cursor = connection.cursor()
+            cursor.execute('PRAGMA synchronous = 0')
+            cursor.execute('PRAGMA journal_mode = MEMORY')
             cursor.execute(statement, values)
             result = cursor.fetchall()
             connection.commit()

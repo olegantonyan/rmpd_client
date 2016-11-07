@@ -2,7 +2,6 @@
 server_url = https://server.slon-ds.ru
 login = rmpd-vanilla-image
 password = b3a2953f838edb9cf82396aaa12e80db
-message_queue_sync_period = 12
 
 [logging]
 logfile = /var/log/rmpd.log
