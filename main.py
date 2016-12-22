@@ -72,7 +72,7 @@ def app():
     if config.Config().enable_clockd():
         threads.run_in_thread(clockd.Clockd().run)
 
-    threads.run_in_thread(hdmihotplug.HdmiHotplug(onchange_callback=wallpaper.Wallpaper().load).run)
+    #threads.run_in_thread(hdmihotplug.HdmiHotplug(onchange_callback=wallpaper.Wallpaper().load).run)
 
     player = playercontroller.PlayerController()
     player.start_playlist()
