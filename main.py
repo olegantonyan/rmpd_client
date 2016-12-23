@@ -22,6 +22,7 @@ import system.wallpaper as wallpaper
 import hdmihotplug.hdmihotplug as hdmihotplug
 import utils.files as files
 import system.rw_fs as rw_fs
+import xmain
 
 
 def signal_handler(signum, frame):
@@ -67,12 +68,13 @@ def app():
     with rw_fs.Storage(restart_player=False):
         hardware.platfrom.fix_file_permissions(config.Config().storage_path())
 
-    wallpaper.Wallpaper().load()
+    # wallpaper.Wallpaper().load()
 
     if config.Config().enable_clockd():
         threads.run_in_thread(clockd.Clockd().run)
 
-    #threads.run_in_thread(hdmihotplug.HdmiHotplug(onchange_callback=wallpaper.Wallpaper().load).run)
+    # threads.run_in_thread(hdmihotplug.HdmiHotplug(onchange_callback=wallpaper.Wallpaper().load).run)
+    threads.run_in_thread(xmain.start)
 
     player = playercontroller.PlayerController()
     player.start_playlist()
