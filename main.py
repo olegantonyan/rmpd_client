@@ -74,7 +74,7 @@ def app():
         threads.run_in_thread(clockd.Clockd().run)
 
     # threads.run_in_thread(hdmihotplug.HdmiHotplug(onchange_callback=wallpaper.Wallpaper().load).run)
-    threads.run_in_thread(xmain.start)
+    xmain.start()
 
     player = playercontroller.PlayerController()
     player.start_playlist()
@@ -89,6 +89,7 @@ def app():
         proto.send('now_playing', track=track, percent_position=pos)
         watchdog.Watchdog().feed()
         time.sleep(20)
+        xmain.send({'type': 'show_image', 'path': wallpaper.Wallpaper().default_image_path()})
 
 
 class DaemonApp(daemon.Daemon):
