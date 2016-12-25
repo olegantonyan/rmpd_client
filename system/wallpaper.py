@@ -6,6 +6,7 @@ import utils.shell as shell
 import utils.singleton
 import hardware
 import utils.config as config
+import xmain
 
 
 class Wallpaper(object, metaclass=utils.singleton.Singleton):
@@ -24,6 +25,7 @@ class Wallpaper(object, metaclass=utils.singleton.Singleton):
     def show(self, filepath):
         if hardware.platfrom.__name__ != 'raspberry':
             return True
+        xmain.send({'type': 'show_image', 'path': filepath})
         if self._cpid is not None:
             self.hide()
         (r, o, e, p) = shell.execute_child_pid("sudo fbi {} --noverbose -T 1".format(filepath))

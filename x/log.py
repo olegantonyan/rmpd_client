@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import x.global_daemon_wrapper as gdw
+import x.wrappers as wrappers
 
 
 def _write(level, source, msg):
-    return gdw.get().send({'type': 'log', 'message': msg, 'level': level, 'source': source})
+    return wrappers.Wrappers().daemon().send({'type': 'log', 'message': msg, 'level': level, 'source': source})
 
 
 def debug(source, msg):

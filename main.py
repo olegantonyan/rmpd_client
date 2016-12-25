@@ -63,18 +63,23 @@ def bootstrap(configfile, console_app=False, verbose_log=False):
     signal.signal(signal.SIGTERM, signal_handler)
 
 
+# def resolution_changed():
+#    xmain.restart()
+#    wallpaper.Wallpaper().load()
+
+
 def app():
     hardware.platfrom.fix_file_permissions('/tmp')
     with rw_fs.Storage(restart_player=False):
         hardware.platfrom.fix_file_permissions(config.Config().storage_path())
 
-    # wallpaper.Wallpaper().load()
+    xmain.start()
+    wallpaper.Wallpaper().load()
 
     if config.Config().enable_clockd():
         threads.run_in_thread(clockd.Clockd().run)
 
-    # threads.run_in_thread(hdmihotplug.HdmiHotplug(onchange_callback=wallpaper.Wallpaper().load).run)
-    xmain.start()
+    # threads.run_in_thread(hdmihotplug.HdmiHotplug(onchange_callback=resolution_changed).run)
 
     player = playercontroller.PlayerController()
     player.start_playlist()
@@ -82,14 +87,12 @@ def app():
     proto = protocoldispatcher.ProtocolDispatcher()
 
     threads.run_in_thread(webui.start, ['0.0.0.0', 8080])
-
     while True:
         track = player.current_track_name()
         pos = player.current_track_posiotion()
         proto.send('now_playing', track=track, percent_position=pos)
         watchdog.Watchdog().feed()
         time.sleep(20)
-        xmain.send({'type': 'show_image', 'path': wallpaper.Wallpaper().default_image_path()})
 
 
 class DaemonApp(daemon.Daemon):

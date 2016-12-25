@@ -24,6 +24,6 @@ else
     PORT=$4
 fi
 
-sshpass -p $PASSWORD scp -P $PORT $1 rmpd@$2:/tmp && sshpass -p $PASSWORD ssh rmpd@$2 -p $PORT "sudo mount -o remount,rw / && cd /tmp && sudo tar -xvf $(basename $DIST) -C /home/rmpd/ && sync"
+sshpass -p $PASSWORD scp -P $PORT $1 rmpd@$2:/tmp && sshpass -p $PASSWORD ssh rmpd@$2 -p $PORT "sudo mount -o remount,rw / && cd /tmp && sudo tar -xvf $(basename $DIST) -C /home/rmpd/ && sync && sudo reboot"
 
 exit $?

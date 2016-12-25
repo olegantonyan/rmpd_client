@@ -16,8 +16,12 @@ class AppWindow(Qt.QWidget):
         self.image_label.setSizePolicy(Qt.QSizePolicy.Expanding, Qt.QSizePolicy.Expanding)
         self.image_label.setAlignment(Qt.Qt.AlignCenter)
 
+        # l = Qt.QLabel(self)
+        # l.setText(" ____________________________________________________________ " + str(self._width()) + 'x' + str(self._height()))
+
         self.layout = Qt.QGridLayout()
         self.layout.addWidget(self.image_label, 0, 0)
+        # self.layout.addWidget(l,0,0)
         self.setLayout(self.layout)
         self.showFullScreen()
 
