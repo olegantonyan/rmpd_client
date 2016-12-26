@@ -71,11 +71,8 @@ class PipeDuplex(object):
 
 class Parent(PipeDuplex):
     def __init__(self):
-        shell.execute_shell('sudo chmod 777 /dev/tty*')
-        env = os.environ.copy()
-        env['XAUTHORITY'] = '/tmp/Xauthority'
-        cli = ['startx', sys.executable, os.path.abspath(__file__), '--', '-nocursor', '-logfile', '/dev/null']
-        self._proc = subprocess.Popen(cli, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, env=env)
+        shell.execute_shell('sudo chmod 770 /dev/tty*')
+        self._proc = self._spawn_process()
         super().__init__()
 
     def stop(self):
@@ -84,6 +81,12 @@ class Parent(PipeDuplex):
             self._proc.wait(timeout=5)
         except subprocess.TimeoutExpired:
             self._proc.kill()
+
+    def _spawn_process(self):
+        env = os.environ.copy()
+        env['XAUTHORITY'] = '/tmp/Xauthority'
+        cli = ['startx', sys.executable, os.path.abspath(__file__), '--', '-nocursor', '-logfile', '/dev/null', '-dpms', '-s', '0']
+        return subprocess.Popen(cli, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, env=env)
 
     def _read_pipe(self):
         return self._proc.stdout.readline().decode('utf-8').rstrip()

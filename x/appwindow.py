@@ -16,18 +16,15 @@ class AppWindow(Qt.QWidget):
         self.image_label.setSizePolicy(Qt.QSizePolicy.Expanding, Qt.QSizePolicy.Expanding)
         self.image_label.setAlignment(Qt.Qt.AlignCenter)
 
-        # l = Qt.QLabel(self)
-        # l.setText(" ____________________________________________________________ " + str(self._width()) + 'x' + str(self._height()))
-
         self.layout = Qt.QGridLayout()
         self.layout.addWidget(self.image_label, 0, 0)
-        # self.layout.addWidget(l,0,0)
         self.setLayout(self.layout)
         self.showFullScreen()
 
     def show_image(self, image_path):
         pixmap = Qt.QPixmap(image_path)
-        scaled = pixmap.scaledToHeight(min(self._height(), self._width()))
+        height = self._height()
+        scaled = pixmap.scaledToHeight(height, Qt.Qt.SmoothTransformation)
         self.image_label.setPixmap(scaled)
 
     def _height(self):

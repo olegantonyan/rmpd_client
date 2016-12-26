@@ -1,8 +1,0 @@
-[Unit]
-Description=clean /var/tmp
-
-[Service]
-ExecStart=/home/rmpd/rmpd_client/tools/clean_tmp.sh
-
-[Install]
-WantedBy=multi-user.target
