@@ -27,6 +27,7 @@ import xmain
 
 def signal_handler(signum, frame):
     logging.info("caught signal {s}".format(s=signum))
+    xmain.stop()
     playercontroller.PlayerController().quit()
     hardware.platfrom.set_all_leds_disabled()
     logging.warning("terminated")
@@ -124,7 +125,11 @@ def main():
         if opts.workingdir:
             os.chdir(opts.workingdir)
         bootstrap(opts.configfile if opts.configfile else "rmpd.conf", True, opts.verbose)
-        sys.exit(app())
+        try:
+            sys.exit(app())
+        except KeyboardInterrupt:
+            xmain.stop()
+            raise
     else:
         if not opts.pidfile:
             parser.error("no pid file specified for daemon mode")

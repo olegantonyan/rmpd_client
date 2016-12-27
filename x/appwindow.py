@@ -22,10 +22,12 @@ class AppWindow(Qt.QWidget):
         self.showFullScreen()
 
     def show_image(self, image_path):
+        if image_path is None:
+            return self.image_label.clear()
         pixmap = Qt.QPixmap(image_path)
         height = self._height()
         scaled = pixmap.scaledToHeight(height, Qt.Qt.SmoothTransformation)
-        self.image_label.setPixmap(scaled)
+        return self.image_label.setPixmap(scaled)
 
     def _height(self):
         screen = Qt.QDesktopWidget().screenGeometry()

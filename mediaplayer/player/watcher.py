@@ -154,7 +154,7 @@ class Watcher(object, metaclass=singleton.Singleton):
         if self._isplaying():
             self._guard.execute('stop')
             self._onstop(self._get_expected_state()[1]['item'])
-        if self._guard.execute('play', filepath=item.filepath):
+        if self._guard.execute('play', filepath=item.filepath, show_duration=item.show_duration, mime_type=item.mime_type):
             self._onplay(item)
             self._set_expected_state('playing', item=item)
             return True
@@ -179,7 +179,7 @@ class Watcher(object, metaclass=singleton.Singleton):
             self._run_callback('onerror', item=item)
             return False
 
-        if self._guard.execute('play', filepath=item.filepath, start_position=position_seconds):
+        if self._guard.execute('play', filepath=item.filepath, start_position=position_seconds, show_duration=item.show_duration, mime_type=item.mime_type):
             self._onresume(item, position_seconds)
             self._set_expected_state('playing', item=item)
             self._watchdog.resumed_at(item, position_seconds)

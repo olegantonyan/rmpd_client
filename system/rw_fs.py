@@ -4,6 +4,7 @@ import logging
 import time
 
 import utils.shell as shell
+import hardware
 
 
 log = logging.getLogger(__name__)
@@ -38,6 +39,8 @@ class RwFs(object):
         return 'rw'
 
     def _remount_fs(self, mode='rw'):
+        if hardware.platfrom.__name__ != 'raspberry':
+            return True
         for i in range(10):
             log.info("remount {fs} {mode}".format(fs=self._fs, mode=mode))
             shell.execute('sudo sync')

@@ -22,7 +22,7 @@ class OMXPlayer(object):
         self._process = None
         self._position_thread = None
 
-    def play(self, mediafile, start_pos=0):
+    def play(self, mediafile, start_pos=0, *_):
         if not self.isstopped():
             self.stop()
         self._fileinfo = self._get_fileinfo(mediafile)

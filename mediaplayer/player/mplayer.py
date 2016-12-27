@@ -24,16 +24,10 @@ class MPlayer(object):
     def isstopped(self):
         return self._player is not None and self.filename() is None and self.length() is None
 
-    def play_list(self, playlist):
-        self._player.loadlist(playlist)
-
-    def play(self, filename, start_position=0):
+    def play(self, filename, start_position=0, *_):
         self._player.loadfile(filename)
         if start_position != 0:
             self.seek(int(start_position), self.SEEK_MODE_SECONDS_ABSOLUTE)
-
-    def pause(self):
-        self._player.pause()
 
     def stop(self):
         self._player.stop()
@@ -56,20 +50,11 @@ class MPlayer(object):
             return self._player.percent_pos
         return d
 
-    def path(self):
-        d = self._player.path
-        if d is None:
-            return self._player.path
-        return self._player.path
-
     def filename(self):
         d = self._player.filename
         if d is None:
             return self._player.filename
         return d
-
-    def loop(self, value):
-        self._player.loop = value
 
     def length(self):
         d = self._player.length

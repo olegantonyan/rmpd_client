@@ -59,6 +59,14 @@ class Item(object):
         return self._d['playbacks_per_day']
 
     @property
+    def show_duration(self):
+        return self._d['show_duration']
+
+    @property
+    def mime_type(self):
+        return self._d['content_type']
+
+    @property
     def is_background(self):
         return self.type == 'background'
 

@@ -16,6 +16,7 @@ import x.wrappers as wrappers
 import x.log as log
 import utils.threads as threads
 import utils.shell as shell
+import hardware
 
 
 class PipeDuplex(object):
@@ -71,9 +72,10 @@ class PipeDuplex(object):
 
 class Parent(PipeDuplex):
     def __init__(self):
-        shell.execute_shell('sudo chmod 770 /dev/tty*')
         self._proc = self._spawn_process()
         super().__init__()
+        self._last_command = None
+        threads.run_in_thread(self._watchdog)
 
     def stop(self):
         super().stop()
@@ -83,17 +85,31 @@ class Parent(PipeDuplex):
             self._proc.kill()
 
     def _spawn_process(self):
-        env = os.environ.copy()
-        env['XAUTHORITY'] = '/tmp/Xauthority'
-        cli = ['startx', sys.executable, os.path.abspath(__file__), '--', '-nocursor', '-logfile', '/dev/null', '-dpms', '-s', '0']
-        return subprocess.Popen(cli, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, env=env)
+        if hardware.platfrom.__name__ == 'raspberry':
+            shell.execute_shell('sudo chmod 770 /dev/tty*')
+            env = os.environ.copy()
+            env['XAUTHORITY'] = '/tmp/Xauthority'
+            cli = ['startx', sys.executable, os.path.abspath(__file__), '--', '-nocursor', '-logfile', '/dev/null', '-dpms', '-s', '0']
+            return subprocess.Popen(cli, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, env=env)
+        else:
+            return subprocess.Popen([sys.executable, os.path.abspath(__file__)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
 
     def _read_pipe(self):
         return self._proc.stdout.readline().decode('utf-8').rstrip()
 
     def _write_pipe(self, data):
+        self._last_command = data
         self._proc.stdin.write(bytes(data + '\n', 'utf-8'))
         self._proc.stdin.flush()
+
+    def _watchdog(self):
+        while not self._stop_flag:
+            time.sleep(1.62)
+            if not self._stop_flag and self._proc.poll() is not None:
+                self._proc = self._spawn_process()
+                if self._last_command is not None:
+                    # time.sleep(2)
+                    self._write_pipe(self._last_command)
 
 
 class Child(PipeDuplex):
