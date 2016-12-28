@@ -10,6 +10,9 @@ class Platform(object):
     @property
     def __name__(self):
         return "stub"
+
+    def initialize(self):
+        pass
     
     def set_network_led(self, state):
         print("stub platform, network: {s}".format(s=state))

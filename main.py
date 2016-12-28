@@ -57,6 +57,7 @@ def setup_logger(console_app=False, verbose_log=False):
 
 
 def bootstrap(configfile, console_app=False, verbose_log=False):
+    hardware.platfrom.initialize()
     config.Config().set_configfile(configfile)
     setup_logger(console_app, verbose_log)
     logging.info("using config file: '{c}'".format(c=configfile))

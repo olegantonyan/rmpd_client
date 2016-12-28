@@ -12,20 +12,24 @@ class PlatformRaspberry(hardware.Platform):
     @property
     def __name__(self):
         return "raspberry"
-    
+
     def __init__(self):
-        hardware.Platform.__init__(self)
-        self.__network_pin = 22
-        self.__player_pin = 21
+        super().__init__()
+        self._network_pin = 22
+        self._player_pin = 21
+        self._blink_network = False
+        self._init_timer_once = False
+
+    def initialize(self):
         try:
             r, o, e = utils.shell.execute("gpio -v")
             if r != 0:
-                sys.exit("WiringPI gpio does not work properly: 'gpio -v' result: {r}, stdout: {o}, stderr: {e}\nPlease, install it http://wiringpi.com\nTerminated".format(r=r, o=o, e=e))
+                sys.exit(
+                    "WiringPI gpio does not work properly: 'gpio -v' result: {r}, stdout: {o}, stderr: {e}\nPlease, install it http://wiringpi.com\nTerminated".format(
+                        r=r, o=o, e=e))
         except OSError:
             sys.exit("No wiringPI gpio utility \nPlease, install it http://wiringpi.com\nTerminated")
-        self._setup_pins([self.__network_pin, self.__player_pin])
-        self._blink_network = False
-        self._init_timer_once = False
+        self._setup_pins([self._network_pin, self._player_pin])
     
     def get_webui_interface(self):
         return 'eth0:0'
@@ -43,16 +47,16 @@ class PlatformRaspberry(hardware.Platform):
     
     def set_network_led(self, state):
         hardware.log.debug("Raspberry Pi platform, network: {s}".format(s=state))
-        self._write_pin(self.__network_pin, 1 if state else 0)
+        self._write_pin(self._network_pin, 1 if state else 0)
     
     def set_player_led(self, state):
         hardware.log.debug("Raspberry Pi platform, player: {s}".format(s=state))
-        self._write_pin(self.__player_pin, 1 if state else 0)
+        self._write_pin(self._player_pin, 1 if state else 0)
         
     def set_all_leds_disabled(self):
         hardware.log.debug("Raspberry Pi platform, disable all leds")
-        self._write_pin(self.__player_pin, 0)
-        self._write_pin(self.__network_pin, 0)
+        self._write_pin(self._player_pin, 0)
+        self._write_pin(self._network_pin, 0)
     
     def set_network_blink_led(self, state):
         hardware.log.debug("Raspberry Pi platform, network blink: {s}".format(s=state))
@@ -63,10 +67,10 @@ class PlatformRaspberry(hardware.Platform):
             
     def _blink_network_pin(self):
         if self._blink_network:
-            if self._read_pin(self.__network_pin) == 1:
-                self._write_pin(self.__network_pin, 0)
+            if self._read_pin(self._network_pin) == 1:
+                self._write_pin(self._network_pin, 0)
             else:
-                self._write_pin(self.__network_pin, 1)
+                self._write_pin(self._network_pin, 1)
         utils.threads.run_after_timeout(0.4, self._blink_network_pin)
                     
     def _setup_pins(self, pins):
