@@ -24,3 +24,11 @@ def camelcase_to_underscore(s):
 
 def list_compact(arg):
     return [j for j in arg if j is not None]
+
+
+def join_list_excerpt(lst, max_size, char=', '):
+    sz = len(lst)
+    if sz > max_size:
+        lst = lst[0:max_size]
+        lst.append('... and {c} more'.format(c=sz - max_size))
+    return char.join(lst)
