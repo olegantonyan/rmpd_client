@@ -23,8 +23,8 @@ class Address(object):
     def __init__(self, iface):
         self._iface = iface
         self._all_ifaces = webui.models.debinterface.interfaces.interfaces()
-        self._iface_actual = self._get_ifaces_actual().get(self._iface, None)
-        self._iface_config = self._get_ifaces_config().get(self._iface, None)
+        self._iface_actual = self._get_ifaces_actual().get(self._iface, {})
+        self._iface_config = self._get_ifaces_config().get(self._iface, {})
         self._error = ''
         self._iface_config_changed = False
 
