@@ -60,7 +60,6 @@ def bootstrap(configfile, verbose_log=False):
 
 
 def app():
-    hardware.platfrom.fix_file_permissions('/tmp')
     with rw_fs.Storage(restart_player=False):
         hardware.platfrom.fix_file_permissions(config.Config().storage_path())
 

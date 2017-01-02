@@ -60,4 +60,11 @@ class Control(object):
                 log.error("error setting hardware clock to system time: {e}\n{o}".format(e=e, o=o))
             return r == 0
 
-
+    def set_system_time_from_hwclock(self):
+        log.debug("setting system time from hwclock")
+        if not self.is_hwclock_present():
+            return False
+        (r, o, e) = shell.execute_shell('sudo hwclock -s')
+        if r != 0:
+            log.error("error setting the time from hwclock: {e}\n{o}".format(e=e, o=o))
+        return r == 0

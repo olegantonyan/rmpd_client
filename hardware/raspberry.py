@@ -6,6 +6,7 @@ import hardware
 import utils.shell
 import utils.threads
 import utils.files as files
+import system.control as control
 
 
 class PlatformRaspberry(hardware.Platform):
@@ -30,6 +31,8 @@ class PlatformRaspberry(hardware.Platform):
         except OSError:
             sys.exit("No wiringPI gpio utility \nPlease, install it http://wiringpi.com\nTerminated")
         self._setup_pins([self._network_pin, self._player_pin])
+        self.fix_file_permissions('/tmp')
+        control.Control().set_system_time_from_hwclock()
     
     def get_webui_interface(self):
         return 'eth0:0'

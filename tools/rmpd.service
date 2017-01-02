@@ -3,7 +3,7 @@ Description=rmpd client
 Wants=network.target logrotate_boot.service
 
 [Service]
-ExecStart=/usr/bin/python3 /home/rmpd/rmpd_client/main.py -c /home/rmpd/rmpd_client/rmpd.conf
+ExecStart=/usr/bin/python3 -B /home/rmpd/rmpd_client/main.py -c /home/rmpd/rmpd_client/rmpd.conf
 User=rmpd
 WorkingDirectory=/var/lib/rmpd/
 Restart=always

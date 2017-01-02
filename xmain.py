@@ -89,7 +89,7 @@ class Parent(PipeDuplex):
             shell.execute_shell('sudo chmod 770 /dev/tty*')
             env = os.environ.copy()
             env['XAUTHORITY'] = '/tmp/Xauthority'
-            cli = ['startx', sys.executable, os.path.abspath(__file__), '--', '-nocursor', '-logfile', '/dev/null', '-dpms', '-s', '0']
+            cli = ['startx', sys.executable, '-B', os.path.abspath(__file__), '--', '-nocursor', '-logfile', '/dev/null', '-dpms', '-s', '0']
             return subprocess.Popen(cli, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, env=env)
         else:
             return subprocess.Popen([sys.executable, os.path.abspath(__file__)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)

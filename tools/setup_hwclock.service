@@ -1,8 +1,0 @@
-[Unit]
-Description=set current time from hwclock if present
-
-[Service]
-ExecStart=/sbin/hwclock -s
-
-[Install]
-WantedBy=multi-user.target
