@@ -27,6 +27,7 @@ class AppWindow(Qt.QWidget):
         pixmap = Qt.QPixmap(image_path)
         height = self._height()
         scaled = pixmap.scaledToHeight(height, Qt.Qt.SmoothTransformation)
+        self.image_label.setAlignment(Qt.Qt.AlignCenter)
         return self.image_label.setPixmap(scaled)
 
     def _height(self):
@@ -36,3 +37,4 @@ class AppWindow(Qt.QWidget):
     def _width(self):
         screen = Qt.QDesktopWidget().screenGeometry()
         return screen.width()
+
