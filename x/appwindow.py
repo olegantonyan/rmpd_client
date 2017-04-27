@@ -18,6 +18,8 @@ class AppWindow(Qt.QWidget):
 
         self.layout = Qt.QGridLayout()
         self.layout.addWidget(self.image_label, 0, 0)
+        self.layout.setSpacing(0)
+        self.layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self.layout)
         self.showFullScreen()
 
