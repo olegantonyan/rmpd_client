@@ -1,5 +1,5 @@
 bottle==0.12.9
-git+git://github.com/olegantonyan/mplayer.py.git@master#egg=mplayer
+mplayer.py==0.7.1
 netifaces==0.10.5
 ntplib==0.3.3
 pexpect==4.2.1
