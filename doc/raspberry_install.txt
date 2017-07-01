@@ -17,7 +17,7 @@ Update/install soft
   git clone git://git.drogon.net/wiringPi && cd wiringPi && ./build && cd .. && rm -rf wiringPi/
   
 Network
-  echo -e "auto lo\niface lo inet loopback\nauto eth0\niface eth0 inet dhcp\nauto eth0:0\niface eth0:0 inet static\n\taddress 10.10.10.2\n\tnetmask 255.255.255.252\n" > /etc/network/interfaces
+  echo -e "auto lo\niface lo inet loopback\nauto eth0\niface eth0 inet dhcp\nauto eth0:0\niface eth0:0 inet static\n\taddress 10.10.10.2\n\tnetmask 255.255.255.252\nauto wlan0\niface wlan0 inet dhcp\n\twpa-ssid example\n\twpa-psk example\n" > /etc/network/interfaces
   rm /etc/udev/rules.d/70-persistent-net.rules
   
 Watchdog
