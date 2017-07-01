@@ -16,12 +16,16 @@
             <td>{{ "yes" if online else "no" }}</td>
         </tr>
         <tr>
-            <td>WebUI IP</td>
-            <td>{{webui_ip}}</td>
+            <td>Static IP</td>
+            <td>{{static_ip}}</td>
         </tr>
         <tr>
-            <td>Main IP</td>
-            <td>{{main_ip}}</td>
+            <td>Ethernet IP</td>
+            <td>{{ethernet_ip}}</td>
+        </tr>
+        <tr>
+            <td>WiFi IP</td>
+            <td>{{wifi_ip}}</td>
         </tr>
     </tbody>
 </table>

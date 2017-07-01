@@ -27,12 +27,16 @@ class Address(object):
         self._iface_config_changed = False
 
     @staticmethod
-    def iface_name_webui():
-        return hardware.platfrom.get_webui_interface()
+    def iface_name_static():
+        return hardware.platfrom.get_static_interface()
 
     @staticmethod
-    def iface_name_main():
-        return hardware.platfrom.get_main_interface()
+    def iface_name_ethernet():
+        return hardware.platfrom.get_ethernet_interface()
+
+    @staticmethod
+    def iface_name_wifi():
+        return hardware.platfrom.get_wifi_interface()
 
     def addr_configured(self):
         return self._iface_config
@@ -60,36 +64,37 @@ class Address(object):
         with rw_fs.Root():
             try:
                 new_ifaces = self._all_ifaces
-                for i in self._all_ifaces:
-                    if self._iface == i.name:
-                        if self._iface_config['source'] not in ['dhcp', 'static']:
-                            self._error = "Invalid address source"
+                for i in new_ifaces:
+                    if self._iface != i.name:
+                        continue
+                    if self._iface_config['source'] not in ['dhcp', 'static']:
+                        self._error = "Invalid address source"
+                        return False
+                    i.src = self._iface_config['source']
+                    if i.src != 'dhcp':
+                        if self._validate_ip(self._iface_config['addr']):
+                            i.address = self._iface_config['addr']
+                        else:
+                            self._error = "No static IP address specified"
                             return False
-                        i.src = self._iface_config['source']
-                        if i.src != 'dhcp':
-                            if self._validate_ip(self._iface_config['addr']):
-                                i.address = self._iface_config['addr']
-                            else:
-                                self._error = "No static IP address specified"
-                                return False
-                            if self._validate_ip(self._iface_config['netmask']):
-                                i.netmask = self._iface_config['netmask']
-                            else:
-                                self._error = "No netmask specified"
-                                return False
-                            if self._validate_ip(self._iface_config['gateway']):
-                                i.gateway = self._iface_config['gateway']
-                            else:
-                                self._error = "No gateway specified"
-                                return False
-                            if len(self._iface_config['nameservers']) > 0 and len(self._iface_config['nameservers'][0]) > 0:
-                                for ns in self._iface_config['nameservers']:
-                                    if not self._validate_ip(ns):
-                                        self._error = "Invalid DNS nameserver address"
-                                        return False
-                                i.dns_nameservers = self._iface_config['nameservers']
-                            else:
-                                i.dns_nameservers = [i.gateway]
+                        if self._validate_ip(self._iface_config['netmask']):
+                            i.netmask = self._iface_config['netmask']
+                        else:
+                            self._error = "No netmask specified"
+                            return False
+                        if self._validate_ip(self._iface_config['gateway']):
+                            i.gateway = self._iface_config['gateway']
+                        else:
+                            self._error = "No gateway specified"
+                            return False
+                        if len(self._iface_config['nameservers']) > 0 and len(self._iface_config['nameservers'][0]) > 0:
+                            for ns in self._iface_config['nameservers']:
+                                if not self._validate_ip(ns):
+                                    self._error = "Invalid DNS nameserver address"
+                                    return False
+                            i.dns_nameservers = self._iface_config['nameservers']
+                        else:
+                            i.dns_nameservers = [i.gateway]
 
                 interfaces.Interfaces(self.interfaces_path).write(interfaces.Interfaces.dump_all(new_ifaces))
                 self._all_ifaces = new_ifaces

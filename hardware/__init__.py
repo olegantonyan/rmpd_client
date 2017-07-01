@@ -26,11 +26,14 @@ class Platform(object):
     def set_network_blink_led(self, state):
         print("stub platform, network blink: {s}".format(s=state))
         
-    def get_webui_interface(self):
-        return "(stub webui iface)"
+    def get_static_interface(self):
+        return "(stub static iface)"
     
-    def get_main_interface(self):
-        return "(stub main iface)"
+    def get_ethernet_interface(self):
+        return "(stub ethernet iface)"
+
+    def get_wifi_interface(self):
+        return "(stub wifi iface)"
     
     def restart_networking(self):
         print("restart network stub")

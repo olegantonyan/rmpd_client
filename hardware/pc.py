@@ -8,11 +8,14 @@ class PlatformPc(hardware.Platform):
     def __name__(self):
         return "pc"
     
-    def get_webui_interface(self):
-        return 'eth0'
+    def get_static_interface(self):
+        return 'eth0:0'
     
-    def get_main_interface(self):
+    def get_ethernet_interface(self):
         return 'eth0'
+
+    def get_wifi_interface(self):
+        return 'wlan0'
 
     def set_network_led(self, state):
         hardware.log.debug("PC platform, network: {s}".format(s=state))

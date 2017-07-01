@@ -34,11 +34,14 @@ class PlatformRaspberry(hardware.Platform):
         self.fix_file_permissions('/tmp')
         control.Control().set_system_time_from_hwclock()
     
-    def get_webui_interface(self):
+    def get_static_interface(self):
         return 'eth0:0'
     
-    def get_main_interface(self):
+    def get_ethernet_interface(self):
         return 'eth0'
+
+    def get_wifi_interface(self):
+        return 'wlan0'
     
     def restart_networking(self):
         hardware.log.warning("restarting network")

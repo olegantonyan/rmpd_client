@@ -36,17 +36,19 @@ def home_variables():
 
 
 def status_variables():
-    addr_webui = webui.models.address.Address(webui.models.address.Address.iface_name_webui())
-    addr_main = webui.models.address.Address(webui.models.address.Address.iface_name_main())
+    addr_static = webui.models.address.Address(webui.models.address.Address.iface_name_static())
+    addr_eth = webui.models.address.Address(webui.models.address.Address.iface_name_ethernet())
+    addr_wifi = webui.models.address.Address(webui.models.address.Address.iface_name_wifi())
     return {'g': global_variables(),
             'online': webui.models.status.Status.online(),
             'now_playing': webui.models.status.Status.current_track_name(),
-            'webui_ip': addr_webui.addr_summary(),
-            'main_ip': addr_main.addr_summary()}
+            'static_ip': addr_static.addr_summary(),
+            'ethernet_ip': addr_eth.addr_summary(),
+            'wifi_ip': addr_wifi.addr_summary()}
 
 
 def settings_variables():
-    a = webui.models.address.Address(webui.models.address.Address.iface_name_main())
+    a = webui.models.address.Address(webui.models.address.Address.iface_name_ethernet())
     dhcp = True if a.addr_configured().get('source', '') == 'dhcp' else False
     if dhcp:
         f = a.addr_actual
@@ -94,7 +96,7 @@ def change_password_form_handler():
 @post("/settings/change_address")
 @auth_basic(check_pass, "default: admin/admin")
 def change_address_form_handler():
-    addr_main = webui.models.address.Address(webui.models.address.Address.iface_name_main())
+    addr_main = webui.models.address.Address(webui.models.address.Address.iface_name_ethernet())
     use_dhcp = request.forms.get('use_dhcp')
     if use_dhcp:
         addr_main.set_addr({'source': 'dhcp'})
