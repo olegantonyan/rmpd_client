@@ -48,20 +48,37 @@ def status_variables():
 
 
 def settings_variables():
-    a = webui.models.address.Address(webui.models.address.Address.iface_name_ethernet())
-    dhcp = True if a.addr_configured().get('source', '') == 'dhcp' else False
-    if dhcp:
-        f = a.addr_actual
+    eth = webui.models.address.Address(webui.models.address.Address.iface_name_ethernet())
+    eth_dhcp = True if eth.addr_configured().get('source', '') == 'dhcp' else False
+    if eth_dhcp:
+        eth_f = eth.addr_actual
     else:
-        f = a.addr_configured
-    return {'g': global_variables(),
-            'addr_form_values': {'dhcp': dhcp,
-                                 'addr': f().get('addr', ''),
-                                 'netmask': f().get('netmask', ''),
-                                 'gateway': f().get('gateway', ''),
-                                 'nameservers': ', '.join(f().get('nameservers', []))
-                                 }
-            }
+        eth_f = eth.addr_configured
+    result = {'g': global_variables()}
+    result['ethernet_addr_form_values'] = {
+        'dhcp': eth_dhcp,
+        'addr': eth_f().get('addr', '') or '',
+        'netmask': eth_f().get('netmask', '') or '',
+        'gateway': eth.addr_configured().get('gateway', '') or '',
+        'nameservers': ', '.join(eth.addr_configured().get('nameservers', []))
+    }
+
+    wifi = webui.models.address.Address(webui.models.address.Address.iface_name_wifi())
+    wifi_dhcp = True if wifi.addr_configured().get('source', '') == 'dhcp' else False
+    if wifi_dhcp:
+        wifi_f = wifi.addr_actual
+    else:
+        wifi_f = wifi.addr_configured
+    result['wifi_addr_form_values'] = {
+        'dhcp': wifi_dhcp,
+        'addr': wifi_f().get('addr', '') or '',
+        'netmask': wifi_f().get('netmask', '') or '',
+        'gateway': wifi.addr_configured().get('gateway', '') or '',
+        'nameservers': ', '.join(wifi.addr_configured().get('nameservers', [])),
+        'psk': wifi.addr_configured().get('psk', '') or '',
+        'ssid': wifi.addr_configured().get('ssid', '') or ''
+    }
+    return result
 
 
 @get("/")
@@ -93,23 +110,47 @@ def change_password_form_handler():
     abort(403, pw.errors())
 
 
-@post("/settings/change_address")
+@post("/settings/change_ethernet_address")
 @auth_basic(check_pass, "default: admin/admin")
-def change_address_form_handler():
-    addr_main = webui.models.address.Address(webui.models.address.Address.iface_name_ethernet())
+def change_ethernet_address_form_handler():
+    model = webui.models.address.Address(webui.models.address.Address.iface_name_ethernet())
     use_dhcp = request.forms.get('use_dhcp')
     if use_dhcp:
-        addr_main.set_addr({'source': 'dhcp'})
+        model.set_addr({'source': 'dhcp'})
     else:
-        addr_main.set_addr({'source': 'static',
-                            'addr': request.forms.get('addr'),
-                            'netmask': request.forms.get('netmask'),
-                            'gateway': request.forms.get('gateway'),
-                            'nameservers': request.forms.get('nameservers').split(',')})
-    if addr_main.save():
+        model.set_addr({'source': 'static',
+                        'addr': request.forms.get('addr'),
+                        'netmask': request.forms.get('netmask'),
+                        'gateway': request.forms.get('gateway'),
+                        'nameservers': request.forms.get('nameservers').split(',')})
+    if model.save():
         webui.models.system.System().restart_network()
         redirect("/settings")
-    abort(403, addr_main.error())
+    abort(403, model.error())
+
+
+@post("/settings/change_wifi_address")
+@auth_basic(check_pass, "default: admin/admin")
+def change_wifi_address_form_handler():
+    model = webui.models.address.Address(webui.models.address.Address.iface_name_wifi())
+    use_dhcp = request.forms.get('use_dhcp')
+    addr = {}
+    if use_dhcp:
+        addr['source'] = 'dhcp'
+    else:
+        addr['source'] = 'static'
+        addr['addr'] = request.forms.get('addr')
+        addr['netmask'] = request.forms.get('netmask')
+        addr['gateway'] = request.forms.get('gateway')
+        addr['nameservers'] = request.forms.get('nameservers').split(',')
+
+    addr['ssid'] = request.forms.get('ssid')
+    addr['psk'] = request.forms.get('psk')
+    model.set_addr(addr)
+    if model.save():
+        webui.models.system.System().restart_network()
+        redirect("/settings")
+    abort(403, model.error())
 
 
 @post("/reboot")

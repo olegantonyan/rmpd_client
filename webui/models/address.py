@@ -61,49 +61,53 @@ class Address(object):
         if not self._iface_config_changed:
             self._error = "Not changed"
             return True
-        with rw_fs.Root():
-            try:
-                new_ifaces = self._all_ifaces
-                for i in new_ifaces:
-                    if self._iface != i.name:
-                        continue
-                    if self._iface_config['source'] not in ['dhcp', 'static']:
-                        self._error = "Invalid address source"
-                        return False
-                    i.src = self._iface_config['source']
-                    if i.src != 'dhcp':
-                        if self._validate_ip(self._iface_config['addr']):
-                            i.address = self._iface_config['addr']
-                        else:
-                            self._error = "No static IP address specified"
-                            return False
-                        if self._validate_ip(self._iface_config['netmask']):
-                            i.netmask = self._iface_config['netmask']
-                        else:
-                            self._error = "No netmask specified"
-                            return False
-                        if self._validate_ip(self._iface_config['gateway']):
-                            i.gateway = self._iface_config['gateway']
-                        else:
-                            self._error = "No gateway specified"
-                            return False
-                        if len(self._iface_config['nameservers']) > 0 and len(self._iface_config['nameservers'][0]) > 0:
-                            for ns in self._iface_config['nameservers']:
-                                if not self._validate_ip(ns):
-                                    self._error = "Invalid DNS nameserver address"
-                                    return False
-                            i.dns_nameservers = self._iface_config['nameservers']
-                        else:
-                            i.dns_nameservers = [i.gateway]
 
+        try:
+            new_ifaces = self._all_ifaces
+            for i in new_ifaces:
+                if self._iface != i.name:
+                    continue
+                if self._iface_config['source'] not in ['dhcp', 'static']:
+                    self._error = "Invalid address source"
+                    return False
+                i.src = self._iface_config['source']
+                i.wpa_ssid = self._iface_config.get('ssid', None)
+                i.wpa_psk = self._iface_config.get('psk', None)
+                if i.src != 'dhcp':
+                    if self._validate_ip(self._iface_config['addr']):
+                        i.address = self._iface_config['addr']
+                    else:
+                        self._error = "No static IP address specified"
+                        return False
+                    if self._validate_ip(self._iface_config['netmask']):
+                        i.netmask = self._iface_config['netmask']
+                    else:
+                        self._error = "No netmask specified"
+                        return False
+                    if self._validate_ip(self._iface_config['gateway']):
+                        i.gateway = self._iface_config['gateway']
+                    else:
+                        self._error = "No gateway specified"
+                        return False
+                    if len(self._iface_config['nameservers']) > 0 and len(self._iface_config['nameservers'][0]) > 0:
+                        for ns in self._iface_config['nameservers']:
+                            if not self._validate_ip(ns):
+                                self._error = "Invalid DNS nameserver address"
+                                return False
+                        i.dns_nameservers = self._iface_config['nameservers']
+                    else:
+                        i.dns_nameservers = [i.gateway]
+
+            with rw_fs.Root():
+                hardware.platfrom.fix_file_permissions(self.interfaces_path)
                 interfaces.Interfaces(self.interfaces_path).write(interfaces.Interfaces.dump_all(new_ifaces))
-                self._all_ifaces = new_ifaces
-                log.warning("new network configuration written")
-                return True
-            except Exception as e:
-                self._error = "Error saving IP addr: " + str(e)
-                log.exception("error saving ip addr")
-                return False
+            self._all_ifaces = new_ifaces
+            log.warning("new network configuration written")
+            return True
+        except Exception as e:
+            self._error = "Error saving IP addr: " + str(e)
+            log.exception("error saving ip addr")
+            return False
 
     def error(self):
         return self._error
