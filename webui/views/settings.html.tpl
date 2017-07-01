@@ -4,7 +4,7 @@
                         
 <form class="pure-form pure-form-aligned" action="/settings/change_address" method="post">
     <fieldset>
-        <legend>Main IP address</legend>
+        <legend>Ethernet IP address</legend>
         <div class="pure-controls">
             <label for="use_dhcp" class="pure-checkbox">
                 % dhcp_state_checkbox = 'checked' 
