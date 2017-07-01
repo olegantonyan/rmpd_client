@@ -127,10 +127,13 @@ class Address(object):
 
     def _get_ifaces_actual(self):
         res = {}
-        for iface_name in netifaces.interfaces():
-            addr = netifaces.ifaddresses(iface_name)[netifaces.AF_INET][0]['addr']
-            netmask = netifaces.ifaddresses(iface_name)[netifaces.AF_INET][0]['netmask']
-            res[iface_name] = {'addr': addr, 'netmask': netmask}
+        try:
+            for iface_name in netifaces.interfaces():
+                addr = netifaces.ifaddresses(iface_name)[netifaces.AF_INET][0]['addr']
+                netmask = netifaces.ifaddresses(iface_name)[netifaces.AF_INET][0]['netmask']
+                res[iface_name] = {'addr': addr, 'netmask': netmask}
+        except KeyError:
+            pass
         return res
 
     def _validate_ip(self, ip):

@@ -45,7 +45,10 @@ class PlatformRaspberry(hardware.Platform):
     
     def restart_networking(self):
         hardware.log.warning("restarting network")
-        (r, o, e) = utils.shell.execute("sudo /etc/init.d/networking restart")
+        utils.shell.execute("sudo ifdown -a --force")
+        utils.shell.execute("sudo systemctl daemon-reload")
+        (r, o, e) = utils.shell.execute("sudo systemctl restart networking")
+        utils.shell.execute("sudo ifup -a")
         if r != 0:
             hardware.log.error("error restarting network: " + o + ", " + e)
             return False
