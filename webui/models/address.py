@@ -83,6 +83,10 @@ class Address(object):
                                 self._error = "No gateway specified"
                                 return False
                             if len(self._iface_config['nameservers']) > 0 and len(self._iface_config['nameservers'][0]) > 0:
+                                for ns in self._iface_config['nameservers']:
+                                    if not self._validate_ip(ns):
+                                        self._error = "Invalid DNS nameserver address"
+                                        return False
                                 i.dns_nameservers = self._iface_config['nameservers']
                             else:
                                 i.dns_nameservers = [i.gateway]
@@ -122,7 +126,7 @@ class Address(object):
 
     def _validate_ip(self, ip):
         try:
-            socket.inet_aton(ip)
+            socket.inet_aton(ip.strip())
             return True
         except socket.error:
             return False
