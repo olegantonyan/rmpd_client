@@ -2,7 +2,9 @@
 .project
 .pydevproject
 .settings
-*__pychache__/*
+__pycache__/
+*.py[cod]
+*$py.class
 *.conf
 *.state
 *.pid
