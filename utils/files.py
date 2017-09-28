@@ -6,6 +6,7 @@ import getpass
 
 import utils.config as config
 import utils.shell as shell
+import hardware
 
 
 def mediafiles_path():
@@ -23,7 +24,11 @@ def full_url_by_relative(relativeurl):
 
 
 def mkdir(path):
-    shell.execute("sudo mkdir -p {p}".format(p=path))
+    if hardware.platfrom.__name__ == 'raspberry':
+        sudo = 'sudo '
+    else:
+        sudo = ''
+    shell.execute("{s}mkdir -p {p}".format(p=path, s=sudo))
     chown_to_current(path)
 
 
@@ -32,10 +37,9 @@ def chmod(path, mode):
 
 
 def chown(path, user, group):
-    shell.execute("sudo chown -R {u}:{g} {p}".format(p=path, u=user, g=group))
+    if hardware.platfrom.__name__ == 'raspberry':
+        shell.execute("sudo chown -R {u}:{g} {p}".format(p=path, u=user, g=group))
 
 
 def chown_to_current(path):
     chown(path, getpass.getuser(), os.getegid())
-
-
