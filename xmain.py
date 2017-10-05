@@ -90,9 +90,9 @@ class Parent(PipeDuplex):
             env = os.environ.copy()
             env['XAUTHORITY'] = '/tmp/Xauthority'
             cli = ['startx', sys.executable, '-B', os.path.abspath(__file__), '--', '-nocursor', '-logfile', '/dev/null', '-dpms', '-s', '0']
-            return subprocess.Popen(cli, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, env=env)
+            return subprocess.Popen(cli, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, stdin=subprocess.PIPE, env=env)
         else:
-            return subprocess.Popen([sys.executable, os.path.abspath(__file__)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+            return subprocess.Popen([sys.executable, os.path.abspath(__file__)], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, stdin=subprocess.PIPE)
 
     def _read_pipe(self):
         return self._proc.stdout.readline().decode('utf-8').rstrip()

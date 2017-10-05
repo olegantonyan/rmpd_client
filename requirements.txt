@@ -8,3 +8,4 @@ pytz==2016.6.1
 requests==2.11.1
 tzlocal==1.2
 debian_interfaces_parser
+#pyqt5
