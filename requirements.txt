@@ -1,11 +1,11 @@
 bottle==0.12.9
 mplayer.py==0.7.1
-netifaces==0.10.5
+netifaces==0.10.6
 ntplib==0.3.3
 pexpect==4.2.1
-ptyprocess==0.5.1
-pytz==2016.6.1
-requests==2.11.1
-tzlocal==1.2
+ptyprocess==0.5.2
+pytz==2017.2
+requests==2.18.4
+tzlocal==1.4
 debian_interfaces_parser
 #pyqt5
