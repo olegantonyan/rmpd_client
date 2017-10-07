@@ -57,7 +57,7 @@ class ImagePlayer(object):
         self._started = False
         self._seek_position = 0
         self._max_duration = 0
-        threads.run_after_timeout(3, self._deadband_timeout)
+        threads.run_after_timeout(5, self._deadband_timeout)
 
     def _timer_loop(self):
         while not self._stop_flag:
@@ -70,4 +70,3 @@ class ImagePlayer(object):
     def _deadband_timeout(self):
         if not self._started:
             wallpaper.Wallpaper().load()
-

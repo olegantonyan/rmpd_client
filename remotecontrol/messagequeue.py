@@ -3,6 +3,7 @@
 import logging
 import os
 import time
+import threading
 
 import utils.smart_queue as smart_queue
 import utils.config as config
@@ -19,6 +20,7 @@ class MessageQueue(object):
 
         self._queue = smart_queue.SmartQueue(maxlen=200000, db_params=db_params)
         self._start_sync_timer()
+        self._wait_condition = threading.Condition()
 
     def enqueue(self, data):
         self._queue.enqueue(data)
@@ -43,7 +45,6 @@ class MessageQueue(object):
         sync_period = config.Config().message_queue_sync_period() * 3600
         if sync_period == 0:
             return
-        self._sync_complete = False
         threads.run_after_timeout(sync_period, self._on_sync_period)
 
     def _on_sync_period(self):
@@ -70,9 +71,9 @@ class MessageQueue(object):
         except:
             log.exception('error running message queue sync')
         finally:
-            self._sync_complete = True
+            with self._wait_condition:
+                self._wait_condition.notify_all()
 
     def _wait_for_sync_to_complete(self, *args):
-        while not self._sync_complete:
-            time.sleep(0.1)
-
+        with self._wait_condition:
+            self._wait_condition.wait()

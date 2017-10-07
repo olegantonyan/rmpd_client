@@ -172,4 +172,3 @@ class Scheduler(object, metaclass=utils.singleton.Singleton):
 
     def __del__(self):
         self._stop_flag = True
-
