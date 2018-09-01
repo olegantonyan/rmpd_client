@@ -119,7 +119,7 @@ class Config(object, metaclass=singleton.Singleton):
         self._server_url = self._parser.get(section, 'server_url')
         self._login = self._parser.get(section, 'login')
         self._password = self._parser.get(section, 'password')
-        self._message_queue_sync_period = int(self._parser.get(section, 'message_queue_sync_period', fallback=12))
+        self._message_queue_sync_period = int(self._parser.get(section, 'message_queue_sync_period', fallback=0))
 
         section = 'logging'
         self._logfile = self._parser.get(section, 'logfile')
@@ -136,4 +136,3 @@ class Config(object, metaclass=singleton.Singleton):
 
         section = 'clockd'
         self._enable_clockd = self._parser.get(section, 'enable', fallback='no')
-
